@@ -1,61 +1,16 @@
 export const metadata = {
-
-  title: 'Euroleague guessing game',
-
-  description: 'Created by Matija Blagojevic',
-
+  title: 'Euroleague Guessing Game',
+  description: 'Created by Matjia Blagojevic',
 }
 
-
-
 export default function RootLayout({
-
-  children,
-
+  children,
 }: {
-
-  children: React.ReactNode
-
+  children: React.ReactNode
 }) {
-
-  return (
-
-    <html lang="en">
-
-      <body>{children}</body>
-
-    </html>
-
-  )
-
-}export const metadata = {
-
-  title: 'Euroleague guessing game',
-
-  description: 'Created by Matija Blagojevic',
-
-}
-
-
-
-export default function RootLayout({
-
-  children,
-
-}: {
-
-  children: React.ReactNode
-
-}) {
-
-  return (
-
-    <html lang="en">
-
-      <body>{children}</body>
-
-    </html>
-
-  )
-
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
 }
