@@ -111,7 +111,7 @@ const PlayerInput = ({
       </div>
 
       {isDropdownOpen && (
-        <ul className="absolute w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto mt-7 z-50">
+        <ul className="absolute w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto mt-10 z-50">
           {suggestions.map((player, index) => (
             <li
               key={player.name}
