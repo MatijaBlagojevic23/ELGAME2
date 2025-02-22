@@ -1,14 +1,11 @@
 "use client";
 import '../styles/globals.css'; // Import your global styles
 
-
-
 import { useState, useEffect, useRef } from "react";
 import { loadPlayers } from "../components/PlayerData"; // Adjust the path
 import PlayerInput from "../components/PlayerInput"; // Adjust the path
 import PlayerTable from "../components/PlayerTable"; // Adjust the path
 import WelcomePopup from "../components/WelcomePopUp"; // Adjust the path
-
 
 export default function ELGAME() {
   const [players, setPlayers] = useState([]);
@@ -74,11 +71,11 @@ export default function ELGAME() {
   };
 
   return (
-    <div className="relative flex flex-col items-center gap-4 p-6">
+    <div className="relative flex flex-col items-center gap-4 p-4 sm:p-6">
       {/* Rules Button in Upper Right Corner */}
       <button
         onClick={() => setShowWelcomePopup(true)}
-        className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-full shadow-md transition duration-300 hover:scale-105"
+        className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 sm:px-5 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 text-sm sm:text-base"
       >
         Rules
       </button>
@@ -88,22 +85,22 @@ export default function ELGAME() {
 
       {/* Success Popup */}
       {showPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg text-center">
-            <p className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded shadow-lg text-center">
+            <p className="text-lg sm:text-xl font-bold mb-4">
               Okay, great! You guessed it correctly!
             </p>
             <p className="mb-4">Do you want to play again?</p>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
               <button
                 onClick={() => setShowPopup(false)}
-                className="bg-gray-500 text-white px-5 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-sm"
               >
                 Close
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-full shadow-md transition duration-300 hover:scale-105"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 text-sm"
               >
                 Play Again
               </button>
@@ -114,22 +111,22 @@ export default function ELGAME() {
 
       {/* Exceed Attempts Popup */}
       {showExceedPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg text-center">
-            <p className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded shadow-lg text-center">
+            <p className="text-lg sm:text-xl font-bold mb-4">
               You have tried too many times! The target player was{" "}
               <span className="text-red-500 font-bold">{target.name}</span>
             </p>
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
               <button
                 onClick={() => setShowExceedPopup(false)}
-                className="bg-gray-500 text-white px-5 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-sm"
               >
                 Close
               </button>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-full shadow-md transition duration-300 hover:scale-105"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 text-sm"
               >
                 Play Again
               </button>
@@ -139,14 +136,14 @@ export default function ELGAME() {
       )}
 
       {/* Top Logo */}
-      <div className="w-full flex justify-center mb-1">
+      <div className="w-full flex justify-center mb-2">
         <img
           src="/images/logo.png"
           alt="EuroLeague Logo"
-          className="w-[20%] max-w-[280px]"
+          className="w-1/2 sm:w-[20%] max-w-[280px]"
         />
       </div>
-      <h1 className="text-2xl font-bold text-center">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center">
         ELGAME - Euroleague Player Guessing Game
       </h1>
 
@@ -161,10 +158,7 @@ export default function ELGAME() {
       />
 
       {/* Scrolling Attempts Table */}
-      <div
-        ref={attemptsRef}
-        className="w-full overflow-y-auto max-h-64 mt-4"
-      >
+      <div ref={attemptsRef} className="w-full overflow-y-auto max-h-64 mt-4">
         <PlayerTable attempts={attempts} target={target} />
       </div>
     </div>
