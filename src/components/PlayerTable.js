@@ -33,44 +33,44 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* Header Row */}
-      <div className="grid grid-cols-7 font-bold text-center p-2 sm:p-3 bg-gray-800 text-white rounded-lg shadow-md text-xs sm:text-sm"> {/* Adjusted padding and text size */}
-        <div className="min-w-[40px] sm:min-w-[60px]">Name</div> {/* Reduced min-width on mobile, increased on sm */}
-        <div className="min-w-[40px] sm:min-w-[60px]">Team</div>
-        <div className="min-w-[40px] sm:min-w-[60px]">Country</div>
-        <div className="min-w-[40px] sm:min-w-[60px]">Position</div>
-        <div className="min-w-[40px] sm:min-w-[60px]">Height</div>
-        <div className="min-w-[40px] sm:min-w-[60px]">Age</div>
-        <div className="min-w-[30px] sm:min-w-[40px]">#</div>
+      <div className="grid grid-cols-7 font-bold text-center p-1 sm:p-2 bg-gray-800 text-white rounded-lg shadow-md text-[0.7rem] sm:text-xs"> {/* Reduced padding and text size even further */}
+        <div className="min-w-[30px] sm:min-w-[40px]">Name</div> {/* Further reduced min-width */}
+        <div className="min-w-[30px] sm:min-w-[40px]">Team</div> {/* Further reduced min-width */}
+        <div className="min-w-[30px] sm:min-w-[40px]">Country</div> {/* Further reduced min-width */}
+        <div className="min-w-[30px] sm:min-w-[40px]">Position</div> {/* Further reduced min-width */}
+        <div className="min-w-[30px] sm:min-w-[40px]">Height</div> {/* Further reduced min-width */}
+        <div className="min-w-[30px] sm:min-w-[40px]">Age</div> {/* Further reduced min-width */}
+        <div className="min-w-[20px] sm:min-w-[30px]">#</div> {/* Further reduced min-width */}
       </div>
       {attempts.map((player, index) => (
         <motion.div
           key={index}
-          className="grid grid-cols-7 items-center text-center p-1 sm:p-2 border rounded-lg bg-gray-100 mt-1 shadow-md text-xs sm:text-sm" // Adjusted padding and text size
+          className="grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 mt-1 shadow-md text-[0.7rem] sm:text-xs" // Reduced padding and text size even further
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           {/* Name */}
-          <div className={`p-1 sm:p-2 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[40px] sm:min-h-[48px] flex items-center justify-center font-semibold`}>{player.name}</div> {/* Adjusted padding and min-height */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.name}</div> {/* Reduced padding and min-height */}
 
           {/* Team */}
-          <div className={`p-1 sm:p-2 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[40px] sm:min-h-[48px] flex items-center justify-center`}> {/* Adjusted padding and min-height */}
-            <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-6 h-6 sm:w-8 sm:h-8" /> {/* Adjusted image size */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}> {/* Reduced padding and min-height */}
+            <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5 sm:w-6 sm:h-6" /> {/* Further reduced image size */}
           </div>
 
           {/* Country */}
-          <div className={`p-1 sm:p-2 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[40px] sm:min-h-[48px] flex items-center justify-center`}>{player.country}</div> {/* Adjusted padding and min-height */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>{player.country}</div> {/* Reduced padding and min-height */}
 
           {/* Position */}
-          <div className={`p-1 sm:p-2 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[40px] sm:min-h-[48px] flex items-center justify-center`}>{player.position}</div> {/* Adjusted padding and min-height */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>{player.position}</div> {/* Reduced padding and min-height */}
 
           {/* Height */}
-          <div className={`p-1 sm:p-2 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[40px] sm:min-h-[48px] flex items-center justify-center font-semibold`}>{player.height} cm {getHint(player, target, "height")}</div> {/* Adjusted padding and min-height */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.height} cm {getHint(player, target, "height")}</div> {/* Reduced padding and min-height */}
 
           {/* Age */}
-          <div className={`p-1 sm:p-2 border rounded-md ${getBackgroundColor(player, target, "age")} min-h-[40px] sm:min-h-[48px] flex items-center justify-center font-semibold`}>{player.age} {getHint(player, target, "age")}</div> {/* Adjusted padding and min-height */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "age")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.age} {getHint(player, target, "age")}</div> {/* Reduced padding and min-height */}
 
           {/* Number */}
-          <div className={`p-1 sm:p-2 border rounded-md ${getBackgroundColor(player, target, "number")} min-h-[40px] sm:min-h-[48px] flex items-center justify-center font-semibold`}>#{player.number} {getHint(player, target, "number")}</div> {/* Adjusted padding and min-height */}
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "number")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>#{player.number} {getHint(player, target, "number")}</div> {/* Reduced padding and min-height */}
         </motion.div>
       ))}
     </div>
