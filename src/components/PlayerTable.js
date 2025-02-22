@@ -33,15 +33,16 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* Header Row */}
-      <div className="grid grid-cols-7 font-bold text-center p-1 sm:p-2 bg-gray-800 text-white rounded-lg shadow-md text-[0.7rem] sm:text-xs"> {/* Reduced padding and text size even further */}
-        <div className="min-w-[30px] sm:min-w-[40px]">Name</div> {/* Further reduced min-width */}
-        <div className="min-w-[30px] sm:min-w-[40px]">Team</div> {/* Further reduced min-width */}
-        <div className="min-w-[30px] sm:min-w-[40px]">Country</div> {/* Further reduced min-width */}
-        <div className="min-w-[30px] sm:min-w-[40px]">Position</div> {/* Further reduced min-width */}
-        <div className="min-w-[30px] sm:min-w-[40px]">Height</div> {/* Further reduced min-width */}
-        <div className="min-w-[30px] sm:min-w-[40px]">Age</div> {/* Further reduced min-width */}
-        <div className="min-w-[20px] sm:min-w-[30px]">#</div> {/* Further reduced min-width */}
-      </div>
+      <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md text-[6px] sm:text-[8px]">
+  <div className="min-w-[30px]">Name</div>
+  <div className="min-w-[30px]">Team</div>
+  <div className="min-w-[30px]">Country</div>
+  <div className="min-w-[30px]">Position</div>
+  <div className="min-w-[30px]">Height</div>
+  <div className="min-w-[30px]">Age</div>
+  <div className="min-w-[20px]">#</div>
+</div>
+
       {attempts.map((player, index) => (
         <motion.div
           key={index}
