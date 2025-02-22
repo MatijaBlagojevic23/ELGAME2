@@ -33,7 +33,7 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* Header Row */}
-      <div className="grid grid-cols-7 gap-1 font-bold text-center p-1 bg-gray-800 text-white rounded-lg shadow-md text-[8px] sm:text-xs md:text-sm">
+      <div className="grid grid-cols-7 gap-1 font-bold text-center p-1 bg-gray-800 text-white rounded-lg shadow-md text-xs sm:text-sm md:text-base"> {/* Responsive text size for header */}
         <div className="min-w-[60px]">Name</div>
         <div className="min-w-[60px]">Team</div>
         <div className="min-w-[60px]">Country</div>
@@ -45,7 +45,7 @@ export default function PlayerTable({ attempts, target }) {
       {attempts.map((player, index) => (
         <motion.div
           key={index}
-          className="grid grid-cols-7 gap-1 items-center text-center p-1 border rounded-lg bg-gray-100 mt-1 shadow-md text-[8px] sm:text-xs md:text-sm"
+          className="grid grid-cols-7 gap-1 items-center text-center p-1 border rounded-lg bg-gray-100 mt-1 shadow-md text-xs sm:text-sm md:text-base" // Responsive text size for table rows
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
