@@ -33,20 +33,20 @@ export default function PlayerTable({ attempts, target }) {
     return (
         <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
             {/* Header Row */}
-            <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md **text-[0.6rem] sm:text-xs**"> {/* Adjusted header text sizes */}
-                <div className="min-w-[30px] py-2">Name</div>
-                <div className="min-w-[30px] py-2">Team</div>
-                <div className="min-w-[30px] py-2">Country</div>
-                <div className="min-w-[30px] py-2">Position</div>
-                <div className="min-w-[30px] py-2">Height</div>
-                <div className="min-w-[30px] py-2">Age</div>
-                <div className="min-w-[20px] py-2">#</div>
+            <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md **text-[0.55rem] sm:text-[0.7rem]**"> {/* Further reduced header text sizes */}
+                <div className="min-w-[30px] **py-1**">Name</div> {/* Reduced vertical padding */}
+                <div className="min-w-[30px] **py-1**">Team</div> {/* Reduced vertical padding */}
+                <div className="min-w-[30px] **py-1**">Country</div> {/* Reduced vertical padding */}
+                <div className="min-w-[30px] **py-1**">Position</div> {/* Reduced vertical padding */}
+                <div className="min-w-[30px] **py-1**">Height</div> {/* Reduced vertical padding */}
+                <div className="min-w-[30px] **py-1**">Age</div> {/* Reduced vertical padding */}
+                <div className="min-w-[20px] **py-1**">#</div> {/* Reduced vertical padding */}
             </div>
 
             {attempts.map((player, index) => (
                 <motion.div
                     key={index}
-                    className="grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 mt-1 shadow-md **text-[0.6rem] sm:text-xs**" // Adjusted row text sizes
+                    className="grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 mt-1 shadow-md **text-[0.55rem] sm:text-[0.7rem]**" // Further reduced row text sizes
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                 >
@@ -57,11 +57,11 @@ export default function PlayerTable({ attempts, target }) {
 
                     {/* Team */}
                     <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>
-                        <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Further reduced image size */}
                     </div>
 
                     {/* Country */}
-                    <div className={`p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>{player.country}</div>
+                    <div className={`p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center **text-ellipsis overflow-hidden**`}>{player.country}</div> {/* Text overflow for Country */}
 
                     {/* Position */}
                     <div className={`p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>{player.position}</div>
