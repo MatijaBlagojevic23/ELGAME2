@@ -33,25 +33,25 @@ export default function PlayerTable({ attempts, target }) {
     return (
         <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
             {/* Header Row */}
-            <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md **text-xs sm:text-sm**"> {/* Increased header text size */}
-                <div className="min-w-[30px] **py-2**">Name</div> {/* Increased vertical padding */}
-                <div className="min-w-[30px] **py-2**">Team</div> {/* Increased vertical padding */}
-                <div className="min-w-[30px] **py-2**">Country</div> {/* Increased vertical padding */}
-                <div className="min-w-[30px] **py-2**">Position</div> {/* Increased vertical padding */}
-                <div className="min-w-[30px] **py-2**">Height</div> {/* Increased vertical padding */}
-                <div className="min-w-[30px] **py-2**">Age</div> {/* Increased vertical padding */}
-                <div className="min-w-[20px] **py-2**">#</div> {/* Increased vertical padding */}
+            <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md **text-[0.6rem] sm:text-xs**"> {/* Adjusted header text sizes */}
+                <div className="min-w-[30px] py-2">Name</div>
+                <div className="min-w-[30px] py-2">Team</div>
+                <div className="min-w-[30px] py-2">Country</div>
+                <div className="min-w-[30px] py-2">Position</div>
+                <div className="min-w-[30px] py-2">Height</div>
+                <div className="min-w-[30px] py-2">Age</div>
+                <div className="min-w-[20px] py-2">#</div>
             </div>
 
             {attempts.map((player, index) => (
                 <motion.div
                     key={index}
-                    className="grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 mt-1 shadow-md text-[0.7rem] sm:text-xs"
+                    className="grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 mt-1 shadow-md **text-[0.6rem] sm:text-xs**" // Adjusted row text sizes
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                 >
                     {/* Name */}
-                    <div className={`p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold **overflow-hidden text-ellipsis whitespace-nowrap**`}> {/* Text overflow handling */}
+                    <div className={`p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
                         {player.name}
                     </div>
 
@@ -64,7 +64,7 @@ export default function PlayerTable({ attempts, target }) {
                     <div className={`p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>{player.country}</div>
 
                     {/* Position */}
-                    <div className={`p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center **overflow-hidden text-ellipsis whitespace-nowrap**`}>{player.position}</div> {/* Text overflow handling */}
+                    <div className={`p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>{player.position}</div>
 
                     {/* Height */}
                     <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.height} cm {getHint(player, target, "height")}</div>
