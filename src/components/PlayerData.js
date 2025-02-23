@@ -4,11 +4,11 @@ export async function loadPlayers() {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const text = await response.text();
-    console.log("Raw CSV Data:", text); // Debug: Check CSV content
+    //console.log("Raw CSV Data:", text); // Debug: Check CSV content
 
     // Ensure we split correctly using semicolons (`;`)
     const rows = text.trim().split("\n").slice(1); // Remove header
-    console.log("Parsed Rows:", rows); // Debug: Check split rows
+    //console.log("Parsed Rows:", rows); // Debug: Check split rows
 
     return rows
       .map((row) => {
