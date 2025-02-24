@@ -39,13 +39,13 @@ export default function PlayerTable({ attempts, target }) {
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* Header Row */}
       <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md text-[6px] sm:text-[8px]">
-        <div className="min-w-[30px] truncate whitespace-nowrap">Name</div>
-        <div className="min-w-[30px] truncate whitespace-nowrap">Team</div>
-        <div className="min-w-[30px] truncate whitespace-nowrap">Country</div>
-        <div className="min-w-[30px] truncate whitespace-nowrap">Position</div>
-        <div className="min-w-[30px] truncate whitespace-nowrap">Height</div>
-        <div className="min-w-[30px] truncate whitespace-nowrap">Age</div>
-        <div className="min-w-[20px] truncate whitespace-nowrap">#</div>
+        <div className="min-w-[30px] max-w-[60px] truncate whitespace-nowrap">Name</div>
+        <div className="min-w-[30px] max-w-[50px] truncate whitespace-nowrap">Team</div>
+        <div className="min-w-[30px] max-w-[70px] truncate whitespace-nowrap">Country</div>
+        <div className="min-w-[30px] max-w-[70px] truncate whitespace-nowrap">Position</div>
+        <div className="min-w-[30px] max-w-[50px] truncate whitespace-nowrap">Height</div>
+        <div className="min-w-[30px] max-w-[50px] truncate whitespace-nowrap">Age</div>
+        <div className="min-w-[20px] max-w-[30px] truncate whitespace-nowrap">#</div>
       </div>
 
       {attempts.map((player, index) => (
@@ -56,37 +56,37 @@ export default function PlayerTable({ attempts, target }) {
           animate={{ opacity: 1 }}
         >
           {/* Name */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap max-w-[60px]`}>
             {player.name}
           </div>
 
           {/* Team */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center max-w-[50px]`}>
             <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
 
           {/* Country */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center truncate whitespace-nowrap`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center truncate whitespace-nowrap max-w-[70px]`}>
             {player.country}
           </div>
 
           {/* Position */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center truncate whitespace-nowrap`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center truncate whitespace-nowrap max-w-[70px]`}>
             {player.position}
           </div>
 
           {/* Height */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap max-w-[50px]`}>
             {player.height} cm {getHint(player, target, "height")}
           </div>
 
           {/* Age */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "age")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "age")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap max-w-[50px]`}>
             {player.age} {getHint(player, target, "age")}
           </div>
 
           {/* Number */}
-          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "number")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap`}>
+          <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "number")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold truncate whitespace-nowrap max-w-[30px]`}>
             #{player.number} {getHint(player, target, "number")}
           </div>
         </motion.div>
