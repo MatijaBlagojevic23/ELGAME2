@@ -166,36 +166,38 @@ export default function PlayerTable({ attempts, target }) {
           </div>
 
           {/* PC (and Larger) Version: Table Row Layout */}
-          <div className="hidden sm:grid grid-cols-7 items-center text-center p-2 border rounded-lg bg-gray-100 text-base">
+          {/* PC (and Larger) Version: Table Row Layout */}
+<div className="hidden sm:grid grid-cols-7 items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
   {/* Name */}
-  <div className={`px-2 py-2 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
+  <div className={`px-1 py-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
     {player.name}
   </div>
   {/* Team */}
-  <div className={`px-2 py-2 border rounded-md ${getBackgroundColor(player, target, "team")} flex items-center justify-center`}>
-    <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-6 h-6" />
+  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "team")} flex items-center justify-center`}>
+    <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5" />
   </div>
   {/* Country */}
-  <div className={`px-2 py-2 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis`}>
+  <div className={`px-1 py-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis`}>
     {player.country}
   </div>
   {/* Position */}
-  <div className={`px-2 py-2 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
+  <div className={`px-1 py-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
     {player.position}
   </div>
   {/* Height */}
-  <div className={`px-2 py-2 border rounded-md ${getBackgroundColor(player, target, "height")} flex items-center justify-center font-semibold`}>
+  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "height")} flex items-center justify-center font-semibold`}>
     {player.height} cm {getHint(player, target, "height")}
   </div>
   {/* Age */}
-  <div className={`px-2 py-2 border rounded-md ${getBackgroundColor(player, target, "age")} flex items-center justify-center font-semibold`}>
+  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "age")} flex items-center justify-center font-semibold`}>
     {player.age} {getHint(player, target, "age")}
   </div>
   {/* Number */}
-  <div className={`px-2 py-2 border rounded-md ${getBackgroundColor(player, target, "number")} flex items-center justify-center font-semibold`}>
+  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "number")} flex items-center justify-center font-semibold`}>
     #{player.number} {getHint(player, target, "number")}
   </div>
 </div>
+
         </motion.div>
       ))}
     </div>
