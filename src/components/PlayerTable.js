@@ -37,48 +37,71 @@ export default function PlayerTable({ attempts, target }) {
 
     return (
         <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
-            {/* Header Row */}
-            <div className="grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px] sm:text-[10px] md:text-[15px]">
-                <div className="**min-w-0 px-1 py-1**">Name</div> {/* min-w-0 and px-1 py-1 */}
-                <div className="**min-w-0 px-1 py-1**">Team</div> {/* min-w-0 and px-1 py-1 */}
-                <div className="**min-w-0 px-1 py-1**">Country</div> {/* min-w-0 and px-1 py-1 */}
-                <div className="**min-w-0 px-1 py-1**">Position</div> {/* min-w-0 and px-1 py-1 */}
-                <div className="**min-w-0 px-1 py-1**">Height</div>
-                <div className="**min-w-0 px-1 py-1**">Age</div>
-                <div className="**min-w-0 px-1 py-1**">#</div>
+            {/* Header Row (PC Version - Hidden on Phones) */}
+            <div className="hidden sm:grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px] sm:text-[10px] md:text-[15px]"> {/* Hidden on small screens */}
+                <div className="min-w-0 px-1 py-1">Name</div>
+                <div className="min-w-0 px-1 py-1">Team</div>
+                <div className="min-w-0 px-1 py-1">Country</div>
+                <div className="min-w-0 px-1 py-1">Position</div>
+                <div className="min-w-[30px] py-1">Height</div>
+                <div className="min-w-[30px] py-1">Age</div>
+                <div className="min-w-[20px] py-1">#</div>
             </div>
+
+            {/* Header Row (Mobile Version - Shown only on Phones) */}
+            <div className="sm:hidden grid grid-cols-6 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px]"> {/* Only shown on small screens, 6 columns */}
+                <div className="min-w-0 px-1 py-1">Team</div>
+                <div className="min-w-0 px-1 py-1">Country</div>
+                <div className="min-w-0 px-1 py-1">Position</div>
+                <div className="min-w-[30px] py-1">Height</div>
+                <div className="min-w-[30px] py-1">Age</div>
+                <div className="min-w-[20px] py-1">#</div>
+            </div>
+
 
             {attempts.map((player, index) => (
                 <motion.div
                     key={index}
-                    className="grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 mt-1 shadow-md **text-[0.5rem] xs:text-[0.6rem] sm:text-[0.7rem]**" // Responsive font sizes for rows
+                    className="mt-1 shadow-md rounded-lg bg-gray-100 border sm:p-0.5" // General container styling, removed p-0.5 from sm: onwards
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                 >
-                    {/* Name */}
-                    <div className={`**px-1** p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold **overflow-hidden text-ellipsis whitespace-nowrap**`}> {/* px-1 and text-overflow */}
-                        {player.name}
+                    {/* Mobile (Phone) Version - Two-Line Stacked Layout */}
+                    <div className="sm:hidden flex flex-col items-stretch text-center text-xs"> {/* Only shown on small screens */}
+                        <div className={`font-semibold py-1 px-2 rounded-t-lg ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} overflow-hidden text-ellipsis whitespace-nowrap`}> {/* Name line, removed border-b */}
+                            {player.name}
+                        </div>
+                        <div className="flex justify-around py-1 px-2 text-[0.6rem] rounded-b-lg bg-gray-200"> {/* Parameters line, added bg-gray-200 and rounded-b-lg, removed p-1 and added px-2 for horizontal padding*/}
+                            <div className={`border-r pr-1 last:border-r-0 ${getBackgroundColor(player, target, "team")}`}>{player.team}</div>
+                            <div className={`border-r pr-1 last:border-r-0 ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'}`}>{player.country}</div>
+                            <div className={`border-r pr-1 last:border-r-0 ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'}`}>{player.position}</div>
+                            <div className={`border-r pr-1 last:border-r-0 ${getBackgroundColor(player, target, "height")}`}>{player.height}cm</div> {/* Removed hint from mobile layout parameters */}
+                            <div className={`border-r pr-1 last:border-r-0 ${getBackgroundColor(player, target, "age")}`}>{player.age}</div> {/* Removed hint from mobile layout parameters */}
+                            <div className={`${getBackgroundColor(player, target, "number")}`}>#{player.number}</div> {/* Removed hint from mobile layout parameters */}
+                        </div>
                     </div>
 
-                    {/* Team */}
-                    <div className={`**px-1** p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}> {/* px-1 */}
-                        <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-4 h-4 sm:w-5 sm:h-5" /> {/* Reduced image size */}
+                    {/* PC (and Larger) Version - Table Row Layout */}
+                    <div className="hidden sm:grid grid-cols-7 items-center text-center p-0.5 sm:p-1 border rounded-lg bg-gray-100 text-[0.5rem] xs:text-[0.6rem] sm:text-[0.7rem]"> {/* Hidden on small screens, shown on larger */}
+                        {/* Name */}
+                        <div className={`px-0.5 p-0.5 sm:p-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
+                            {player.name}
+                        </div>
+                        {/* Team */}
+                        <div className={`px-0.5 p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "team")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center`}>
+                            <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </div>
+                        {/* Country */}
+                        <div className={`px-0.5 p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center text-ellipsis overflow-hidden`}>{player.country}</div>
+                        {/* Position */}
+                        <div className={`px-0.5 p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>{player.position}</div>
+                        {/* Height */}
+                        <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.height} cm {getHint(player, target, "height")}</div>
+                        {/* Age */}
+                        <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "age")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.age} {getHint(player, target, "age")}</div>
+                        {/* Number */}
+                        <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "number")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>#{player.number} {getHint(player, target, "number")}</div>
                     </div>
-
-                    {/* Country */}
-                    <div className={`**px-1** p-0.5 sm:p-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center **text-ellipsis overflow-hidden**`}>{player.country}</div> {/* px-1 and text-overflow */}
-
-                    {/* Position */}
-                    <div className={`**px-1** p-0.5 sm:p-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} min-h-[35px] sm:min-h-[40px] flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>{player.position}</div> {/* px-1 and text-overflow */}
-
-                    {/* Height */}
-                    <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "height")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.height} cm {getHint(player, target, "height")}</div>
-
-                    {/* Age */}
-                    <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "age")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>{player.age} {getHint(player, target, "age")}</div>
-
-                    {/* Number */}
-                    <div className={`p-0.5 sm:p-1 border rounded-md ${getBackgroundColor(player, target, "number")} min-h-[35px] sm:min-h-[40px] flex items-center justify-center font-semibold`}>#{player.number} {getHint(player, target, "number")}</div>
                 </motion.div>
             ))}
         </div>
