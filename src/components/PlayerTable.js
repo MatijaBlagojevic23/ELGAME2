@@ -43,9 +43,9 @@ export default function PlayerTable({ attempts, target }) {
                 <div className="**min-w-0 px-1 py-1**">Team</div> {/* min-w-0 and px-1 py-1 */}
                 <div className="**min-w-0 px-1 py-1**">Country</div> {/* min-w-0 and px-1 py-1 */}
                 <div className="**min-w-0 px-1 py-1**">Position</div> {/* min-w-0 and px-1 py-1 */}
-                <div className="min-w-[30px] py-1">Height</div>
-                <div className="min-w-[30px] py-1">Age</div>
-                <div className="min-w-[20px] py-1">#</div>
+                <div className="**min-w-0 px-1 py-1**">Height</div>
+                <div className="**min-w-0 px-1 py-1**">Age</div>
+                <div className="**min-w-0 px-1 py-1**">#</div>
             </div>
 
             {attempts.map((player, index) => (
