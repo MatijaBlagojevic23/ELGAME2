@@ -38,15 +38,16 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* Header Row */}
-      <div className="grid grid-cols-7 gap-0.5 font-bold text-center p-1 bg-gray-800 text-white rounded shadow-md text-[6px] sm:text-[8px]">
-  <div className="min-w-[30px]">Name</div>
-  <div className="min-w-[30px]">Team</div>
-  <div className="min-w-[30px]">Country</div>
-  <div className="min-w-[30px]">Position</div>
-  <div className="min-w-[30px]">Height</div>
-  <div className="min-w-[30px]">Age</div>
-  <div className="min-w-[20px]">#</div>
+      <div className="grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[6px] sm:text-[8px] md:text-[10px]">
+  <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Name</div>
+  <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Team</div>
+  <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Country</div>
+  <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Position</div>
+  <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Height</div>
+  <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Age</div>
+  <div className="min-w-[20px] sm:min-w-[40px] md:min-w-[60px]">#</div>
 </div>
+
 
       {attempts.map((player, index) => (
         <motion.div
