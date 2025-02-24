@@ -16,10 +16,15 @@ export default function PlayerTable({ attempts, target }) {
       }
       return "bg-red-500";
     }
-    if (["height", "age"].includes(key)) {
+    if (key === "height") {
       const diff = Math.abs(player[key] - target[key]);
       if (diff === 0) return "bg-green-500";
       if (diff <= 3) return "bg-yellow-300";
+    }
+    if (key === "age") {
+      const diff = Math.abs(player[key] - target[key]);
+      if (diff === 0) return "bg-green-500";
+      if (diff <= 1) return "bg-yellow-300";
     }
     if (key === "number") {
       const diff = Math.abs(player[key] - target[key]);
