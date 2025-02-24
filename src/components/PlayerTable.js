@@ -61,7 +61,7 @@ export default function PlayerTable({ attempts, target }) {
       {attempts.map((player, index) => (
         <motion.div
           key={index}
-          className="mt-1 shadow-md rounded-lg bg-gray-100 border"
+          className="mt-1 shadow-md  bg-gray-100 border"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
