@@ -38,7 +38,7 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* Header Row */}
-      <div className="grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[6px] sm:text-[8px] md:text-[10px]">
+      <div className="grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px] sm:text-[10px] md:text-[15px]">
   <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Name</div>
   <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Team</div>
   <div className="min-w-[30px] sm:min-w-[60px] md:min-w-[80px]">Country</div>
