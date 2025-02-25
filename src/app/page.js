@@ -1,18 +1,16 @@
 "use client";
 
 import "../styles/globals.css"; 
-
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../context/AuthContext";
 import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
-import { useAuth } from "../context/AuthContext";
 
 export default function ELGAME() {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [players, setPlayers] = useState([]);
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -23,7 +21,6 @@ export default function ELGAME() {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   
   const attemptsRef = useRef(null);
-  const { setOriginalPage } = useAuth();
 
   useEffect(() => {
     loadPlayers().then((data) => {
@@ -84,10 +81,19 @@ export default function ELGAME() {
         >
           Rules
         </button>
-        {session ? (
-          <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{session.user.email}</p>
+
+        {user ? (
+          <>
+            <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{user.email}</p>
+            <button
+              onClick={logout}
+              className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
+            >
+              Logout
+            </button>
+          </>
         ) : (
-          <Link href={{ pathname: "/auth/signin", query: { originalPage: "/paig" } }} className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+          <Link href="/auth/signin" className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
             Login
           </Link>
         )}
