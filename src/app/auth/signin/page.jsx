@@ -1,24 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
-import { useAuth } from "../../../context/AuthContext"; // Import useAuth
+import { useAuth } from "../../../context/AuthContext";
+import dynamic from "next/dynamic";
+
+const useSearchParams = dynamic(() => import("next/navigation").then(mod => mod.useSearchParams), { ssr: false });
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { originalPage, setOriginalPage } = useAuth(); // Use AuthContext
+  const { originalPage, setOriginalPage } = useAuth();
 
-  useEffect(() => {
-    const page = searchParams.get("originalPage");
-    if (page) {
-      setOriginalPage(page);
-    }
-  }, [searchParams, setOriginalPage]);
+  const SearchParamsWrapper = () => {
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+      const page = searchParams.get("originalPage");
+      if (page) {
+        setOriginalPage(page);
+      }
+    }, [searchParams, setOriginalPage]);
+
+    return null;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +44,9 @@ export default function SignInPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
+      <Suspense fallback={<div>Loading...</div>}>
+        <SearchParamsWrapper />
+      </Suspense>
       <h1 className="text-2xl font-bold mb-4">Sign In</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
         <input
