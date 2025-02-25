@@ -144,7 +144,7 @@ export default function ELGAME() {
                 />
             </div>
             <h1 className="**text-base sm:text-lg md:text-xl** font-bold text-center"> {/* Increased font size */}
-                ELGAME - Euroleague Player Guessing Game
+                ELGAME - Euroleague Player Guessing Game1
             </h1>
 
             <PlayerInput
