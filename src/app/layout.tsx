@@ -5,7 +5,7 @@ import { SessionProvider } from "next-auth/react";
 export const metadata = {
   title: 'Euroleague Guessing Game',
   description: 'Created by Matija Blagojevic',
-}
+};
 
 export default function RootLayout({
   children,
