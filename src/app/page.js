@@ -3,15 +3,16 @@
 import "../styles/globals.css"; 
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link"; // Import Link for navigation
-import { signIn, useSession } from "next-auth/react"; // Import NextAuth
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
+import { useAuth } from "../context/AuthContext";
 
 export default function ELGAME() {
-  const { data: session } = useSession(); // Check authentication status
+  const { data: session } = useSession();
   const [players, setPlayers] = useState([]);
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -22,6 +23,7 @@ export default function ELGAME() {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   
   const attemptsRef = useRef(null);
+  const { setOriginalPage } = useAuth();
 
   useEffect(() => {
     loadPlayers().then((data) => {
