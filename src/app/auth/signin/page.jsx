@@ -1,14 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { supabase } from "../../../utils/supabase"; // adjust the path as needed
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "../../../utils/supabase";
+import { useAuth } from "../../../context/AuthContext"; // Import useAuth
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { originalPage, setOriginalPage } = useAuth(); // Use AuthContext
+
+  useEffect(() => {
+    const page = searchParams.get("originalPage");
+    if (page) {
+      setOriginalPage(page);
+    }
+  }, [searchParams, setOriginalPage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +30,7 @@ export default function SignInPage() {
     if (error) {
       setError(error.message);
     } else {
-      router.push("/");
+      router.push(originalPage || "/");
     }
   };
 
