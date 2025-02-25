@@ -1,32 +1,42 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../utils/supabase";
 
-interface AuthContextProps {
-  originalPage: string;
-  setOriginalPage: (page: string) => void;
-}
+const AuthContext = createContext();
 
-const AuthContext = createContext<AuthContextProps | null>(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data?.user ?? null);
+    };
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [originalPage, setOriginalPage] = useState("/");
+    fetchUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ originalPage, setOriginalPage }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
