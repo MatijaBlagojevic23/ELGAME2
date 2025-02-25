@@ -1,6 +1,12 @@
-"use client"; // This directive is necessary for Next.js to recognize this as a client component
+"use client";
 
 import { SessionProvider } from "next-auth/react";
+import { AuthProvider } from "../context/AuthContext";
+
+export const metadata = {
+  title: 'Euroleague Guessing Game',
+  description: 'Created by Matija Blagojevic',
+};
 
 export default function RootLayout({
   children,
@@ -14,9 +20,11 @@ export default function RootLayout({
         {/* You can add other meta tags or links here */}
       </head>
       <body>
-        <SessionProvider> {/* Wrap children with SessionProvider */}
-          {children}
-        </SessionProvider>
+        <AuthProvider>
+          <SessionProvider>
+            {children}
+          </SessionProvider>
+        </AuthProvider>
       </body>
     </html>
   );
