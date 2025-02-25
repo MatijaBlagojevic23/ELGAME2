@@ -3,10 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "../context/AuthContext";
 
-export const metadata = {
-  title: 'Euroleague Guessing Game',
-  description: 'Created by Matija Blagojevic',
-};
+
 
 export default function RootLayout({
   children,
