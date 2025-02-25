@@ -1,4 +1,4 @@
-"use client";
+"use client"; // This directive is necessary for Next.js to recognize this as a client component
 
 import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "../context/AuthContext";
