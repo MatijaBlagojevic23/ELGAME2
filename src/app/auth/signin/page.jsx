@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../utils/supabase"; // adjust the path as needed
+import { supabase } from "../../../utils/supabase";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -12,6 +12,7 @@ export default function SignInPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -19,9 +20,10 @@ export default function SignInPage() {
 
     if (error) {
       setError(error.message);
-    } else {
-      router.push("/");
+      return;
     }
+
+    router.push("/"); // Redirect to home after login
   };
 
   return (
