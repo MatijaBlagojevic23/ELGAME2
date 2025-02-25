@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { supabase } from "@/utils/supabase"; // Import your Supabase client
 import bcrypt from "bcryptjs"; // Import bcryptjs
 
-const authOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -61,4 +61,11 @@ const authOptions = {
   },
 };
 
-export default (req, res) => NextAuth(req, res, authOptions);  // Corrected export to work with Next.js route handling
+// Next.js expects GET/POST methods to be exported from the API route
+export async function GET(req, res) {
+  return NextAuth(req, res, authOptions);
+}
+
+export async function POST(req, res) {
+  return NextAuth(req, res, authOptions);
+}
