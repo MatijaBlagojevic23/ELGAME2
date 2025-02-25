@@ -1,3 +1,5 @@
+"use client"; // This directive is necessary for Next.js to recognize this as a client component
+
 import { SessionProvider } from "next-auth/react";
 
 export const metadata = {
