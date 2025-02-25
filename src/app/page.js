@@ -82,7 +82,7 @@ export default function ELGAME() {
         >
           Rules
         </button>
-        {{session ? (
+        {session ? (
           <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{session.user.email}</p>
         ) : (
           <Link href={{ pathname: "/auth/signin", query: { originalPage: "/paig" } }} className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
