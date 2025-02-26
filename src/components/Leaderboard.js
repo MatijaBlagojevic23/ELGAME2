@@ -35,9 +35,9 @@ export default function Leaderboard() {
             <th className="px-4 py-2">Games Played</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="max-h-60 overflow-y-auto block">
           {leaderboard.map((entry, index) => (
-            <tr key={index} className="border-t">
+            <tr key={index} className="border-t block">
               <td className="px-4 py-2">{entry.username}</td>
               <td className="px-4 py-2">{entry.average_attempts.toFixed(2)}</td>
               <td className="px-4 py-2">{entry.games_played}</td>
