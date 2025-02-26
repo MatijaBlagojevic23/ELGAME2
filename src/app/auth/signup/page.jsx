@@ -1,5 +1,5 @@
 "use client";
-import "../../../styles/globals.css";  
+import "../../../styles/globals.css";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState(""); // Add username state
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null); // Add state for the success message
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -37,8 +38,13 @@ export default function SignUpPage() {
       return;
     }
 
-    alert("Check your email to confirm your account!");
-    router.push("/auth/signin"); // Redirect to sign-in page
+    // Display the success message
+    setMessage("Check your email to confirm your account!");
+
+    // After a short delay, redirect to the sign-in page
+    setTimeout(() => {
+      router.push("/auth/signin"); // Redirect to sign-in page
+    }, 2000); // 2 seconds delay for the message to show
   };
 
   return (
@@ -77,6 +83,9 @@ export default function SignUpPage() {
           Sign Up
         </button>
       </form>
+      {message && (
+        <p className="mt-4 text-green-500 text-sm">{message}</p>
+      )}
       <p className="mt-2 text-sm">
         Already have an account?{" "}
         <a href="/auth/signin" className="text-blue-600 hover:underline">
