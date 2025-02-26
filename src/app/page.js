@@ -7,6 +7,8 @@ import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
+import Leaderboard from "../components/Leaderboard";
+
 
 export default function ELGAME() {
   const [user, setUser] = useState(null);
@@ -125,9 +127,11 @@ export default function ELGAME() {
         >
           Rules
         </button>
-    <Link href="/leaderboard" className="absolute top-2 left-2 bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+    <div className="absolute top-2 left-2">
+  <Link href="/leaderboard" className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
     Leaderboard
   </Link>
+</div>
 
 
         {user ? (
