@@ -25,11 +25,9 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+    <div className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-bold mb-4">Leaderboard</h1>
-      <Link href="/" className="absolute top-2 left-2 text-blue-500 hover:underline">
-        ← Back to Game
-      </Link>
+      {/*  "Back to Game" Link is removed */}
       <table className="w-full max-w-lg bg-white shadow-md rounded-lg overflow-hidden">
         <thead className="bg-gray-200">
           <tr>
