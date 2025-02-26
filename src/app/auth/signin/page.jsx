@@ -13,7 +13,7 @@ export default function SignInPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -23,7 +23,7 @@ export default function SignInPage() {
       return;
     }
 
-    router.push("/"); // Redirect to home after login
+    router.push("/"); // Redirect to home
   };
 
   return (
@@ -54,6 +54,9 @@ export default function SignInPage() {
           Sign In
         </button>
       </form>
+      <p className="mt-2 text-sm">
+        Don't have an account? <a href="/auth/signup" className="text-blue-600">Sign Up</a>
+      </p>
     </div>
   );
 }
