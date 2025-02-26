@@ -65,12 +65,14 @@ export default function ELGAME() {
     setAttempts(newAttempts);
 
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
-      setShowPopup(true);
-      setGameOver(true);
-    } else if (newAttempts.length >= 10) {
-      setShowExceedPopup(true);
-      setGameOver(true);
-    }
+  setShowPopup(true);
+  setGameOver(true);
+  if (user) updateLeaderboard(user.id, newAttempts.length);
+} else if (newAttempts.length >= 10) {
+  setShowExceedPopup(true);
+  setGameOver(true);
+  if (user) updateLeaderboard(user.id, newAttempts.length);
+}
 
     setGuess("");
 
@@ -85,6 +87,47 @@ export default function ELGAME() {
     await supabase.auth.signOut();
     setUser(null);
   };
+  const updateLeaderboard = async (userId, attempts) => {
+  const { data, error } = await supabase
+    .from("leaderboard")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("Error fetching leaderboard data:", error.message);
+    return;
+  }
+
+  if (data) {
+    // Update existing record
+    const { error: updateError } = await supabase
+      .from("leaderboard")
+      .update({
+        total_attempts: data.total_attempts + attempts,
+        games_played: data.games_played + 1,
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.error("Error updating leaderboard:", updateError.message);
+    }
+  } else {
+    // Insert new record
+    const { error: insertError } = await supabase.from("leaderboard").insert([
+      {
+        user_id: userId,
+        total_attempts: attempts,
+        games_played: 1,
+      },
+    ]);
+
+    if (insertError) {
+      console.error("Error inserting into leaderboard:", insertError.message);
+    }
+  }
+};
+
 
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
