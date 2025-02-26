@@ -209,19 +209,21 @@ export default function ELGAME() {
       )}
 
       {/* Leaderboard Modal */}
-      {showLeaderboard && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative w-96">
-            <button
-              onClick={() => setShowLeaderboard(false)}
-              className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded"
-            >
-              ✖
-            </button>
-            <Leaderboard />
-          </div>
-        </div>
-      )}
+      
+  {showLeaderboard && (
+  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg relative w-96 flex flex-col items-center">
+      <Leaderboard />
+      <button
+        onClick={() => setShowLeaderboard(false)}
+        className="mt-4 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
 
       <div className="w-full flex justify-center mb-2">
         <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
