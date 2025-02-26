@@ -83,6 +83,38 @@ export default function ELGAME() {
     await supabase.auth.signOut();
     setUser(null);
   };
+  const updateLeaderboard = async (userId, attempts) => {
+  const { data, error } = await supabase
+    .from("leaderboard")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("Error fetching leaderboard data:", error.message);
+    return;
+  }
+
+  if (data) {
+    // Update existing record
+    await supabase
+      .from("leaderboard")
+      .update({
+        total_attempts: data.total_attempts + attempts,
+        games_played: data.games_played + 1,
+      })
+      .eq("user_id", userId);
+  } else {
+    // Insert new record
+    await supabase.from("leaderboard").insert([
+      {
+        user_id: userId,
+        total_attempts: attempts,
+        games_played: 1,
+      },
+    ]);
+  }
+};
 
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
@@ -93,6 +125,10 @@ export default function ELGAME() {
         >
           Rules
         </button>
+    <Link href="/leaderboard" className="absolute top-2 left-2 bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+    Leaderboard
+  </Link>
+
 
         {user ? (
           <>
