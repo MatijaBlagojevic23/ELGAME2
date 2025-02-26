@@ -11,7 +11,7 @@ export default function Leaderboard() {
     const fetchLeaderboard = async () => {
       let { data, error } = await supabase
         .from("leaderboard")
-        .select("user_id, total_attempts, games_played, average_attempts")
+        .select("username, total_attempts, games_played, average_attempts")
         .order("average_attempts", { ascending: true });
 
       if (error) {
@@ -27,7 +27,6 @@ export default function Leaderboard() {
   return (
     <div className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-bold mb-4">Leaderboard</h1>
-      {/*  "Back to Game" Link is removed */}
       <table className="w-full max-w-lg bg-white shadow-md rounded-lg overflow-hidden">
         <thead className="bg-gray-200">
           <tr>
@@ -39,7 +38,7 @@ export default function Leaderboard() {
         <tbody>
           {leaderboard.map((entry, index) => (
             <tr key={index} className="border-t">
-              <td className="px-4 py-2">{entry.user_id}</td>
+              <td className="px-4 py-2">{entry.username}</td>
               <td className="px-4 py-2">{entry.average_attempts.toFixed(2)}</td>
               <td className="px-4 py-2">{entry.games_played}</td>
             </tr>
