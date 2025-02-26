@@ -1,16 +1,15 @@
 "use client";
 
-import "../styles/globals.css"; 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useAuth } from "../context/AuthContext";
+import { supabase } from "../utils/supabase";
 import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
 
 export default function ELGAME() {
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState(null);
   const [players, setPlayers] = useState([]);
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -19,9 +18,20 @@ export default function ELGAME() {
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-  
+
   const attemptsRef = useRef(null);
 
+  // Fetch authenticated user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+
+    getUser();
+  }, []);
+
+  // Load players and set the target
   useEffect(() => {
     loadPlayers().then((data) => {
       setPlayers(data);
@@ -71,6 +81,11 @@ export default function ELGAME() {
     }, 100);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
       {/* Top-Right Buttons */}
@@ -86,7 +101,7 @@ export default function ELGAME() {
           <>
             <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{user.email}</p>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
             >
               Logout
