@@ -27,24 +27,26 @@ export default function Leaderboard() {
   return (
     <div className="flex flex-col items-center p-4">
       <h1 className="text-2xl font-bold mb-4">Leaderboard</h1>
-      <table className="w-full max-w-lg bg-white shadow-md rounded-lg overflow-hidden">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="px-4 py-2">User</th>
-            <th className="px-4 py-2">Avg Attempts</th>
-            <th className="px-4 py-2">Games Played</th>
-          </tr>
-        </thead>
-        <tbody className="max-h-60 overflow-y-auto block">
-          {leaderboard.map((entry, index) => (
-            <tr key={index} className="border-t block">
-              <td className="px-4 py-2">{entry.username}</td>
-              <td className="px-4 py-2">{entry.average_attempts.toFixed(2)}</td>
-              <td className="px-4 py-2">{entry.games_played}</td>
+      <div className="overflow-y-auto max-h-80 w-full">
+        <table className="w-full max-w-lg bg-white shadow-md rounded-lg">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="px-4 py-2">User</th>
+              <th className="px-4 py-2">Avg Attempts</th>
+              <th className="px-4 py-2">Games Played</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {leaderboard.map((entry, index) => (
+              <tr key={index} className="border-t">
+                <td className="px-4 py-2">{entry.username}</td>
+                <td className="px-4 py-2">{entry.average_attempts.toFixed(2)}</td>
+                <td className="px-4 py-2">{entry.games_played}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
