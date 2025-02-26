@@ -127,11 +127,7 @@ export default function ELGAME() {
         >
           Rules
         </button>
-    <div className="absolute top-2 left-2">
-  <Link href="/leaderboard" className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
-    Leaderboard
-  </Link>
-</div>
+    
 
 
         {user ? (
@@ -150,6 +146,11 @@ export default function ELGAME() {
           </Link>
         )}
       </div>
+  <div className="absolute top-2 left-2">
+  <Link href="/leaderboard" className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+    Leaderboard
+  </Link>
+</div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
