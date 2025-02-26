@@ -1,8 +1,6 @@
-"use client";
-
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import "../styles/globals.css"; 
+import "../styles/globals.css";
 import { supabase } from "../utils/supabase";
 import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
@@ -22,7 +20,6 @@ export default function ELGAME() {
 
   const attemptsRef = useRef(null);
 
-  // Fetch authenticated user
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -32,7 +29,6 @@ export default function ELGAME() {
     getUser();
   }, []);
 
-  // Load players and set the target
   useEffect(() => {
     loadPlayers().then((data) => {
       setPlayers(data);
@@ -89,7 +85,6 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
-      {/* Top-Right Buttons */}
       <div className="absolute top-2 right-2 flex gap-2">
         <button
           onClick={() => setShowWelcomePopup(true)}
@@ -115,10 +110,8 @@ export default function ELGAME() {
         )}
       </div>
 
-      {/* Welcome Popup */}
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
-      {/* Success Popup */}
       {showPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
@@ -129,11 +122,16 @@ export default function ELGAME() {
             >
               Play Again
             </button>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
 
-      {/* Exceed Attempts Popup */}
       {showExceedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
@@ -144,11 +142,16 @@ export default function ELGAME() {
             >
               Play Again
             </button>
+            <button
+              onClick={() => setShowExceedPopup(false)}
+              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
 
-      {/* Top Logo */}
       <div className="w-full flex justify-center mb-2">
         <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
       </div>
@@ -164,7 +167,6 @@ export default function ELGAME() {
         target={target}
       />
 
-      {/* Scrolling Attempts Table */}
       <div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-2">
         <PlayerTable attempts={attempts} target={target} />
       </div>
