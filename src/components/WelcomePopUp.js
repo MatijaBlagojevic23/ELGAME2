@@ -7,6 +7,7 @@ const WelcomePopup = ({ onClose }) => {
         <h2 className="text-xl font-bold mb-4">Welcome to ELGAME!</h2>
         <p className="mb-4">
           🎯 Guess the EuroLeague Player! <br />
+    📝  Enter the name of a player to compare their attributes with the target player.<br/>
           🏀 You have 10 attempts to find the correct player. <br />
           ⬆️⬇️ Arrows indicate whether a guessed attribute is higher or lower. <br />
           ✅ Green fields mean a perfect match. <br />
