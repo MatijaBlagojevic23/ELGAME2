@@ -1,5 +1,5 @@
 "use client";
-import "../../styles/globals.css";
+import "../../../styles/globals.css";  
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
