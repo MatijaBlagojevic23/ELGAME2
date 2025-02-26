@@ -7,19 +7,32 @@ import { supabase } from "../../../utils/supabase";
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState(""); // Add username state
   const [error, setError] = useState(null);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { error } = await supabase.auth.signUp({
+    // Create the user in Supabase Auth
+    const { user, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+
+    // Add username to the users table
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ username })
+      .eq('id', user.id);
+
+    if (updateError) {
+      setError(updateError.message);
       return;
     }
 
@@ -31,6 +44,14 @@ export default function SignUpPage() {
     <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
       <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="p-2 border rounded"
+          required
+        />
         <input
           type="email"
           placeholder="Email"
