@@ -9,7 +9,6 @@ import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
 import Leaderboard from "../components/Leaderboard";
 
-
 export default function ELGAME() {
   const [user, setUser] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -20,6 +19,7 @@ export default function ELGAME() {
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false); // State for Leaderboard popup
 
   const attemptsRef = useRef(null);
 
@@ -85,38 +85,6 @@ export default function ELGAME() {
     await supabase.auth.signOut();
     setUser(null);
   };
-  const updateLeaderboard = async (userId, attempts) => {
-  const { data, error } = await supabase
-    .from("leaderboard")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-
-  if (error && error.code !== "PGRST116") {
-    console.error("Error fetching leaderboard data:", error.message);
-    return;
-  }
-
-  if (data) {
-    // Update existing record
-    await supabase
-      .from("leaderboard")
-      .update({
-        total_attempts: data.total_attempts + attempts,
-        games_played: data.games_played + 1,
-      })
-      .eq("user_id", userId);
-  } else {
-    // Insert new record
-    await supabase.from("leaderboard").insert([
-      {
-        user_id: userId,
-        total_attempts: attempts,
-        games_played: 1,
-      },
-    ]);
-  }
-};
 
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
@@ -128,8 +96,6 @@ export default function ELGAME() {
           Rules
         </button>
     
-
-
         {user ? (
           <>
             <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{user.email}</p>
@@ -146,11 +112,16 @@ export default function ELGAME() {
           </Link>
         )}
       </div>
-  <div className="absolute top-2 left-2">
-  <Link href="/leaderboard" className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
-    Leaderboard
-  </Link>
-</div>
+
+      {/* Leaderboard Button */}
+      <div className="absolute top-2 left-2">
+        <button
+          onClick={() => setShowLeaderboard(true)}
+          className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
+        >
+          Leaderboard
+        </button>
+      </div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
@@ -190,6 +161,21 @@ export default function ELGAME() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard Modal */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-96">
+            <button
+              onClick={() => setShowLeaderboard(false)}
+              className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded"
+            >
+              ✖
+            </button>
+            <Leaderboard />
           </div>
         </div>
       )}
