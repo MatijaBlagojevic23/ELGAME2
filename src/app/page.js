@@ -212,7 +212,7 @@ export default function ELGAME() {
       
   {showLeaderboard && (
   <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg relative w-96 flex flex-col items-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg relative w-96" style={{ height: '70vh' }}>
       <Leaderboard />
       <button
         onClick={() => setShowLeaderboard(false)}
@@ -223,6 +223,7 @@ export default function ELGAME() {
     </div>
   </div>
 )}
+
 
 
       <div className="w-full flex justify-center mb-2">
