@@ -212,14 +212,19 @@ export default function ELGAME() {
       
   {showLeaderboard && (
   <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-    <div className="bg-white p-6 rounded-lg shadow-lg relative w-96" style={{ height: '70vh' }}>
+    <div
+      className="bg-white p-6 rounded-lg shadow-lg relative w-96 flex flex-col h-[70vh]" // Added flex and h-[70vh]
+      style={{ maxHeight: '70vh' }} // Added maxHeight as fallback, if needed
+    >
       <Leaderboard />
-      <button
-        onClick={() => setShowLeaderboard(false)}
-        className="mt-4 bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
-      >
-        Close
-      </button>
+      <div className="mt-auto flex justify-center"> {/* Container for button to push it to bottom */}
+        <button
+          onClick={() => setShowLeaderboard(false)}
+          className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
+        >
+          Close
+        </button>
+      </div>
     </div>
   </div>
 )}
