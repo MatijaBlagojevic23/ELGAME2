@@ -10,10 +10,10 @@ export default function SignUpPage() {
   const [error, setError] = useState(null);
   const router = useRouter();
 
-  const handleSignUp = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const { data, error } = await supabase.auth.signUp({
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -23,25 +23,20 @@ export default function SignUpPage() {
       return;
     }
 
-    // Store user info in the database
-    const { user } = data;
-    if (user) {
-      await supabase.from("users").insert([{ id: user.id, email: user.email }]);
-    }
-
-    router.push("/auth/signin");
+    alert("Check your email to confirm your account!");
+    router.push("/auth/signin"); // Redirect to sign-in page
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-2xl font-bold">Sign Up</h1>
-      <form onSubmit={handleSignUp} className="mt-4 flex flex-col gap-3">
+    <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border p-2 rounded"
+          className="p-2 border rounded"
           required
         />
         <input
@@ -49,14 +44,20 @@ export default function SignUpPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-2 rounded"
+          className="p-2 border rounded"
           required
         />
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
           Sign Up
         </button>
       </form>
+      <p className="mt-2 text-sm">
+        Already have an account? <a href="/auth/signin" className="text-blue-600">Sign In</a>
+      </p>
     </div>
   );
 }
