@@ -87,8 +87,10 @@ export default function ELGAME() {
     await supabase.auth.signOut();
     setUser(null);
   };
-  const updateLeaderboard = async (userId, attempts) => {
-  // Fetch username from the users table
+ const updateLeaderboard = async (userId, attempts) => {
+  console.log("Updating leaderboard for user:", userId);
+
+  // Step 1: Fetch username from the users table
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("username")
@@ -100,9 +102,10 @@ export default function ELGAME() {
     return;
   }
 
-  const username = userData?.username || "Unknown"; // Default value if username is missing
+  const username = userData?.username || "Unknown"; // Default username if missing
+  console.log("Fetched username:", username);
 
-  // Fetch existing leaderboard entry
+  // Step 2: Check if the user already exists in the leaderboard
   const { data, error } = await supabase
     .from("leaderboard")
     .select("*")
@@ -115,7 +118,8 @@ export default function ELGAME() {
   }
 
   if (data) {
-    // Update existing record
+    console.log("User already in leaderboard, updating record...");
+    // Step 3: Update existing record
     const { error: updateError } = await supabase
       .from("leaderboard")
       .update({
@@ -126,13 +130,16 @@ export default function ELGAME() {
 
     if (updateError) {
       console.error("Error updating leaderboard:", updateError.message);
+    } else {
+      console.log("Leaderboard updated successfully!");
     }
   } else {
-    // Insert new record with username
+    console.log("User not found in leaderboard, inserting new record...");
+    // Step 4: Insert new record with username
     const { error: insertError } = await supabase.from("leaderboard").insert([
       {
         user_id: userId,
-        username: username, 
+        username: username, // ✅ Store username
         total_attempts: attempts,
         games_played: 1,
       },
@@ -140,6 +147,8 @@ export default function ELGAME() {
 
     if (insertError) {
       console.error("Error inserting into leaderboard:", insertError.message);
+    } else {
+      console.log("New leaderboard entry added successfully!");
     }
   }
 };
