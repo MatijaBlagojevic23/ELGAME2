@@ -88,6 +88,21 @@ export default function ELGAME() {
     setUser(null);
   };
   const updateLeaderboard = async (userId, attempts) => {
+  // Fetch username from the users table
+  const { data: userData, error: userError } = await supabase
+    .from("users")
+    .select("username")
+    .eq("id", userId)
+    .single();
+
+  if (userError) {
+    console.error("Error fetching username:", userError.message);
+    return;
+  }
+
+  const username = userData?.username || "Unknown"; // Default value if username is missing
+
+  // Fetch existing leaderboard entry
   const { data, error } = await supabase
     .from("leaderboard")
     .select("*")
@@ -113,10 +128,11 @@ export default function ELGAME() {
       console.error("Error updating leaderboard:", updateError.message);
     }
   } else {
-    // Insert new record
+    // Insert new record with username
     const { error: insertError } = await supabase.from("leaderboard").insert([
       {
         user_id: userId,
+        username: username, 
         total_attempts: attempts,
         games_played: 1,
       },
@@ -127,6 +143,7 @@ export default function ELGAME() {
     }
   }
 };
+
 
 
   return (
