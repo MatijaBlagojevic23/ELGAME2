@@ -34,6 +34,7 @@ export default function Leaderboard() {
               <th className="px-4 py-2">User</th>
               <th className="px-4 py-2">Avg Attempts</th>
               <th className="px-4 py-2">Games Played</th>
+              <th className="px-4 py-2">Total Attempts</th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +43,7 @@ export default function Leaderboard() {
                 <td className="px-4 py-2">{entry.username}</td>
                 <td className="px-4 py-2">{entry.average_attempts.toFixed(2)}</td>
                 <td className="px-4 py-2">{entry.games_played}</td>
+                <td className="px-4 py-2">{entry.total_attempts}</td>
               </tr>
             ))}
           </tbody>
