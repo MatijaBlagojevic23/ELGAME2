@@ -1,78 +1,44 @@
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { supabase } from "@/utils/supabase";
-import bcrypt from "bcryptjs";
+async authorize(credentials) {
+  if (!credentials?.email || !credentials?.password) {
+    console.error("❌ Missing email or password");
+    return null;
+  }
 
-const authOptions = {
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+  try {
+    // ✅ Fetch user including username
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("id, email, password, full_name, username") // Include username
+      .eq("email", credentials.email)
+      .single();
 
-        try {
-          const { data: user, error } = await supabase
-            .from("users")
-            .select("id, email, password, full_name, username")
-            .eq("email", credentials.email)
-            .single();
+    if (error) {
+      console.error("❌ Supabase fetch error:", error.message);
+      return null;
+    }
 
-          if (error) {
-            console.error("Error fetching user from Supabase:", error);
-            return null;
-          }
+    if (!user) {
+      console.error("❌ User not found");
+      return null;
+    }
 
-          if (!user) {
-            return null;
-          }
+    // ✅ Compare hashed password
+    const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+    if (!passwordMatch) {
+      console.error("❌ Invalid password");
+      return null;
+    }
 
-          const passwordMatch = await bcrypt.compare(credentials.password, user.password);
+    console.log("✅ User authenticated:", user.email);
 
-          if (!passwordMatch) {
-            return null;
-          }
-
-          return {
-            id: user.id.toString(),
-            email: user.email,
-            name: user.full_name || user.email,
-            username: user.username,
-          };
-        } catch (error) {
-          console.error("Error during authorize:", error);
-          return null;
-        }
-      },
-    }),
-  ],
-  pages: {
-    signIn: "/auth/signin",
-  },
-  session: {
-    strategy: "jwt",
-  },
-  callbacks: {
-    async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.username = token.username;
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.username = user.username;
-      }
-      return token;
-    },
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: true,
-};
-
-export default (req, res) => NextAuth(req, res, authOptions);
+    return {
+      id: user.id.toString(),
+      email: user.email,
+      name: user.full_name || user.username || user.email, // ✅ Use username if available
+      username: user.username, // ✅ Store username in session
+    };
+  } catch (error) {
+    console.error("❌ Error during authentication:", error);
+    return null;
+  }
+}
