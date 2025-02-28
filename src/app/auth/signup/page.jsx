@@ -8,16 +8,18 @@ import { supabase } from "../../../utils/supabase";
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState(""); // Add username state
+  const [username, setUsername] = useState("");
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null); // Add state for the success message
+  const [message, setMessage] = useState(null);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setMessage(null);
 
-    // Create the user in Supabase Auth
-    const { user, error: signUpError } = await supabase.auth.signUp({
+    // Sign up user
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -27,24 +29,13 @@ export default function SignUpPage() {
       return;
     }
 
-    // Add username to the users table
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ username })
-      .eq('id', user.id);
-
-    if (updateError) {
-      setError(updateError.message);
-      return;
-    }
-
-    // Display the success message
+    // Show confirmation message
     setMessage("Check your email to confirm your account!");
 
-    // After a short delay, redirect to the sign-in page
+    // Redirect after delay
     setTimeout(() => {
-      router.push("/auth/signin"); // Redirect to sign-in page
-    }, 2000); // 2 seconds delay for the message to show
+      router.push("/auth/signin");
+    }, 3000); // 3 seconds delay
   };
 
   return (
