@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabase";
-import Link from "next/link";
 
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
@@ -22,6 +21,16 @@ export default function Leaderboard() {
     };
 
     fetchLeaderboard();
+
+    // Enable real-time updates
+    const leaderboardSubscription = supabase
+      .channel("leaderboard")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leaderboard" }, fetchLeaderboard)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(leaderboardSubscription); // Cleanup
+    };
   }, []);
 
   return (
@@ -34,7 +43,6 @@ export default function Leaderboard() {
               <th className="px-4 py-2">User</th>
               <th className="px-4 py-2">Avg Attempts</th>
               <th className="px-4 py-2">Games Played</th>
-              <th className="px-4 py-2">Total Attempts</th>
             </tr>
           </thead>
           <tbody>
@@ -43,7 +51,6 @@ export default function Leaderboard() {
                 <td className="px-4 py-2">{entry.username}</td>
                 <td className="px-4 py-2">{entry.average_attempts.toFixed(2)}</td>
                 <td className="px-4 py-2">{entry.games_played}</td>
-                <td className="px-4 py-2">{entry.total_attempts}</td>
               </tr>
             ))}
           </tbody>
