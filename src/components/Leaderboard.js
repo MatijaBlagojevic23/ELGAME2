@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,30 +7,26 @@ import Link from "next/link";
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
 
- useEffect(() => {
-  const fetchLeaderboard = async () => {
-    try {
-      let { data, error } = await supabase
-        .from("leaderboard")
-        .select("username, total_attempts, games_played, average_attempts")
-        .order("average_attempts", { ascending: true });
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        let { data, error } = await supabase
+          .from("leaderboard")
+          .select("username, total_attempts, games_played, average_attempts")
+          .order("average_attempts", { ascending: true });
 
-      if (error) {
-        if (error.message.includes("Unexpected token")) {
-          console.error("Invalid JSON response:", error.message);
-        } else {
+        if (error) {
           console.error("Error fetching leaderboard:", error.message);
+        } else {
+          setLeaderboard(data);
         }
-      } else {
-        setLeaderboard(data);
+      } catch (error) {
+        console.error("Unexpected error:", error.message);
       }
-    } catch (error) {
-      console.error("Unexpected error:", error.message);
-    }
-  };
+    };
 
-  fetchLeaderboard();
-}, []);
+    fetchLeaderboard();
+  }, []);
 
   return (
     <div className="flex flex-col items-center p-4">
