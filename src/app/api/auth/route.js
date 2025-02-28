@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { supabase } from "@/utils/supabase"; 
-import bcrypt from "bcryptjs"; 
+import { supabase } from "@/utils/supabase";
+import bcrypt from "bcryptjs";
 
 const authOptions = {
   providers: [
@@ -19,7 +19,7 @@ const authOptions = {
         try {
           const { data: user, error } = await supabase
             .from("users")
-            .select("id, email, password, full_name, username") // ✅ Added username
+            .select("id, email, password, full_name, username")
             .eq("email", credentials.email)
             .single();
 
@@ -42,7 +42,7 @@ const authOptions = {
             id: user.id.toString(),
             email: user.email,
             name: user.full_name || user.email,
-            username: user.username, // ✅ Added username to return object
+            username: user.username,
           };
         } catch (error) {
           console.error("Error during authorize:", error);
@@ -57,12 +57,22 @@ const authOptions = {
   session: {
     strategy: "jwt",
   },
+  callbacks: {
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.username = token.username;
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.username = user.username;
+      }
+      return token;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: true,
 };
 
-export async function GET(req, res) {
-  return NextAuth(req, res, authOptions);
-}
-
-export async function POST(req, res) {
-  return NextAuth(req, res, authOptions);
-}
+export default (req, res) => NextAuth(req, res, authOptions);
