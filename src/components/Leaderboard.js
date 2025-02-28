@@ -8,22 +8,30 @@ import Link from "next/link";
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
+ useEffect(() => {
+  const fetchLeaderboard = async () => {
+    try {
       let { data, error } = await supabase
         .from("leaderboard")
         .select("username, total_attempts, games_played, average_attempts")
         .order("average_attempts", { ascending: true });
 
       if (error) {
-        console.error("Error fetching leaderboard:", error.message);
+        if (error.message.includes("Unexpected token")) {
+          console.error("Invalid JSON response:", error.message);
+        } else {
+          console.error("Error fetching leaderboard:", error.message);
+        }
       } else {
         setLeaderboard(data);
       }
-    };
+    } catch (error) {
+      console.error("Unexpected error:", error.message);
+    }
+  };
 
-    fetchLeaderboard();
-  }, []);
+  fetchLeaderboard();
+}, []);
 
   return (
     <div className="flex flex-col items-center p-4">
