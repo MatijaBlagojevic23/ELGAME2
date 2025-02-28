@@ -120,11 +120,16 @@ export default function ELGAME() {
   if (data) {
     console.log("User already in leaderboard, updating record...");
     // Step 3: Update existing record
+    const newTotalAttempts = data.total_attempts + attempts;
+    const newGamesPlayed = data.games_played + 1;
+    const newAverageAttempts = newTotalAttempts / newGamesPlayed;
+
     const { error: updateError } = await supabase
       .from("leaderboard")
       .update({
-        total_attempts: data.total_attempts + attempts,
-        games_played: data.games_played + 1,
+        total_attempts: newTotalAttempts,
+        games_played: newGamesPlayed,
+        average_attempts: newAverageAttempts, // Calculate and update average_attempts
       })
       .eq("user_id", userId);
 
@@ -142,6 +147,7 @@ export default function ELGAME() {
         username: username, // ✅ Store username
         total_attempts: attempts,
         games_played: 1,
+        average_attempts: attempts, //set average_attempts to the first attempts.
       },
     ]);
 
@@ -152,7 +158,6 @@ export default function ELGAME() {
     }
   }
 };
-
 
 
   return (
