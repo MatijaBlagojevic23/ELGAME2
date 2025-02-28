@@ -90,7 +90,7 @@ export default function ELGAME() {
  const updateLeaderboard = async (userId, attempts) => {
   console.log("Updating leaderboard for user:", userId);
 
-  // Step 1: Fetch username from the users table
+  // Step 1: Fetch username from users table
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("username")
@@ -105,31 +105,27 @@ export default function ELGAME() {
   const username = userData?.username || "Unknown"; // Default username if missing
   console.log("Fetched username:", username);
 
-  // Step 2: Check if the user already exists in the leaderboard
+  // Step 2: Check if user exists in leaderboard
   const { data, error } = await supabase
     .from("leaderboard")
     .select("*")
     .eq("user_id", userId)
     .single();
 
-  if (error && error.code !== "PGRST116") {
+  if (error && error.code !== "PGRST001") {
     console.error("Error fetching leaderboard data:", error.message);
     return;
   }
 
   if (data) {
-    console.log("User already in leaderboard, updating record...");
+    console.log("User found in leaderboard, updating record...");
     // Step 3: Update existing record
-    const newTotalAttempts = data.total_attempts + attempts;
-    const newGamesPlayed = data.games_played + 1;
-    const newAverageAttempts = newTotalAttempts / newGamesPlayed;
-
     const { error: updateError } = await supabase
       .from("leaderboard")
       .update({
-        total_attempts: newTotalAttempts,
-        games_played: newGamesPlayed,
-        average_attempts: newAverageAttempts, // Calculate and update average_attempts
+        total_attempts: data.total_attempts + attempts,
+        games_played: data.games_played + 1,
+        average_attempts: (data.total_attempts + attempts) / (data.games_played + 1), // ✅ Fix average calculation
       })
       .eq("user_id", userId);
 
@@ -139,15 +135,15 @@ export default function ELGAME() {
       console.log("Leaderboard updated successfully!");
     }
   } else {
-    console.log("User not found in leaderboard, inserting new record...");
-    // Step 4: Insert new record with username
+    console.log("User not in leaderboard, inserting new record...");
+    // Step 4: Insert new record
     const { error: insertError } = await supabase.from("leaderboard").insert([
       {
         user_id: userId,
-        username: username, // ✅ Store username
+        username: username,
         total_attempts: attempts,
         games_played: 1,
-        average_attempts: attempts, //set average_attempts to the first attempts.
+        average_attempts: attempts, // ✅ Initialize average_attempts
       },
     ]);
 
