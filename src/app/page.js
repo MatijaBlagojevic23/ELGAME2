@@ -94,7 +94,7 @@ export default function ELGAME() {
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("username")
-    .eq("user_id", userId)
+    .eq("user_id", userId)  // Make sure to use `user_id`, not `id`
     .single();
 
   if (userError) {
@@ -109,7 +109,7 @@ export default function ELGAME() {
   const { data, error } = await supabase
     .from("leaderboard")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", userId)  // Make sure to use `user_id`, not `id`
     .single();
 
   if (error && error.code !== "PGRST001") {
@@ -125,7 +125,7 @@ export default function ELGAME() {
       .update({
         total_attempts: data.total_attempts + attempts,
         games_played: data.games_played + 1,
-        average_attempts: (data.total_attempts + attempts) / (data.games_played + 1), // ✅ Fix average calculation
+        average_attempts: (data.total_attempts + attempts) / (data.games_played + 1), // Fix average calculation
       })
       .eq("user_id", userId);
 
@@ -139,11 +139,11 @@ export default function ELGAME() {
     // Step 4: Insert new record
     const { error: insertError } = await supabase.from("leaderboard").insert([
       {
-        user_id: userId,
+        user_id: userId,  // Ensure this matches the column name
         username: username,
         total_attempts: attempts,
         games_played: 1,
-        average_attempts: attempts, // ✅ Initialize average_attempts
+        average_attempts: attempts, // Initialize with the first attempt
       },
     ]);
 
@@ -154,6 +154,8 @@ export default function ELGAME() {
     }
   }
 };
+
+   
 
 
   return (
