@@ -25,8 +25,11 @@ export default function SignUpPage() {
 
     if (signUpError) {
       setError(signUpError.message);
+      console.error("Sign Up Error:", signUpError.message);
       return;
     }
+
+    console.log("User signed up:", user);
 
     // Insert user data into 'users' table
     const { error: insertError } = await supabase
@@ -41,8 +44,11 @@ export default function SignUpPage() {
 
     if (insertError) {
       setError(insertError.message);
+      console.error("Insert Error:", insertError.message);
       return;
     }
+
+    console.log("User data inserted into 'users' table");
 
     // Show confirmation message
     setMessage("Check your email to confirm your account!");
