@@ -13,15 +13,13 @@ const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.error("Missing email or password");
           return null;
         }
 
         try {
-          console.log("Fetching user from Supabase for email:", credentials.email);
           const { data: user, error } = await supabase
             .from("users")
-            .select("user_id, email, password, full_name, username")
+            .select("user_id, email, password, full_name, username") // ✅ Fixed ID field
             .eq("email", credentials.email)
             .single();
 
@@ -31,18 +29,14 @@ const authOptions = {
           }
 
           if (!user) {
-            console.error("User not found");
             return null;
           }
 
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
           if (!passwordMatch) {
-            console.error("Password mismatch");
             return null;
           }
-
-          console.log("User authenticated successfully:", user.username);
 
           return {
             id: user.user_id.toString(),
@@ -65,5 +59,6 @@ const authOptions = {
   },
 };
 
+// ✅ Correct export format for Next.js App Router
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
