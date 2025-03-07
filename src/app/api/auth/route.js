@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { supabase } from "@/utils/supabase"; 
-import bcrypt from "bcryptjs"; 
+import { supabase } from "@/utils/supabase";
+import bcrypt from "bcryptjs";
 
 const authOptions = {
   providers: [
@@ -13,13 +13,15 @@ const authOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.error("Missing email or password");
           return null;
         }
 
         try {
+          console.log("Fetching user from Supabase for email:", credentials.email);
           const { data: user, error } = await supabase
             .from("users")
-            .select("id, email, password, full_name, username") // ✅ Added username
+            .select("id, email, password, full_name, username")
             .eq("email", credentials.email)
             .single();
 
@@ -29,20 +31,24 @@ const authOptions = {
           }
 
           if (!user) {
+            console.error("User not found");
             return null;
           }
 
           const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
           if (!passwordMatch) {
+            console.error("Password mismatch");
             return null;
           }
+
+          console.log("User authenticated successfully:", user.username);
 
           return {
             id: user.id.toString(),
             email: user.email,
             name: user.full_name || user.email,
-            username: user.username, // ✅ Added username to return object
+            username: user.username,
           };
         } catch (error) {
           console.error("Error during authorize:", error);
@@ -59,10 +65,5 @@ const authOptions = {
   },
 };
 
-export async function GET(req, res) {
-  return NextAuth(req, res, authOptions);
-}
-
-export async function POST(req, res) {
-  return NextAuth(req, res, authOptions);
-}
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
