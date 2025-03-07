@@ -21,7 +21,7 @@ const authOptions = {
           console.log("Fetching user from Supabase for email:", credentials.email);
           const { data: user, error } = await supabase
             .from("users")
-            .select("id, email, password, full_name, username")
+            .select("user_id, email, password, full_name, username")
             .eq("email", credentials.email)
             .single();
 
@@ -45,7 +45,7 @@ const authOptions = {
           console.log("User authenticated successfully:", user.username);
 
           return {
-            id: user.id.toString(),
+            id: user.user_id.toString(),
             email: user.email,
             name: user.full_name || user.email,
             username: user.username,
