@@ -94,7 +94,7 @@ export default function ELGAME() {
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("username")
-    .eq("id", userId)
+    .eq("user_id", userId)
     .single();
 
   if (userError) {
