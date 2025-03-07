@@ -1,44 +1,68 @@
-async authorize(credentials) {
-  if (!credentials?.email || !credentials?.password) {
-    console.error("❌ Missing email or password");
-    return null;
-  }
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { supabase } from "@/utils/supabase"; 
+import bcrypt from "bcryptjs"; 
 
-  try {
-    // ✅ Fetch user including username
-    const { data: user, error } = await supabase
-      .from("users")
-      .select("id, email, password, full_name, username") // Include username
-      .eq("email", credentials.email)
-      .single();
+const authOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
 
-    if (error) {
-      console.error("❌ Supabase fetch error:", error.message);
-      return null;
-    }
+        try {
+          const { data: user, error } = await supabase
+            .from("users")
+            .select("id, email, password, full_name, username") // ✅ Added username
+            .eq("email", credentials.email)
+            .single();
 
-    if (!user) {
-      console.error("❌ User not found");
-      return null;
-    }
+          if (error) {
+            console.error("Error fetching user from Supabase:", error);
+            return null;
+          }
 
-    // ✅ Compare hashed password
-    const passwordMatch = await bcrypt.compare(credentials.password, user.password);
-    if (!passwordMatch) {
-      console.error("❌ Invalid password");
-      return null;
-    }
+          if (!user) {
+            return null;
+          }
 
-    console.log("✅ User authenticated:", user.email);
+          const passwordMatch = await bcrypt.compare(credentials.password, user.password);
 
-    return {
-      id: user.id.toString(),
-      email: user.email,
-      name: user.full_name || user.username || user.email, // ✅ Use username if available
-      username: user.username, // ✅ Store username in session
-    };
-  } catch (error) {
-    console.error("❌ Error during authentication:", error);
-    return null;
-  }
+          if (!passwordMatch) {
+            return null;
+          }
+
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.full_name || user.email,
+            username: user.username, // ✅ Added username to return object
+          };
+        } catch (error) {
+          console.error("Error during authorize:", error);
+          return null;
+        }
+      },
+    }),
+  ],
+  pages: {
+    signIn: "/auth/signin",
+  },
+  session: {
+    strategy: "jwt",
+  },
+};
+
+export async function GET(req, res) {
+  return NextAuth(req, res, authOptions);
+}
+
+export async function POST(req, res) {
+  return NextAuth(req, res, authOptions);
 }
