@@ -1,6 +1,5 @@
 "use client";
 import "../../../styles/globals.css";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
@@ -19,13 +18,29 @@ export default function SignUpPage() {
     setMessage(null);
 
     // Sign up user
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { user, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (signUpError) {
       setError(signUpError.message);
+      return;
+    }
+
+    // Insert user data into 'users' table
+    const { error: insertError } = await supabase
+      .from("users")
+      .insert([
+        {
+          user_id: user.id,  // Use the user ID from authentication
+          email: email,
+          username: username, // Insert username
+        },
+      ]);
+
+    if (insertError) {
+      setError(insertError.message);
       return;
     }
 
