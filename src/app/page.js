@@ -94,7 +94,7 @@ export default function ELGAME() {
   const { data: userData, error: userError } = await supabase
     .from("users")
     .select("username")
-    .eq("user_id", userId)  // Make sure to use `user_id`, not `id`
+    .eq("user_id", userId)  // Make sure to use `user_id` here as per your schema
     .single();
 
   if (userError) {
@@ -139,7 +139,7 @@ export default function ELGAME() {
     // Step 4: Insert new record
     const { error: insertError } = await supabase.from("leaderboard").insert([
       {
-        user_id: userId,  // Ensure this matches the column name
+        user_id: userId,  // Ensure to use `user_id` here
         username: username,
         total_attempts: attempts,
         games_played: 1,
@@ -154,6 +154,7 @@ export default function ELGAME() {
     }
   }
 };
+
 
    
 
@@ -170,7 +171,7 @@ export default function ELGAME() {
     
         {user ? (
           <>
-            <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{user.email}</p>
+            <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{user.username}</p>
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
