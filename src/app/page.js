@@ -171,20 +171,22 @@ export default function ELGAME() {
         </button>
 
         {user ? (
-          <>
-            <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{username}</p> {/* Display username here */}
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <Link href="/auth/signin" className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
-            Login
-          </Link>
-        )}
+  <>
+    <p className="bg-gray-700 text-white px-3 py-2 rounded-full">
+      {username.length > 8 ? `${username.slice(0, 8)}...` : username}
+    </p> {/* Display truncated username if more than 8 characters */}
+    <button
+      onClick={handleLogout}
+      className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
+    >
+      Logout
+    </button>
+  </>
+) : (
+  <Link href="/auth/signin" className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+    Login
+  </Link>
+)}
       </div>
 
       {/* Leaderboard Button */}
