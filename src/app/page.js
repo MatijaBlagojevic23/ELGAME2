@@ -256,7 +256,8 @@ export default function ELGAME() {
             </button>
             <button
               onClick={() => setShowPopup(false)}
-              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
+              className="bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-md transition duration-300 hover:scale-105"
+              style={{ transform: 'scale(0.8)' }}
             >
               Close
             </button>
@@ -276,14 +277,14 @@ export default function ELGAME() {
             </button>
             <button
               onClick={() => setShowExceedPopup(false)}
-              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
+              className="bg-red-600 text-white px-3 py-1.5 rounded-full shadow-md transition duration-300 hover:scale-105"
+              style={{ transform: 'scale(0.8)' }}
             >
               Close
             </button>
           </div>
         </div>
       )}
-
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
