@@ -195,8 +195,8 @@ export default function ELGAME() {
   </Link>
 )}
 
-)}
-      </div>
+
+</div>
 
       {/* Leaderboard Button */}
       <div className="absolute top-2 left-2">
