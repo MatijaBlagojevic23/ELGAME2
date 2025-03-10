@@ -12,46 +12,50 @@ export default function SignUpPage() {
   const [message, setMessage] = useState(null);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setMessage(null);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
+  setMessage(null);
 
-    // Sign up user
-    const { user, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+  // Sign up user
+  const { data, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
-    if (signUpError) {
-      setError(signUpError.message);
-      return;
-    }
+  if (signUpError) {
+    console.error("Sign-up error:", signUpError.message);
+    setError(signUpError.message);
+    return;
+  }
 
-    // Insert user data into 'users' table
-    const { error: insertError } = await supabase
-      .from("users")
-      .insert([
-        {
-          user_id: user.id,  // Use the user ID from authentication
-          email: email,
-          username: username, // Insert username
-        },
-      ]);
+  console.log("User signed up:", data);
 
-    if (insertError) {
-      setError(insertError.message);
-      return;
-    }
+  // Insert user into 'users' table
+  const { error: insertError } = await supabase
+    .from("users")
+    .insert([
+      {
+        user_id: data.user?.id, // Ensure ID is correct
+        email: email,
+        username: username,
+      },
+    ]);
 
-    // Show confirmation message
-    setMessage("Check your email to confirm your account!");
+  if (insertError) {
+    console.error("Error inserting into users table:", insertError.message);
+    setError(insertError.message);
+    return;
+  }
 
-    // Redirect after delay
-    setTimeout(() => {
-      router.push("/auth/signin");
-    }, 3000); // 3 seconds delay
-  };
+  console.log("User inserted into users table successfully");
+
+  setMessage("Check your email to confirm your account!");
+  setTimeout(() => {
+    router.push("/auth/signin");
+  }, 3000);
+};
+
 
   return (
     <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
