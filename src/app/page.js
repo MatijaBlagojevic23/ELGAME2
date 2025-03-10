@@ -88,7 +88,7 @@ export default function ELGAME() {
     setUser(null);
   };
 const updateLeaderboard = async (userId, attempts) => {
-  console.log("Updating leaderboard for user:", userId);
+  //console.log("Updating leaderboard for user:", userId);
 
   // Fetch username from users table
   const { data: userData, error: userError } = await supabase
@@ -103,7 +103,7 @@ const updateLeaderboard = async (userId, attempts) => {
   }
 
   const username = userData.username || "Unknown"; // Default username
-  console.log("Fetched username:", username);
+  //console.log("Fetched username:", username);
 
   // Fetch user in leaderboard
   const { data, error } = await supabase
@@ -118,7 +118,7 @@ const updateLeaderboard = async (userId, attempts) => {
   }
 
   if (data) {
-    console.log("User found in leaderboard, updating record...");
+    //console.log("User found in leaderboard, updating record...");
     // Update existing record
     const { error: updateError } = await supabase
       .from("leaderboard")
@@ -132,10 +132,10 @@ const updateLeaderboard = async (userId, attempts) => {
     if (updateError) {
       console.error("Error updating leaderboard:", updateError.message);
     } else {
-      console.log("Leaderboard updated successfully!");
+      //console.log("Leaderboard updated successfully!");
     }
   } else {
-    console.log("User not in leaderboard, inserting new record...");
+    //console.log("User not in leaderboard, inserting new record...");
     // Insert new record
     const { error: insertError } = await supabase.from("leaderboard").insert([
       {
@@ -150,7 +150,7 @@ const updateLeaderboard = async (userId, attempts) => {
     if (insertError) {
       console.error("Error inserting into leaderboard:", insertError.message);
     } else {
-      console.log("New leaderboard entry added successfully!");
+      //console.log("New leaderboard entry added successfully!");
     }
   }
 };
