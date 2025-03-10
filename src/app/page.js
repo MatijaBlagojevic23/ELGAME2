@@ -11,6 +11,7 @@ import Leaderboard from "../components/Leaderboard";
 
 export default function ELGAME() {
   const [user, setUser] = useState(null);
+  const [username, setUsername] = useState(""); // Add state to store username
   const [players, setPlayers] = useState([]);
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -27,6 +28,21 @@ export default function ELGAME() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        // Fetch username from 'users' table using user ID
+        const { data, error } = await supabase
+          .from("users")
+          .select("username")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching username:", error.message);
+        } else {
+          setUsername(data?.username || "Unknown"); // Set the username if it exists
+        }
+      }
     };
 
     getUser();
@@ -51,7 +67,7 @@ export default function ELGAME() {
 
   const checkGuess = (submittedGuess) => {
     if (gameOver) return;
-    
+
     const guessToCheck = submittedGuess || guess;
     const player = players.find(
       (p) => p.name.toLowerCase() === guessToCheck.toLowerCase()
@@ -65,14 +81,14 @@ export default function ELGAME() {
     setAttempts(newAttempts);
 
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
-  setShowPopup(true);
-  setGameOver(true);
-  if (user) updateLeaderboard(user.id, newAttempts.length);
-} else if (newAttempts.length >= 10) {
-  setShowExceedPopup(true);
-  setGameOver(true);
-  if (user) updateLeaderboard(user.id, newAttempts.length);
-}
+      setShowPopup(true);
+      setGameOver(true);
+      if (user) updateLeaderboard(user.id, newAttempts.length);
+    } else if (newAttempts.length >= 10) {
+      setShowExceedPopup(true);
+      setGameOver(true);
+      if (user) updateLeaderboard(user.id, newAttempts.length);
+    }
 
     setGuess("");
 
@@ -86,79 +102,65 @@ export default function ELGAME() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setUsername(""); // Clear username on logout
   };
-const updateLeaderboard = async (userId, attempts) => {
-  //console.log("Updating leaderboard for user:", userId);
 
-  // Fetch username from users table
-  const { data: userData, error: userError } = await supabase
-    .from("users")
-    .select("username")
-    .eq("user_id", userId)
-    .maybeSingle();  // ✅ Prevents crash
+  const updateLeaderboard = async (userId, attempts) => {
+    // Fetch username from users table
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
+      .eq("user_id", userId)
+      .maybeSingle();  // ✅ Prevents crash
 
-  if (userError || !userData) {
-    console.error("Error fetching username:", userError?.message || "User not found");
-    return;
-  }
+    if (userError || !userData) {
+      console.error("Error fetching username:", userError?.message || "User not found");
+      return;
+    }
 
-  const username = userData.username || "Unknown"; // Default username
-  //console.log("Fetched username:", username);
+    const username = userData.username || "Unknown"; // Default username
 
-  // Fetch user in leaderboard
-  const { data, error } = await supabase
-    .from("leaderboard")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();  // ✅ Handles no existing data properly
-
-  if (error) {
-    console.error("Error fetching leaderboard data:", error.message);
-    return;
-  }
-
-  if (data) {
-    //console.log("User found in leaderboard, updating record...");
-    // Update existing record
-    const { error: updateError } = await supabase
+    // Fetch user in leaderboard
+    const { data, error } = await supabase
       .from("leaderboard")
-      .update({
-        total_attempts: data.total_attempts + attempts,
-        games_played: data.games_played + 1,
-       
-      })
-      .eq("user_id", userId);
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();  // ✅ Handles no existing data properly
 
-    if (updateError) {
-      console.error("Error updating leaderboard:", updateError.message);
-    } else {
-      //console.log("Leaderboard updated successfully!");
+    if (error) {
+      console.error("Error fetching leaderboard data:", error.message);
+      return;
     }
-  } else {
-    //console.log("User not in leaderboard, inserting new record...");
-    // Insert new record
-    const { error: insertError } = await supabase.from("leaderboard").insert([
-      {
-        user_id: userId,
-        username: username,
-        total_attempts: attempts,
-        games_played: 1,
-        
-      },
-    ]);
 
-    if (insertError) {
-      console.error("Error inserting into leaderboard:", insertError.message);
+    if (data) {
+      // Update existing record
+      const { error: updateError } = await supabase
+        .from("leaderboard")
+        .update({
+          total_attempts: data.total_attempts + attempts,
+          games_played: data.games_played + 1,
+        })
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("Error updating leaderboard:", updateError.message);
+      }
     } else {
-      //console.log("New leaderboard entry added successfully!");
+      // Insert new record
+      const { error: insertError } = await supabase.from("leaderboard").insert([
+        {
+          user_id: userId,
+          username: username,
+          total_attempts: attempts,
+          games_played: 1,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error inserting into leaderboard:", insertError.message);
+      }
     }
-  }
-};
-
-
-
-   
-
+  };
 
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
@@ -169,10 +171,10 @@ const updateLeaderboard = async (userId, attempts) => {
         >
           Rules
         </button>
-    
+
         {user ? (
           <>
-            <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{user.username}</p>
+            <p className="bg-gray-700 text-white px-3 py-2 rounded-full">{username}</p> {/* Display username here */}
             <button
               onClick={handleLogout}
               className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
@@ -240,27 +242,24 @@ const updateLeaderboard = async (userId, attempts) => {
       )}
 
       {/* Leaderboard Modal */}
-      
-  {showLeaderboard && (
-  <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-    <div
-      className="bg-white p-6 rounded-lg shadow-lg relative w-96 flex flex-col h-[70vh]" // Added flex and h-[70vh]
-      style={{ maxHeight: '70vh' }} // Added maxHeight as fallback, if needed
-    >
-      <Leaderboard />
-      <div className="mt-auto flex justify-center"> {/* Container for button to push it to bottom */}
-        <button
-          onClick={() => setShowLeaderboard(false)}
-          className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
+      {showLeaderboard && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg relative w-96 flex flex-col h-[70vh]"
+            style={{ maxHeight: '70vh' }}
+          >
+            <Leaderboard />
+            <div className="mt-auto flex justify-center">
+              <button
+                onClick={() => setShowLeaderboard(false)}
+                className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="w-full flex justify-center mb-2">
         <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
