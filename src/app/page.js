@@ -21,6 +21,7 @@ export default function ELGAME() {
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showPlayedPopup, setShowPlayedPopup] = useState(false);
 
   const attemptsRef = useRef(null);
 
@@ -47,35 +48,39 @@ export default function ELGAME() {
     getUser();
   }, []);
 
-  useEffect(() => {
-    const loadGame = async () => {
-      const data = await loadPlayers();
-      setPlayers(data);
+  const loadGame = async () => {
+    const data = await loadPlayers();
+    setPlayers(data);
 
-      // Calculate a daily seed based on the current date
-      const today = new Date().toISOString().slice(0, 10);
-      const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
-      const randomIndex = seed % data.length;
-      setTarget(data[randomIndex]);
+    // Calculate a daily seed based on the current date
+    const today = new Date().toISOString().slice(0, 10);
+    const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
+    const randomIndex = seed % data.length;
+    setTarget(data[randomIndex]);
 
-      if (user) {
-        // Check if the user has already played today
-        const { data: gameData, error } = await supabase
-          .from("games")
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("date", today)
-          .single();
+    if (user) {
+      // Check if the user has already played today
+      const { data: gameData, error } = await supabase
+        .from("games")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .single();
 
-        if (error && error.code !== "PGRST116") {
-          console.error("Error checking game data:", error.message);
-        } else if (gameData) {
-          setGameOver(true);
-          setShowExceedPopup(true);
-        }
+      if (error && error.code !== "PGRST116") {
+        console.error("Error checking game data:", error.message);
+      } else if (gameData) {
+        setGameOver(true);
+        setShowPlayedPopup(true);
       }
-    };
+    } else {
+      // For unauthenticated users, set a random target player
+      const randomIndex = Math.floor(Math.random() * data.length);
+      setTarget(data[randomIndex]);
+    }
+  };
 
+  useEffect(() => {
     loadGame();
 
     const hasSeenPopup = localStorage.getItem("hasSeenPopup");
@@ -127,6 +132,8 @@ export default function ELGAME() {
     await supabase.auth.signOut();
     setUser(null);
     setUsername("");
+    setGameOver(false);
+    loadGame(); // Reload game for unauthenticated user
   };
 
   const updateLeaderboard = async (userId, attempts) => {
@@ -269,6 +276,20 @@ export default function ELGAME() {
             </button>
             <button
               onClick={() => setShowExceedPopup(false)}
+              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showPlayedPopup && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
+          <div className="bg-white p-4 rounded shadow-lg text-center">
+            <p className="text-base font-bold mb-2">You have already played today. The correct player was {target?.name}</p>
+            <button
+              onClick={() => setShowPlayedPopup(false)}
               className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
             >
               Close
