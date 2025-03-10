@@ -147,14 +147,12 @@ export default function ELGAME() {
       }
     } else {
       // Insert new record
-      const { error: insertError } = await supabase.from("leaderboard").insert([
-        {
-          user_id: userId,
-          username: username,
-          total_attempts: attempts,
-          games_played: 1,
-        },
-      ]);
+      const { error: insertError } = await supabase.from("leaderboard").insert([{
+        user_id: userId,
+        username: username,
+        total_attempts: attempts,
+        games_played: 1,
+      }]);
 
       if (insertError) {
         console.error("Error inserting into leaderboard:", insertError.message);
@@ -164,7 +162,7 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
-      <div className="absolute top-2 right-2 flex gap-2">
+      <div className="absolute top-2 right-2 flex flex-col sm:flex-row gap-2">
         <button
           onClick={() => setShowWelcomePopup(true)}
           className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-full shadow-md hover:scale-105"
