@@ -48,7 +48,7 @@ export default function ELGAME() {
     getUser();
   }, []);
 
-  const loadGame = async () => {
+ const loadGame = async () => {
   const data = await loadPlayers();
   setPlayers(data);
 
@@ -58,15 +58,16 @@ export default function ELGAME() {
     // Check if the user has already played today
     const { data: gameData, error } = await supabase
       .from("games")
-      .select("*")
+      .select("player_name") // Only fetch the player's name
       .eq("user_id", user.id)
       .eq("date", today)
       .single();
 
     if (gameData) {
+      setTarget({ name: gameData.player_name }); // Set target from saved data
       setGameOver(true);
       setShowPlayedPopup(true);
-      return; // Stop execution to prevent setting a new target
+      return; // Stop execution to prevent picking a new player
     } else if (error && error.code !== "PGRST116") {
       console.error("Error checking game data:", error.message);
     }
