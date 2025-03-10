@@ -184,6 +184,7 @@ export default function ELGAME() {
     const { error: logError } = await supabase.from("games").insert([{
       user_id: userId,
       date: today,
+      attempts: attempts,
     }]);
 
     if (logError) {
@@ -205,7 +206,7 @@ export default function ELGAME() {
           <>
             <p className="bg-gray-700 text-white px-3 py-2 rounded-full text-center sm:text-left">
               <span className="block sm:hidden">
-                {username.length > 8 ? ${username.slice(0, 8)}... : username}
+                {username.length > 8 ? `${username.slice(0, 8)}...` : username}
               </span>
               <span className="hidden sm:block">
                 {username}
