@@ -84,7 +84,7 @@ export default function ELGAME() {
         .from("games")
         .select("*")
         .eq("user_id", user.id)
-        .eq("date", today)
+        .eq("date", today.toISOString().slice(0, 10))
         .single();
 
       if (error && error.code !== "PGRST116") {
@@ -153,7 +153,7 @@ export default function ELGAME() {
     setUser(null);
     setUsername("");
     setGameOver(false);
-    //loadGame(); // Reload game for unauthenticated user
+    loadGame(); // Reload game for unauthenticated user
   };
 
   const updateLeaderboard = async (userId, attempts) => {
@@ -264,7 +264,7 @@ export default function ELGAME() {
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
-     {showPopup && (
+      {showPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
             <p className="text-base font-bold mb-2">Great job! You guessed correctly!</p>
@@ -303,14 +303,14 @@ export default function ELGAME() {
           </div>
         </div>
       )}
-  
+
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
             <p className="text-base font-bold mb-2">You have already played today. The correct player was {target?.name}</p>
             <button
               onClick={() => setShowPlayedPopup(false)}
-              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
+              className="bg-gray-500 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600"
             >
               Close
             </button>
