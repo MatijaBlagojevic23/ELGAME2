@@ -51,7 +51,9 @@ export default function ELGAME() {
   useEffect(() => {
     loadPlayers().then((data) => {
       setPlayers(data);
-      setTarget(data[Math.floor(Math.random() * data.length)]);
+      const index = 2; // Set the index manually (e.g., 2 to pick the third player)
+      setTarget(data[index]);
+      //setTarget(data[Math.floor(Math.random() * data.length)]);
     });
 
     const hasSeenPopup = localStorage.getItem("hasSeenPopup");
