@@ -11,7 +11,7 @@ import Leaderboard from "../components/Leaderboard";
 
 export default function ELGAME() {
   const [user, setUser] = useState(null);
-  const [username, setUsername] = useState(""); // Add state to store username
+  const [username, setUsername] = useState("");
   const [players, setPlayers] = useState([]);
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
@@ -20,7 +20,7 @@ export default function ELGAME() {
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false); // State for Leaderboard popup
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const attemptsRef = useRef(null);
 
@@ -30,7 +30,6 @@ export default function ELGAME() {
       setUser(user);
 
       if (user) {
-        // Fetch username from 'users' table using user ID
         const { data, error } = await supabase
           .from("users")
           .select("username")
@@ -40,7 +39,7 @@ export default function ELGAME() {
         if (error) {
           console.error("Error fetching username:", error.message);
         } else {
-          setUsername(data?.username || "Unknown"); // Set the username if it exists
+          setUsername(data?.username || "Unknown");
         }
       }
     };
@@ -49,25 +48,48 @@ export default function ELGAME() {
   }, []);
 
   useEffect(() => {
-    loadPlayers().then((data) => {
+    const loadGame = async () => {
+      const data = await loadPlayers();
       setPlayers(data);
-      //const index = 159; // Set the index manually (e.g., 2 to pick the third player)
-      //setTarget(data[index]);
-      setTarget(data[Math.floor(Math.random() * data.length)]);
-    });
+
+      // Calculate a daily seed based on the current date
+      const today = new Date().toISOString().slice(0, 10);
+      const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
+      const randomIndex = seed % data.length;
+      setTarget(data[randomIndex]);
+
+      if (user) {
+        // Check if the user has already played today
+        const { data: gameData, error } = await supabase
+          .from("games")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("date", today)
+          .single();
+
+        if (error && error.code !== "PGRST116") {
+          console.error("Error checking game data:", error.message);
+        } else if (gameData) {
+          setGameOver(true);
+          setShowExceedPopup(true);
+        }
+      }
+    };
+
+    loadGame();
 
     const hasSeenPopup = localStorage.getItem("hasSeenPopup");
     if (!hasSeenPopup) {
       setShowWelcomePopup(true);
     }
-  }, []);
+  }, [user]);
 
   const handleCloseWelcomePopup = () => {
     localStorage.setItem("hasSeenPopup", "true");
     setShowWelcomePopup(false);
   };
 
-  const checkGuess = (submittedGuess) => {
+  const checkGuess = async (submittedGuess) => {
     if (gameOver) return;
 
     const guessToCheck = submittedGuess || guess;
@@ -85,11 +107,11 @@ export default function ELGAME() {
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
       setShowPopup(true);
       setGameOver(true);
-      if (user) updateLeaderboard(user.id, newAttempts.length);
+      if (user) await updateLeaderboard(user.id, newAttempts.length);
     } else if (newAttempts.length >= 10) {
       setShowExceedPopup(true);
       setGameOver(true);
-      if (user) updateLeaderboard(user.id, newAttempts.length);
+      if (user) await updateLeaderboard(user.id, newAttempts.length);
     }
 
     setGuess("");
@@ -104,30 +126,28 @@ export default function ELGAME() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setUsername(""); // Clear username on logout
+    setUsername("");
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    // Fetch username from users table
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("username")
       .eq("user_id", userId)
-      .maybeSingle();  // ✅ Prevents crash
+      .maybeSingle();
 
     if (userError || !userData) {
       console.error("Error fetching username:", userError?.message || "User not found");
       return;
     }
 
-    const username = userData.username || "Unknown"; // Default username
+    const username = userData.username || "Unknown";
 
-    // Fetch user in leaderboard
     const { data, error } = await supabase
       .from("leaderboard")
       .select("*")
       .eq("user_id", userId)
-      .maybeSingle();  // ✅ Handles no existing data properly
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching leaderboard data:", error.message);
@@ -135,7 +155,6 @@ export default function ELGAME() {
     }
 
     if (data) {
-      // Update existing record
       const { error: updateError } = await supabase
         .from("leaderboard")
         .update({
@@ -148,7 +167,6 @@ export default function ELGAME() {
         console.error("Error updating leaderboard:", updateError.message);
       }
     } else {
-      // Insert new record
       const { error: insertError } = await supabase.from("leaderboard").insert([{
         user_id: userId,
         username: username,
@@ -159,6 +177,17 @@ export default function ELGAME() {
       if (insertError) {
         console.error("Error inserting into leaderboard:", insertError.message);
       }
+    }
+
+    // Log the game play for today to prevent multiple plays
+    const today = new Date().toISOString().slice(0, 10);
+    const { error: logError } = await supabase.from("games").insert([{
+      user_id: userId,
+      date: today,
+    }]);
+
+    if (logError) {
+      console.error("Error logging game play:", logError.message);
     }
   };
 
@@ -173,34 +202,29 @@ export default function ELGAME() {
         </button>
 
         {user ? (
-  <>
-    <p className="bg-gray-700 text-white px-3 py-2 rounded-full text-center sm:text-left">
-      <span className="block sm:hidden">
-        {/* Display truncated username (first 8 characters) on small screens */}
-        {username.length > 8 ? `${username.slice(0, 8)}...` : username}
-      </span>
-      <span className="hidden sm:block">
-        {/* Display full username on medium and large screens */}
-        {username}
-      </span>
-    </p>
-    <button
-      onClick={handleLogout}
-      className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
-    >
-      Logout
-    </button>
-  </>
-) : (
-  <Link href="/auth/signin" className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
-    Login
-  </Link>
-)}
+          <>
+            <p className="bg-gray-700 text-white px-3 py-2 rounded-full text-center sm:text-left">
+              <span className="block sm:hidden">
+                {username.length > 8 ? `${username.slice(0, 8)}...` : username}
+              </span>
+              <span className="hidden sm:block">
+                {username}
+              </span>
+            </p>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <Link href="/auth/signin" className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+            Login
+          </Link>
+        )}
+      </div>
 
-
-</div>
-
-      {/* Leaderboard Button */}
       <div className="absolute top-2 left-2">
         <button
           onClick={() => setShowLeaderboard(true)}
@@ -252,7 +276,6 @@ export default function ELGAME() {
         </div>
       )}
 
-      {/* Leaderboard Modal */}
       {showLeaderboard && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <div
