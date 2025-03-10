@@ -53,9 +53,29 @@ export default function ELGAME() {
     setPlayers(data);
 
     // Calculate a daily seed based on the current date
-    const today = new Date().toISOString().slice(0, 10);
-    const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
-    const randomIndex = seed % data.length;
+    const today = new Date();
+    const dateString = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
+    const parts = dateString.split('.');
+    const day = parseInt(parts[0]);
+    const month = parseInt(parts[1]);
+    const year = parseInt(parts[2]);
+
+    // Enhanced seed generation using bitwise operations and multiplication:
+    let seed = year;
+    seed = (seed * 31) + month;
+    seed = (seed * 31) + day;
+    seed = seed ^ (year >> 16); // Bitwise XOR with shifted year
+    seed = seed * (year % 100 + 1); // Multiply by last two digits + 1
+
+    // Use a hash function or a more complex calculation if needed.
+    // Example using a simple hash:
+    seed = seed ^ (seed >>> 16);
+    seed = seed * 0x85ebca6b;
+    seed = seed ^ (seed >>> 13);
+    seed = seed * 0xc2b2ae35;
+    seed = seed ^ (seed >>> 16);
+
+    const randomIndex = Math.abs(seed % data.length); // Ensure positive index
     setTarget(data[randomIndex]);
 
     if (user) {
