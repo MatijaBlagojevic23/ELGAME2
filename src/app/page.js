@@ -244,20 +244,19 @@ export default function ELGAME() {
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
-      {showPopup && (
+     {showPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
             <p className="text-base font-bold mb-2">Great job! You guessed correctly!</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full hover:scale-105"
+              className="bg-blue-600 text-white px-3.2 py-1.6 rounded-full hover:scale-105"
             >
               Play Again
             </button>
             <button
               onClick={() => setShowPopup(false)}
-              className="bg-blue-600 text-white px-3 py-1.5 rounded-full shadow-md transition duration-300 hover:scale-105"
-              style={{ transform: 'scale(0.8)' }}
+              className="bg-blue-600 text-white px-3.2 py-1.6 rounded-full shadow-md transition duration-300 hover:scale-105"
             >
               Close
             </button>
@@ -271,14 +270,13 @@ export default function ELGAME() {
             <p className="text-base font-bold mb-2">Too many attempts! The target player was {target?.name}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-red-600 text-white px-4 py-2 rounded-full hover:scale-105"
+              className="bg-red-600 text-white px-3.2 py-1.6 rounded-full hover:scale-105"
             >
               Play Again
             </button>
             <button
               onClick={() => setShowExceedPopup(false)}
-              className="bg-red-600 text-white px-3 py-1.5 rounded-full shadow-md transition duration-300 hover:scale-105"
-              style={{ transform: 'scale(0.8)' }}
+              className="bg-red-600 text-white px-3.2 py-1.6 rounded-full shadow-md transition duration-300 hover:scale-105"
             >
               Close
             </button>
