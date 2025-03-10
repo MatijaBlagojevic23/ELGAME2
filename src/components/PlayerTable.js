@@ -27,11 +27,17 @@ export default function PlayerTable({ attempts, target }) {
       if (diff <= 3) return "bg-yellow-300";
     }
     if (key === "number") {
-      const diff = Math.abs(player[key] - target[key]);
-      if (diff === 0) return "bg-green-500";
-      if (diff <= 2) return "bg-yellow-300";
-      return "bg-red-500";
+    const diff = Math.abs(player[key] - target[key]);
+    if (diff === 0) {
+      // Check if team and number are the same but names are different
+      if (player.team === target.team && player.number === target.number && player.name !== target.name) {
+        return "bg-yellow-300"; // Yellow background for the number in this special case
+      }
+      return "bg-green-500"; // Green background if the number matches
     }
+    if (diff <= 2) return "bg-yellow-300";
+    return "bg-red-500";
+  }
     return player[key] === target[key] ? "bg-green-500" : "bg-red-500";
   };
 
