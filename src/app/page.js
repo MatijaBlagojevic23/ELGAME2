@@ -143,7 +143,7 @@ const updateLeaderboard = async (userId, attempts) => {
         username: username,
         total_attempts: attempts,
         games_played: 1,
-        average_attempts: attempts, // First attempt is the average
+        
       },
     ]);
 
