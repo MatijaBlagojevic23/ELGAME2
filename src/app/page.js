@@ -125,7 +125,7 @@ const updateLeaderboard = async (userId, attempts) => {
       .update({
         total_attempts: data.total_attempts + attempts,
         games_played: data.games_played + 1,
-        average_attempts: (data.total_attempts + attempts) / (data.games_played + 1),
+       
       })
       .eq("user_id", userId);
 
