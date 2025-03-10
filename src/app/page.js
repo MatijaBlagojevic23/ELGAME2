@@ -172,9 +172,16 @@ export default function ELGAME() {
 
         {user ? (
   <>
-    <p className="bg-gray-700 text-white px-3 py-2 rounded-full">
-      {username.length > 8 ? `${username.slice(0, 8)}...` : username}
-    </p> {/* Display truncated username if more than 8 characters */}
+    <p className="bg-gray-700 text-white px-3 py-2 rounded-full text-center sm:text-left">
+      <span className="block sm:hidden">
+        {/* Display truncated username (first 8 characters) on small screens */}
+        {username.length > 8 ? `${username.slice(0, 8)}...` : username}
+      </span>
+      <span className="hidden sm:block">
+        {/* Display full username on medium and large screens */}
+        {username}
+      </span>
+    </p>
     <button
       onClick={handleLogout}
       className="bg-red-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
@@ -186,6 +193,8 @@ export default function ELGAME() {
   <Link href="/auth/signin" className="bg-green-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
     Login
   </Link>
+)}
+
 )}
       </div>
 
