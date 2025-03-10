@@ -133,7 +133,7 @@ export default function ELGAME() {
     setUser(null);
     setUsername("");
     setGameOver(false);
-    loadGame(); // Reload game for unauthenticated user
+    //loadGame(); // Reload game for unauthenticated user
   };
 
   const updateLeaderboard = async (userId, attempts) => {
