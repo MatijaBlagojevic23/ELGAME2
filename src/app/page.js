@@ -210,16 +210,28 @@ export default function ELGAME() {
     }
 
     // Log the game play for today to prevent multiple plays
-    const today = new Date().toISOString().slice(0, 10);
-    const { error: logError } = await supabase.from("games").insert([{
-      user_id: userId,
-      date: today,
-      attempts: attempts,
-    }]);
+    // Log the game play for today to prevent multiple plays
+const today = new Date().toISOString().slice(0, 10);
 
-    if (logError) {
-      console.error("Error logging game play:", logError.message);
-    }
+const { error: logError } = await supabase
+  .from("games")
+  .upsert(
+    [
+      {
+        user_id: userId,
+        date: today,
+        attempts: attempts,
+      }
+    ],
+    { onConflict: ["user_id"] }  // Ensures it updates instead of inserting duplicate user_id
+  );
+
+if (logError) {
+  console.error("Error logging game play:", logError.message);
+}
+
+
+    
   };
 
   return (
