@@ -171,7 +171,7 @@ export default function PlayerTable({ attempts, target }) {
           </div>
 
           {/* PC Version: Table Row Layout */}
-          <div className="hidden lg:grid grid-cols-7 items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
+          <div className="hidden lg:grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
             {/* Name */}
             <div className={`px-1 py-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
               {player.name}
