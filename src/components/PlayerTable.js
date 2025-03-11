@@ -43,7 +43,7 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* PC Header Row (7 columns including Name) */}
-      <div className="hidden sm:grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[10px] sm:text-[11px] md:text-[12px]">
+      <div className="hidden lg:grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[10px] sm:text-[11px] md:text-[12px]">
         <div className="min-w-0 px-1 py-1">Name</div>
         <div className="min-w-0 px-1 py-1">Team</div>
         <div className="min-w-0 px-1 py-1">Country</div>
@@ -54,7 +54,7 @@ export default function PlayerTable({ attempts, target }) {
       </div>
 
       {/* Mobile Header Row (6 columns, no Name) */}
-      <div className="sm:hidden grid grid-cols-6 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px]">
+      <div className="lg:hidden grid grid-cols-6 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px]">
         <div className="min-w-0 px-1 py-1">Team</div>
         <div className="min-w-0 px-1 py-1">Country</div>
         <div className="min-w-0 px-1 py-1">Position</div>
@@ -71,7 +71,7 @@ export default function PlayerTable({ attempts, target }) {
           animate={{ opacity: 1 }}
         >
           {/* Mobile Version: Two-Line Stacked Layout */}
-          <div className="sm:hidden flex flex-col text-center">
+          <div className="lg:hidden flex flex-col text-center">
             {/* Top Line: Player Name with PC color logic */}
             <div
               className={`font-semibold py-1 px-2 rounded-t-lg overflow-hidden text-ellipsis whitespace-nowrap ${
@@ -171,7 +171,7 @@ export default function PlayerTable({ attempts, target }) {
           </div>
 
           {/* PC Version: Table Row Layout */}
-          <div className="hidden sm:grid grid-cols-7 items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
+          <div className="hidden lg:grid grid-cols-7 items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
             {/* Name */}
             <div className={`px-1 py-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
               {player.name}
@@ -181,7 +181,7 @@ export default function PlayerTable({ attempts, target }) {
               <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5" />
             </div>
             {/* Country */}
-            <div className={`px-1 py-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis`}>
+            <div className={`px-1 py-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
               {player.country}
             </div>
             {/* Position */}
