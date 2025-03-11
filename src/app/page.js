@@ -47,38 +47,61 @@ export default function ELGAME() {
 
     getUser();
   }, []);
+  
+  const getRandomIndex = (data, dateString) => {
+  const parts = dateString.split('.');
+  const day = parseInt(parts[0]);
+  const month = parseInt(parts[1]);
+  const year = parseInt(parts[2]);
+
+  let seed = year;
+  seed = (seed * 31) + month;
+  seed = (seed * 31) + day;
+  seed = seed ^ (year >> 16);
+  seed = seed * (year % 100 + 1);
+
+  seed = seed ^ (seed >>> 16);
+  seed = seed * 0x85ebca6b;
+  seed = seed ^ (seed >>> 13);
+  seed = seed * 0xc2b2ae35;
+  seed = seed ^ (seed >>> 16);
+
+  return Math.abs(seed % data.length);
+};
 
   const loadGame = async () => {
-    const data = await loadPlayers();
-    setPlayers(data);
+  const data = await loadPlayers();
+  setPlayers(data);
 
-    // Calculate a daily seed based on the current date
-    const today = new Date().toISOString().slice(0, 10);
-    const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
-    const randomIndex = seed % data.length;
+  const today = new Date();
+  const dateString = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
+
+  if (user) {
+    // Use deterministic function for signed-in users
+    const randomIndex = getRandomIndex(data, dateString);
     setTarget(data[randomIndex]);
 
-    if (user) {
-      // Check if the user has already played today
-      const { data: gameData, error } = await supabase
-        .from("games")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", today)
-        .single();
+    // Check if the user has already played today
+    const { data: gameData, error } = await supabase
+      .from("games")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", today.toISOString().slice(0, 10))
+      .maybeSingle();
 
-      if (error && error.code !== "PGRST116") {
-        console.error("Error checking game data:", error.message);
-      } else if (gameData) {
-        setGameOver(true);
-        setShowPlayedPopup(true);
-      }
-    } else {
-      // For unauthenticated users, set a random target player
-      const randomIndex = Math.floor(Math.random() * data.length);
-      setTarget(data[randomIndex]);
+    if (error) {
+      console.error("Error checking game data:", error.message);
+    } else if (gameData) {
+      setGameOver(true);
+      setShowPlayedPopup(true);
     }
-  };
+  } else {
+    // Use a completely random selection for unauthenticated users
+    const randomIndex = Math.floor(Math.random() * data.length);
+    setTarget(data[randomIndex]);
+  }
+};
+
 
   useEffect(() => {
     loadGame();
