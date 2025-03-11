@@ -27,17 +27,16 @@ export default function PlayerTable({ attempts, target }) {
       if (diff <= 3) return "bg-yellow-300";
     }
     if (key === "number") {
-    const diff = Math.abs(player[key] - target[key]);
-    if (diff === 0) {
-      // Check if team and number are the same but names are different
-      if (player.team === target.team && player.number === target.number && player.name !== target.name) {
-        return "bg-yellow-300"; // Yellow background for the number in this special case
+      const diff = Math.abs(player[key] - target[key]);
+      if (diff === 0) {
+        if (player.team === target.team && player.number === target.number && player.name !== target.name) {
+          return "bg-yellow-300"; // Yellow background for this special case
+        }
+        return "bg-green-500"; // Green background if the number matches
       }
-      return "bg-green-500"; // Green background if the number matches
+      if (diff <= 2) return "bg-yellow-300";
+      return "bg-red-500";
     }
-    if (diff <= 2) return "bg-yellow-300";
-    return "bg-red-500";
-  }
     return player[key] === target[key] ? "bg-green-500" : "bg-red-500";
   };
 
@@ -67,7 +66,7 @@ export default function PlayerTable({ attempts, target }) {
       {attempts.map((player, index) => (
         <motion.div
           key={index}
-          className="mt-1 shadow-md  bg-gray-100 border"
+          className="mt-1 shadow-md bg-gray-100 border"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -171,39 +170,37 @@ export default function PlayerTable({ attempts, target }) {
             </div>
           </div>
 
-          {/* PC (and Larger) Version: Table Row Layout */}
-          {/* PC (and Larger) Version: Table Row Layout */}
-<div className="hidden sm:grid grid-cols-7 items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
-  {/* Name */}
-  <div className={`px-1 py-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
-    {player.name}
-  </div>
-  {/* Team */}
-  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "team")} flex items-center justify-center`}>
-    <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5" />
-  </div>
-  {/* Country */}
-  <div className={`px-1 py-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis`}>
-    {player.country}
-  </div>
-  {/* Position */}
-  <div className={`px-1 py-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
-    {player.position}
-  </div>
-  {/* Height */}
-  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "height")} flex items-center justify-center font-semibold`}>
-    {player.height} cm {getHint(player, target, "height")}
-  </div>
-  {/* Age */}
-  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "age")} flex items-center justify-center font-semibold`}>
-    {player.age} {getHint(player, target, "age")}
-  </div>
-  {/* Number */}
-  <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "number")} flex items-center justify-center font-semibold`}>
-    #{player.number} {getHint(player, target, "number")}
-  </div>
-</div>
-
+          {/* PC Version: Table Row Layout */}
+          <div className="hidden sm:grid grid-cols-7 items-center text-center p-1 border rounded-lg bg-gray-100 text-[0.75rem]">
+            {/* Name */}
+            <div className={`px-1 py-1 border rounded-md ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
+              {player.name}
+            </div>
+            {/* Team */}
+            <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "team")} flex items-center justify-center`}>
+              <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5" />
+            </div>
+            {/* Country */}
+            <div className={`px-1 py-1 border rounded-md ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis`}>
+              {player.country}
+            </div>
+            {/* Position */}
+            <div className={`px-1 py-1 border rounded-md ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
+              {player.position}
+            </div>
+            {/* Height */}
+            <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "height")} flex items-center justify-center font-semibold`}>
+              {player.height} cm {getHint(player, target, "height")}
+            </div>
+            {/* Age */}
+            <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "age")} flex items-center justify-center font-semibold`}>
+              {player.age} {getHint(player, target, "age")}
+            </div>
+            {/* Number */}
+            <div className={`px-1 py-1 border rounded-md ${getBackgroundColor(player, target, "number")} flex items-center justify-center font-semibold`}>
+              #{player.number} {getHint(player, target, "number")}
+            </div>
+          </div>
         </motion.div>
       ))}
     </div>
