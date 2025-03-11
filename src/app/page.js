@@ -213,21 +213,38 @@ export default function ELGAME() {
     // Log the game play for today to prevent multiple plays
 const today = new Date().toISOString().slice(0, 10);
 
-const { error: logError } = await supabase
+// Check if the user already has an entry in the games table
+const { data: existingGame, error: fetchError } = await supabase
   .from("games")
-  .upsert(
-    [
-      {
-        user_id: userId,
-        date: today,
-        attempts: attempts,
-      }
-    ],
-    { onConflict: ["user_id"] }  // Ensures it updates instead of inserting duplicate user_id
-  );
+  .select("id")  // Fetch only the ID to minimize data transfer
+  .eq("user_id", userId)
+  .maybeSingle();
 
-if (logError) {
-  console.error("Error logging game play:", logError.message);
+if (fetchError) {
+  console.error("Error checking existing game play:", fetchError.message);
+} else if (existingGame) {
+  // If the user has played before, update the date and attempts
+  const { error: updateError } = await supabase
+    .from("games")
+    .update({ date: today, attempts })
+    .eq("id", existingGame.id);
+
+  if (updateError) {
+    console.error("Error updating game play:", updateError.message);
+  }
+} else {
+  // If no existing entry, insert a new row
+  const { error: insertError } = await supabase.from("games").insert([
+    {
+      user_id: userId,
+      date: today,
+      attempts: attempts,
+    },
+  ]);
+
+  if (insertError) {
+    console.error("Error inserting new game play:", insertError.message);
+  }
 }
 
 
