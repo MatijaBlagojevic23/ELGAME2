@@ -48,58 +48,37 @@ export default function ELGAME() {
     getUser();
   }, []);
 
- const loadGame = async () => {
-  const data = await loadPlayers();
-  setPlayers(data);
+  const loadGame = async () => {
+    const data = await loadPlayers();
+    setPlayers(data);
 
-  const today = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
+    // Calculate a daily seed based on the current date
+    const today = new Date().toISOString().slice(0, 10);
+    const seed = today.split("-").reduce((acc, val) => acc + parseInt(val), 0);
+    const randomIndex = seed % data.length;
+    setTarget(data[randomIndex]);
 
-  if (user) {
-    // Check if the user has already played today
-    const { data: gameData, error } = await supabase
-      .from("games")
-      .select("player_name") // Only fetch the player's name
-      .eq("user_id", user.id)
-      .eq("date", today)
-      .single();
-
-    if (gameData) {
-      setTarget({ name: gameData.player_name }); // Set target from saved data
-      setGameOver(true);
-      setShowPlayedPopup(true);
-      return; // Stop execution to prevent picking a new player
-    } else if (error && error.code !== "PGRST116") {
-      console.error("Error checking game data:", error.message);
-    }
-  }
-
-  // If the user hasn't played today OR is not signed in, set a new target
-  const randomIndex = (() => {
     if (user) {
-      // Seeded random selection for signed-in users
-      const [year, month, day] = today.split("-").map(Number);
-      let seed = year;
-      seed = (seed * 31) + month;
-      seed = (seed * 31) + day;
-      seed = seed ^ (year >> 16);
-      seed = seed * (year % 100 + 1);
-      seed = seed ^ (seed >>> 16);
-      seed = seed * 0x85ebca6b;
-      seed = seed ^ (seed >>> 13);
-      seed = seed * 0xc2b2ae35;
-      seed = seed ^ (seed >>> 16);
-      return Math.abs(seed % data.length);
+      // Check if the user has already played today
+      const { data: gameData, error } = await supabase
+        .from("games")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", today)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Error checking game data:", error.message);
+      } else if (gameData) {
+        setGameOver(true);
+        setShowPlayedPopup(true);
+      }
     } else {
-      // Fully random selection for guests
-      return Math.floor(Math.random() * data.length);
+      // For unauthenticated users, set a random target player
+      const randomIndex = Math.floor(Math.random() * data.length);
+      setTarget(data[randomIndex]);
     }
-  })();
-
-  setTarget(data[randomIndex]);
-};
-
-
-
+  };
 
   useEffect(() => {
     loadGame();
@@ -265,7 +244,7 @@ export default function ELGAME() {
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
-      {showPopup && (
+     {showPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
             <p className="text-base font-bold mb-2">Great job! You guessed correctly!</p>
@@ -304,14 +283,14 @@ export default function ELGAME() {
           </div>
         </div>
       )}
-
+  
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
             <p className="text-base font-bold mb-2">You have already played today. The correct player was {target?.name}</p>
             <button
               onClick={() => setShowPlayedPopup(false)}
-              className="bg-gray-500 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600"
+              className="bg-gray-500 text-white px-2 py-1 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600 text-[8px] sm:text-xs"
             >
               Close
             </button>
