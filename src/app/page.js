@@ -8,7 +8,6 @@ import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
-import Leaderboard from "../components/Leaderboard";
 
 export default function ELGAME() {
   const [user, setUser] = useState(null);
@@ -21,7 +20,6 @@ export default function ELGAME() {
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
 
   const attemptsRef = useRef(null);
@@ -211,45 +209,41 @@ export default function ELGAME() {
     }
 
     // Log the game play for today to prevent multiple plays
-    // Log the game play for today to prevent multiple plays
-const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
 
-// Check if the user already has an entry in the games table
-const { data: existingGame, error: fetchError } = await supabase
-  .from("games")
-  .select("id")  // Fetch only the ID to minimize data transfer
-  .eq("user_id", userId)
-  .maybeSingle();
+    // Check if the user already has an entry in the games table
+    const { data: existingGame, error: fetchError } = await supabase
+      .from("games")
+      .select("id")  // Fetch only the ID to minimize data transfer
+      .eq("user_id", userId)
+      .maybeSingle();
 
-if (fetchError) {
-  console.error("Error checking existing game play:", fetchError.message);
-} else if (existingGame) {
-  // If the user has played before, update the date and attempts
-  const { error: updateError } = await supabase
-    .from("games")
-    .update({ date: today, attempts })
-    .eq("id", existingGame.id);
+    if (fetchError) {
+      console.error("Error checking existing game play:", fetchError.message);
+    } else if (existingGame) {
+      // If the user has played before, update the date and attempts
+      const { error: updateError } = await supabase
+        .from("games")
+        .update({ date: today, attempts })
+        .eq("id", existingGame.id);
 
-  if (updateError) {
-    console.error("Error updating game play:", updateError.message);
-  }
-} else {
-  // If no existing entry, insert a new row
-  const { error: insertError } = await supabase.from("games").insert([
-    {
-      user_id: userId,
-      date: today,
-      attempts: attempts,
-    },
-  ]);
+      if (updateError) {
+        console.error("Error updating game play:", updateError.message);
+      }
+    } else {
+      // If no existing entry, insert a new row
+      const { error: insertError } = await supabase.from("games").insert([
+        {
+          user_id: userId,
+          date: today,
+          attempts: attempts,
+        },
+      ]);
 
-  if (insertError) {
-    console.error("Error inserting new game play:", insertError.message);
-  }
-}
-
-
-    
+      if (insertError) {
+        console.error("Error inserting new game play:", insertError.message);
+      }
+    }
   };
 
   return (
@@ -287,12 +281,11 @@ if (fetchError) {
       </div>
 
       <div className="absolute top-2 left-2">
-        <button
-          onClick={() => setShowLeaderboard(true)}
-          className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
-        >
-          Leaderboard
-        </button>
+        <Link href="/auth//leaderboard">
+          <a className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
+            Leaderboard
+          </a>
+        </Link>
       </div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
@@ -347,25 +340,6 @@ if (fetchError) {
             >
               Close
             </button>
-          </div>
-        </div>
-      )}
-
-      {showLeaderboard && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-          <div
-            className="bg-white p-6 rounded-lg shadow-lg relative w-96 flex flex-col h-[70vh]"
-            style={{ maxHeight: '70vh' }}
-          >
-            <Leaderboard />
-            <div className="mt-auto flex justify-center">
-              <button
-                onClick={() => setShowLeaderboard(false)}
-                className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
