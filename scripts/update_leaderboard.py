@@ -1,15 +1,11 @@
 import os
 import psycopg2
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
-
-# Load environment variables from .env
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
 
 def update_leaderboard():
     """Checks for users who haven't played yesterday and updates their leaderboard stats."""
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL is not set")
 
@@ -17,7 +13,7 @@ def update_leaderboard():
     cur = conn.cursor()
 
     today = datetime.utcnow().date()
-    yesterday = today - timedelta(days=1)  # Fix: Now correctly refers to the previous day
+    yesterday = today - timedelta(days=1)  # Correctly refers to the previous day
 
     # Find users who haven't played on 'yesterday'
     cur.execute("""
@@ -25,7 +21,7 @@ def update_leaderboard():
         WHERE userid NOT IN (
             SELECT userid FROM games WHERE game_date = %s
         )
-    """, (yesterday,))  # Fix: Use 'yesterday' instead of 'today'
+    """, (yesterday,))  # Use 'yesterday' instead of 'today'
 
     inactive_users = cur.fetchall()
 
