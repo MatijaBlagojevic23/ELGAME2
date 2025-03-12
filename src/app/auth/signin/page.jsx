@@ -5,21 +5,41 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Can be email or username
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
+    let emailToUse = identifier;
+
+    // Check if the identifier is a username or email
+    if (!identifier.includes("@")) {
+      const { data, error: userError } = await supabase
+        .from("users")
+        .select("email")
+        .eq("username", identifier)
+        .single();
+
+      if (userError || !data) {
+        setError("User not found.");
+        return;
+      }
+
+      emailToUse = data.email; // Use the found email
+    }
+
+    // Authenticate with Supabase using the email
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: emailToUse,
       password,
     });
 
-    if (error) {
-      setError(error.message);
+    if (signInError) {
+      setError(signInError.message);
       return;
     }
 
@@ -31,10 +51,10 @@ export default function SignInPage() {
       <h1 className="text-2xl font-bold mb-4">Sign In</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Username or Email"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
           className="p-2 border rounded"
           required
         />
