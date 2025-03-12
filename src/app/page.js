@@ -21,6 +21,7 @@ export default function ELGAME() {
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
+  const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
 
   const attemptsRef = useRef(null);
 
@@ -246,6 +247,22 @@ export default function ELGAME() {
     }
   };
 
+  const handleLeaderboardClick = () => {
+    if (user && attempts.length > 0 && !gameOver) {
+      setShowLeaderboardPopup(true);
+    } else {
+      window.location.href = '/auth/leaderboard';
+    }
+  };
+
+  const handleConfirmLeaderboard = async () => {
+    if (user) {
+      // Update attempts to 10 for registered users
+      await updateLeaderboard(user.id, 10);
+    }
+    window.location.href = '/auth/leaderboard';
+  };
+
   return (
     <div className="relative flex flex-col items-center gap-2 p-2 sm:p-4">
       <div className="absolute top-2 right-2 flex flex-col sm:flex-row gap-2">
@@ -281,11 +298,12 @@ export default function ELGAME() {
       </div>
 
       <div className="absolute top-2 left-2">
-        <Link href="/auth//leaderboard">
-          <a className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105">
-            Leaderboard
-          </a>
-        </Link>
+        <button
+          onClick={handleLeaderboardClick}
+          className="bg-blue-500 text-white px-3 py-2 rounded-full shadow-md hover:scale-105"
+        >
+          Leaderboard
+        </button>
       </div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
@@ -340,6 +358,28 @@ export default function ELGAME() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {showLeaderboardPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-4 rounded shadow-lg text-center">
+            <p className="text-base font-bold mb-2">Are you sure you want to go to the leaderboard? You will lose your data.</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleConfirmLeaderboard}
+                className="bg-red-500 text-white px-4 py-2 rounded-full hover:scale-105"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setShowLeaderboardPopup(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded-full shadow-md transition duration-300 hover:scale-105 hover:bg-gray-600"
+              >
+                No
+              </button>
+            </div>
           </div>
         </div>
       )}
