@@ -43,15 +43,15 @@ export default function PlayerTable({ attempts, target }) {
   return (
     <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
       {/* PC Header Row (7 columns including Name) */}
-      <div className="hidden lg:grid grid-cols-7 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[10px] sm:text-[11px] md:text-[12px]">
-        <div className="min-w-0 px-1 py-1">Name</div>
-        <div className="min-w-0 px-1 py-1">Team</div>
-        <div className="min-w-0 px-1 py-1">Country</div>
-        <div className="min-w-0 px-1 py-1">Position</div>
-        <div className="min-w-0 px-1 py-1">Height</div>
-        <div className="min-w-0 px-1 py-1">Age</div>
-        <div className="min-w-0 px-1 py-1">#</div>
-      </div>
+      <div className="hidden lg:grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[10px] sm:text-[11px] md:text-[12px]">
+    <div className="min-w-0 px-1 py-1">Name</div>
+    <div className="min-w-0 px-1 py-1">Team</div>
+    <div className="min-w-0 px-1 py-1">Country</div>
+    <div className="min-w-0 px-1 py-1">Position</div>
+    <div className="min-w-0 px-1 py-1">Height</div>
+    <div className="min-w-0 px-1 py-1">Age</div>
+    <div className="min-w-0 px-1 py-1">#</div>
+</div>
 
       {/* Mobile Header Row (6 columns, no Name) */}
       <div className="lg:hidden grid grid-cols-6 gap-1 font-bold text-center p-2 bg-gray-800 text-white rounded shadow-md text-[8px]">
