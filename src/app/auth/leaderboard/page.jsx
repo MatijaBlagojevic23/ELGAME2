@@ -1,5 +1,5 @@
 "use client";
-import "../../../styles/globals.css";  
+
 import { useEffect, useState } from "react";
 import { supabase } from "../../../utils/supabase";
 import Link from "next/link";
@@ -57,9 +57,11 @@ export default function Leaderboard() {
           </table>
         </div>
       </div>
-      <Link href="/">
-        <a className="mt-6 bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:scale-105">Back to Game</a>
-      </Link>
+      <div className="mt-8">
+        <Link href="/">
+          <a className="bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:scale-105">Back to Game</a>
+        </Link>
+      </div>
     </div>
   );
 }
