@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: pip install python-dotenv psycopg2-binary
 
+      - name: Debug DATABASE_URL
+        run: echo "DATABASE_URL: ${DATABASE_URL:0:10}********"
+
       - name: Run leaderboard update script
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
