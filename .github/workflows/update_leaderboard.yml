@@ -18,13 +18,16 @@ jobs:
           python-version: "3.9"
 
       - name: Install dependencies
-        run: pip install python-dotenv psycopg2-binary
+        run: pip install supabase
 
-      - name: Debug DATABASE_URL
-        run: echo "DATABASE_URL ${{ secrets.DATABASE_URL }}"
-        
+      - name: Debug Supabase URL and API Key
+        run: echo "SUPABASE_URL and SUPABASE_API_KEY are set"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
 
       - name: Run leaderboard update script
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
         run: python scripts/update_leaderboard.py
