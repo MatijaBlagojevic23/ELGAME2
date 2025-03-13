@@ -1,4 +1,5 @@
 "use client";
+import "../../../styles/globals.css";  
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabaseClient";
