@@ -1,6 +1,7 @@
 "use client";
-import "../../../styles/globals.css";  
-import { useEffect, useState } from "react";
+
+import "../../../styles/globals.css";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabaseClient";
 
@@ -38,7 +39,7 @@ export default function ResetPasswordPage() {
     setMessage(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.update({
       password: newPassword,
     });
 
@@ -78,6 +79,6 @@ export default function ResetPasswordPage() {
         {error && <p className="text-red-500 mt-4">{error}</p>}
         {message && <p className="mt-4 text-green-500">{message}</p>}
       </div>
-    </div>
+    </Suspense>
   );
 }
