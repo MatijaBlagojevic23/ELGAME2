@@ -21,6 +21,10 @@ function ResetPasswordContent() {
       supabase.auth.setSession({
         access_token: token,
         refresh_token: searchParams.get("refresh_token"),
+      }).then(({ error }) => {
+        if (error) {
+          setError("Failed to set session.");
+        }
       });
     }
   }, [searchParams]);
@@ -28,18 +32,16 @@ function ResetPasswordContent() {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError(null);
-    setAccessToken(searchParams.get("access_token"));
-
-    if (!accessToken) {
-      setError("Auth session missing or invalid.");
-      return;
-    }
-
-    setError(null);
     setMessage(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.update({
+    if (!accessToken) {
+      setError("Auth session missing or invalid.");
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
 
