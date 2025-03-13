@@ -74,7 +74,7 @@ export default function ELGAME() {
   setPlayers(data);
 
   const today = new Date();
-  const dateString = `${today.getDate()}.${today.getMonth() + 1}.${today.getFullYear()}`;
+ const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
 
   if (user) {
     // Use deterministic function for signed-in users
