@@ -22,19 +22,22 @@ def update_leaderboard():
         yesterday = today - timedelta(days=1)
 
         # Find users who haven't played on 'yesterday'
-        response = supabase.table('leaderboard').select('user_id').execute()
+        response = supabase.table('leaderboard').select('user_id', 'games_played', 'total_attempts').execute()
+        leaderboard_data = response.data
 
-        inactive_users = [user['user_id'] for user in response.data if user['user_id'] not in (
-            user['user_id'] for user in supabase.table('games').select('user_id').eq('date', yesterday).execute().data)]
+        inactive_users = [user for user in leaderboard_data if user['user_id'] not in (
+            game['user_id'] for game in supabase.table('games').select('user_id').eq('game_date', yesterday).execute().data)]
 
         if inactive_users:
-            user_ids = inactive_users
+            for user in inactive_users:
+                user_id = user['user_id']
+                games_played = user['games_played'] + 1
+                total_attempts = user['total_attempts'] + 10
 
-            # Update leaderboard for inactive users
-            supabase.table('leaderboard').update({
-                'games_played': supabase.func('games_played + 1'),
-                'total_attempts': supabase.func('total_attempts + 10')
-            }).in_('user_id', user_ids).execute()
+                supabase.table('leaderboard').update({
+                    'games_played': games_played,
+                    'total_attempts': total_attempts
+                }).eq('user_id', user_id).execute()
 
             logging.info("Leaderboard updated successfully.")
 
