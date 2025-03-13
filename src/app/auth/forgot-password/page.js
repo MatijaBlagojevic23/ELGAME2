@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
     setMessage("");
 
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://your-app.com/auth/reset-password',
+      redirectTo: 'https://elgame-matijablagojevic23s-projects.vercel.app/auth/reset-password',
     });
 
     if (error) {
