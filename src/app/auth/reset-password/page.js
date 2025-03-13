@@ -12,17 +12,16 @@ function ResetPasswordContent() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [accessToken, setAccessToken] = useState(null);
 
   useEffect(() => {
     const token = searchParams.get("access_token");
     if (token) {
-      setAccessToken(token);
       supabase.auth.setSession({
         access_token: token,
         refresh_token: searchParams.get("refresh_token"),
       }).then(({ error }) => {
         if (error) {
+          console.error("Failed to set session:", error);
           setError("Failed to set session.");
         }
       });
@@ -35,7 +34,8 @@ function ResetPasswordContent() {
     setMessage(null);
     setLoading(true);
 
-    if (!accessToken) {
+    const token = searchParams.get("access_token");
+    if (!token) {
       setError("Auth session missing or invalid.");
       setLoading(false);
       return;
