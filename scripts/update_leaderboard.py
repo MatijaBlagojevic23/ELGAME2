@@ -1,51 +1,41 @@
 import os
-import psycopg2
+from supabase import create_client, Client
 from datetime import datetime, timedelta
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
+# Initialize Supabase client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 def update_leaderboard():
     """Checks for users who haven't played yesterday and updates their leaderboard stats."""
-    DATABASE_URL = os.getenv("DATABASE_URL")
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        raise ValueError("Supabase URL or API key is not set")
 
-    if not DATABASE_URL:
-        raise ValueError("DATABASE_URL is not set")
-
-    logging.info(f"DATABASE_URL: {DATABASE_URL}")
+    logging.info("Supabase client initialized")
 
     try:
-        conn = psycopg2.connect(DATABASE_URL)
-        cur = conn.cursor()
-
         today = datetime.utcnow().date()
         yesterday = today - timedelta(days=1)  # Correctly refers to the previous day
 
         # Find users who haven't played on 'yesterday'
-        cur.execute("""
-            SELECT DISTINCT userid FROM leaderboard
-            WHERE userid NOT IN (
-                SELECT userid FROM games WHERE game_date = %s
-            )
-        """, (yesterday,))  # Use 'yesterday' instead of 'today'
-
-        inactive_users = cur.fetchall()
+        response = supabase.table('leaderboard').select('userid').execute()
+        inactive_users = [user['userid'] for user in response.data if user['userid'] not in (
+            user['userid'] for user in supabase.table('games').select('userid').eq('game_date', yesterday).execute().data)]
 
         if inactive_users:
-            user_ids = tuple(u[0] for u in inactive_users)
+            user_ids = inactive_users
 
-            cur.execute("""
-                UPDATE leaderboard
-                SET games_played = games_played + 1,
-                    total_attempts = total_attempts + 10
-                WHERE userid IN %s
-            """, (user_ids,))
+            # Update leaderboard for inactive users
+            supabase.table('leaderboard').update({
+                'games_played': supabase.func('games_played + 1'),
+                'total_attempts': supabase.func('total_attempts + 10')
+            }).in_('userid', user_ids).execute()
 
-            conn.commit()
-
-        cur.close()
-        conn.close()
-        logging.info("Leaderboard updated successfully.")
+            logging.info("Leaderboard updated successfully.")
 
     except Exception as e:
         logging.error(f"Error updating leaderboard: {e}")
