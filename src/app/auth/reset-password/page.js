@@ -15,16 +15,22 @@ function ResetPasswordContent() {
 
   useEffect(() => {
     const token = searchParams.get("access_token");
-    if (token) {
+    const refreshToken = searchParams.get("refresh_token");
+
+    if (token && refreshToken) {
       supabase.auth.setSession({
         access_token: token,
-        refresh_token: searchParams.get("refresh_token"),
+        refresh_token: refreshToken,
       }).then(({ error }) => {
         if (error) {
           console.error("Failed to set session:", error);
           setError("Failed to set session.");
+        } else {
+          console.log("Session set successfully");
         }
       });
+    } else {
+      setError("Missing access token or refresh token.");
     }
   }, [searchParams]);
 
@@ -41,17 +47,23 @@ function ResetPasswordContent() {
       return;
     }
 
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setMessage("Password reset successful! Redirecting...");
-      setTimeout(() => {
-        router.push("/auth/signin"); // Redirect to login page
-      }, 3000);
+      if (error) {
+        console.error("Error updating password:", error);
+        setError(error.message);
+      } else {
+        setMessage("Password reset successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/auth/signin"); // Redirect to login page
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Failed to reset password:", err);
+      setError("Failed to reset password.");
     }
 
     setLoading(false);
