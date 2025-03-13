@@ -19,12 +19,12 @@ def update_leaderboard():
 
     try:
         today = datetime.utcnow().date()
-        yesterday = today - timedelta(days=1)  # Correctly refers to the previous day
+        yesterday = today - timedelta(days=1)
 
         # Find users who haven't played on 'yesterday'
-        response = supabase.table('leaderboard').select('userid').execute()
-        inactive_users = [user['userid'] for user in response.data if user['userid'] not in (
-            user['userid'] for user in supabase.table('games').select('userid').eq('game_date', yesterday).execute().data)]
+        response = supabase.table('leaderboard').select('user_id').execute()
+        inactive_users = [user['user_id'] for user in response.data if user['user_id'] not in (
+            user['user_id'] for user in supabase.table('games').select('user_id').eq('date', yesterday).execute().data)]
 
         if inactive_users:
             user_ids = inactive_users
@@ -33,7 +33,7 @@ def update_leaderboard():
             supabase.table('leaderboard').update({
                 'games_played': supabase.func('games_played + 1'),
                 'total_attempts': supabase.func('total_attempts + 10')
-            }).in_('userid', user_ids).execute()
+            }).in_('user_id', user_ids).execute()
 
             logging.info("Leaderboard updated successfully.")
 
