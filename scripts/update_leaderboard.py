@@ -26,7 +26,7 @@ def update_leaderboard():
         leaderboard_data = response.data
 
         inactive_users = [user for user in leaderboard_data if user['user_id'] not in (
-            game['user_id'] for game in supabase.table('games').select('user_id').eq('game_date', yesterday).execute().data)]
+            game['user_id'] for game in supabase.table('games').select('user_id').eq('date', yesterday).execute().data)]
 
         if inactive_users:
             for user in inactive_users:
