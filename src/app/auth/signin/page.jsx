@@ -75,7 +75,15 @@ export default function SignInPage() {
         </button>
       </form>
       <p className="mt-2 text-sm">
-        Don't have an account? <a href="/auth/signup" className="text-blue-600">Sign Up</a>
+        <a href="/auth/forgot-password" className="text-blue-600 hover:underline">
+          Forgot your password?
+        </a>
+      </p>
+      <p className="mt-2 text-sm">
+        Don't have an account?{" "}
+        <a href="/auth/signup" className="text-blue-600 hover:underline">
+          Sign Up
+        </a>
       </p>
     </div>
   );
