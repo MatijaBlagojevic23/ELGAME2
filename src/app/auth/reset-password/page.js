@@ -5,7 +5,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabaseClient";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
@@ -56,29 +56,35 @@ export default function ResetPasswordPage() {
   };
 
   return (
+    <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
+      <form onSubmit={handleResetPassword} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
+        <input
+          type="password"
+          placeholder="New Password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="p-2 border rounded w-full"
+          required
+        />
+        <button
+          type="submit"
+          className="p-2 bg-blue-500 text-white rounded mt-2 w-full"
+          disabled={loading}
+        >
+          {loading ? "Resetting..." : "Reset Password"}
+        </button>
+      </form>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {message && <p className="mt-4 text-green-500">{message}</p>}
+    </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
     <Suspense fallback={<div>Loading...</div>}>
-      <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
-        <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
-        <form onSubmit={handleResetPassword} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="p-2 border rounded w-full"
-            required
-          />
-          <button
-            type="submit"
-            className="p-2 bg-blue-500 text-white rounded mt-2 w-full"
-            disabled={loading}
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
-        </form>
-        {error && <p className="text-red-500 mt-4">{error}</p>}
-        {message && <p className="mt-4 text-green-500">{message}</p>}
-      </div>
+      <ResetPasswordContent />
     </Suspense>
   );
 }
