@@ -21,7 +21,8 @@ jobs:
         run: pip install python-dotenv psycopg2-binary
 
       - name: Debug DATABASE_URL
-        run: echo "DATABASE_URL: ${{ secrets.DATABASE_URL }}"
+        run: echo "DATABASE_URL ${{ secrets.DATABASE_URL }}"
+        
 
       - name: Run leaderboard update script
         env:
