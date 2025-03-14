@@ -3,6 +3,8 @@
 import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "../context/AuthContext";
 import { Analytics } from "@vercel/analytics/react"; // Import Vercel Analytics
+import { SpeedInsights } from '@vercel/speed-insights/next';
+
 
 export default function RootLayout({
   children,
@@ -19,6 +21,7 @@ export default function RootLayout({
           <SessionProvider>
             {children}
             <Analytics /> {/* Add Vercel Analytics here */}
+            <SpeedInsights />
           </SessionProvider>
         </AuthProvider>
       </body>
