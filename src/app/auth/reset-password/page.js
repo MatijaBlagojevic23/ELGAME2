@@ -2,16 +2,18 @@
 
 import "../../../styles/globals.css";
 import { useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabaseClient";
 
 function ResetPasswordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const email = searchParams.get("email");
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -23,7 +25,8 @@ function ResetPasswordContent() {
       // Verify OTP code
       const { error: verifyError } = await supabase.auth.verifyOtp({
         token: otpCode,
-        type: "recovery", // use recovery type
+        type: "recovery",
+        email: email, // Add the user's email here
       });
 
       if (verifyError) {
