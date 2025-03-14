@@ -21,6 +21,12 @@ function ResetPasswordContent() {
     setMessage(null);
     setLoading(true);
 
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Verify OTP code
       const { error: verifyError } = await supabase.auth.verifyOtp({
@@ -31,7 +37,7 @@ function ResetPasswordContent() {
 
       if (verifyError) {
         console.error("OTP verification error:", verifyError);
-        setError(verifyError.message);
+        setError(`${verifyError.message}. The OTP code can only be used once.`);
         setLoading(false);
         return;
       }
@@ -67,7 +73,7 @@ function ResetPasswordContent() {
       >
         <input
           type="text"
-          placeholder="OTP Code"
+          placeholder="RESET CODE"
           value={otpCode}
           onChange={(e) => setOtpCode(e.target.value)}
           className="p-2 border rounded w-full"
@@ -75,7 +81,7 @@ function ResetPasswordContent() {
         />
         <input
           type="password"
-          placeholder="New Password"
+          placeholder="NEW PASSWORD"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           className="p-2 border rounded w-full"
