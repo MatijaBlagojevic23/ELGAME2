@@ -37,7 +37,7 @@ function ResetPasswordContent() {
 
       if (verifyError) {
         console.error("OTP verification error:", verifyError);
-        setError(`${verifyError.message}. The OTP code can only be used once.`);
+        setError(`${verifyError.message}. The RESET code can only be used once.`);
         setLoading(false);
         return;
       }
