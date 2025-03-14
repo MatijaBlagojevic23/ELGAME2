@@ -16,7 +16,7 @@ export default function ELGAME() {
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
-  const [lastGuess, setLastGuess] = useState(""); // Store the last guess
+  const [lastGuess, setLastGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
@@ -423,7 +423,7 @@ export default function ELGAME() {
       <PlayerInput
         guess={guess}
         setGuess={setGuess}
-        checkGuess={handleSubmitGuess}
+        checkGuess={() => handleSubmitGuess(guess)} // Pass the current guess to handleSubmitGuess
         players={players}
         gameOver={gameOver}
         attempts={attempts}
