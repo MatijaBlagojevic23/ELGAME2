@@ -32,7 +32,7 @@ function ResetPasswordContent() {
       const { error: verifyError } = await supabase.auth.verifyOtp({
         token: otpCode,
         type: "recovery",
-        email: email, // Add the user's email here
+        email: email,
       });
 
       if (verifyError) {
@@ -81,7 +81,7 @@ function ResetPasswordContent() {
         />
         <input
           type="password"
-          placeholder="NEW PASSWORD"
+          placeholder="NEW PASSWORD (min. 6 characters)"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           className="p-2 border rounded w-full"
