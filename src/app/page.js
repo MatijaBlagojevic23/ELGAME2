@@ -16,15 +16,12 @@ export default function ELGAME() {
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
-  const [lastGuess, setLastGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
-  const [timer, setTimer] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(15);
 
   const attemptsRef = useRef(null);
 
@@ -52,58 +49,59 @@ export default function ELGAME() {
   }, []);
   
   const getRandomIndex = (data, dateString) => {
-    const parts = dateString.split('.');
-    const day = parseInt(parts[0]);
-    const month = parseInt(parts[1]);
-    const year = parseInt(parts[2]);
+  const parts = dateString.split('.');
+  const day = parseInt(parts[0]);
+  const month = parseInt(parts[1]);
+  const year = parseInt(parts[2]);
 
-    let seed = year;
-    seed = (seed * 31) + month;
-    seed = (seed * 31) + day;
-    seed = seed ^ (year >> 16);
-    seed = seed * (year % 100 + 1);
+  let seed = year;
+  seed = (seed * 31) + month;
+  seed = (seed * 31) + day;
+  seed = seed ^ (year >> 16);
+  seed = seed * (year % 100 + 1);
 
-    seed = seed ^ (seed >>> 16);
-    seed = seed * 0x85ebca6b;
-    seed = seed ^ (seed >>> 13);
-    seed = seed * 0xc2b2ae35;
-    seed = seed ^ (seed >>> 16);
+  seed = seed ^ (seed >>> 16);
+  seed = seed * 0x85ebca6b;
+  seed = seed ^ (seed >>> 13);
+  seed = seed * 0xc2b2ae35;
+  seed = seed ^ (seed >>> 16);
 
-    return Math.abs(seed % data.length);
-  };
+  return Math.abs(seed % data.length);
+};
 
   const loadGame = async () => {
-    const data = await loadPlayers();
-    setPlayers(data);
+  const data = await loadPlayers();
+  setPlayers(data);
 
-    const today = new Date();
-    const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
+  const today = new Date();
+ const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
 
-    if (user) {
-      // Use deterministic function for signed-in users
-      const randomIndex = getRandomIndex(data, dateString);
-      setTarget(data[randomIndex]);
+  if (user) {
+    // Use deterministic function for signed-in users
+    const randomIndex = getRandomIndex(data, dateString);
+    setTarget(data[randomIndex]);
 
-      // Check if the user has already played today
-      const { data: gameData, error } = await supabase
-        .from("games")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", today.toISOString().slice(0, 10))
-        .maybeSingle();
+    // Check if the user has already played today
+    const { data: gameData, error } = await supabase
+      .from("games")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("date", today.toISOString().slice(0, 10))
+      .maybeSingle();
 
-      if (error) {
-        console.error("Error checking game data:", error.message);
-      } else if (gameData) {
-        setGameOver(true);
-        setShowPlayedPopup(true);
-      }
-    } else {
-      // Use a completely random selection for unauthenticated users
-      const randomIndex = Math.floor(Math.random() * data.length);
-      setTarget(data[randomIndex]);
+    if (error) {
+      console.error("Error checking game data:", error.message);
+    } else if (gameData) {
+      setGameOver(true);
+      setShowPlayedPopup(true);
     }
-  };
+  } else {
+    // Use a completely random selection for unauthenticated users
+    const randomIndex = Math.floor(Math.random() * data.length);
+    setTarget(data[randomIndex]);
+  }
+};
+
 
   useEffect(() => {
     loadGame();
@@ -119,23 +117,7 @@ export default function ELGAME() {
     setShowWelcomePopup(false);
   };
 
-  const startTimer = () => {
-    setTimeLeft(15);
-    setTimer(
-      setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            clearInterval(timer);
-            handleSubmitGuess(lastGuess); // Use the last guess for automatic submission
-            return 15;
-          }
-          return prevTime - 1;
-        });
-      }, 1000)
-    );
-  };
-
-  const handleSubmitGuess = async (submittedGuess) => {
+  const checkGuess = async (submittedGuess) => {
     if (gameOver) return;
 
     const guessToCheck = submittedGuess || guess;
@@ -147,23 +129,17 @@ export default function ELGAME() {
       return;
     }
 
-    setLastGuess(guessToCheck); // Store the last guess
-
     const newAttempts = [...attempts, player];
     setAttempts(newAttempts);
 
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
       setShowPopup(true);
       setGameOver(true);
-      clearInterval(timer);
       if (user) await updateLeaderboard(user.id, newAttempts.length);
     } else if (newAttempts.length >= 10) {
       setShowExceedPopup(true);
       setGameOver(true);
-      clearInterval(timer);
       if (user) await updateLeaderboard(user.id, newAttempts.length);
-    } else {
-      startTimer();
     }
 
     setGuess("");
@@ -175,18 +151,11 @@ export default function ELGAME() {
     }, 100);
   };
 
-  useEffect(() => {
-    if (attempts.length > 0) {
-      startTimer();
-    }
-  }, [attempts]);
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setUsername("");
     setGameOver(false);
-    clearInterval(timer);
     //loadGame(); // Reload game for unauthenticated user
   };
 
@@ -339,7 +308,7 @@ export default function ELGAME() {
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
 
-      {showPopup && (
+     {showPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-2">
           <div className="bg-white p-4 rounded shadow-lg text-center">
             <p className="text-base font-bold mb-2">Great job! You guessed correctly!</p>
@@ -423,7 +392,7 @@ export default function ELGAME() {
       <PlayerInput
         guess={guess}
         setGuess={setGuess}
-        checkGuess={() => handleSubmitGuess(guess)} // Pass the current guess to handleSubmitGuess
+        checkGuess={checkGuess}
         players={players}
         gameOver={gameOver}
         attempts={attempts}
@@ -433,12 +402,6 @@ export default function ELGAME() {
       <div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-2">
         <PlayerTable attempts={attempts} target={target} />
       </div>
-
-      {attempts.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-white p-2 rounded shadow-md">
-          Time left: {timeLeft}s
-        </div>
-      )}
     </div>
   );
 }
