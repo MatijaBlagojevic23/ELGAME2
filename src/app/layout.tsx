@@ -1,10 +1,8 @@
-"use client"; // This directive is necessary for Next.js to recognize this as a client component
+"use client"; // This directive ensures Next.js recognizes this as a client component
 
 import { SessionProvider } from "next-auth/react";
 import { AuthProvider } from "../context/AuthContext";
-
-
-
+import { Analytics } from "@vercel/analytics/react"; // Import Vercel Analytics
 
 export default function RootLayout({
   children,
@@ -15,12 +13,12 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        {/* You can add other meta tags or links here */}
       </head>
       <body>
         <AuthProvider>
           <SessionProvider>
             {children}
+            <Analytics /> {/* Add Vercel Analytics here */}
           </SessionProvider>
         </AuthProvider>
       </body>
