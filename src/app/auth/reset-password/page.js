@@ -1,65 +1,110 @@
 "use client";
-import "../../../styles/globals.css";  
-import { useState, useEffect } from "react";
+
+import "../../../styles/globals.css";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabaseClient";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
-
-  useEffect(() => {
-    const session = supabase.auth.getSession();
-    if (!session) {
-      setError("Auth session missing! Please try the reset process again.");
-    }
-  }, []);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const email = searchParams.get("email");
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
+    setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      setLoading(false);
       return;
     }
 
-    setMessage("Password updated! Redirecting to login...");
-    setTimeout(() => {
-      router.push("/auth/signin");
-    }, 3000);
+    try {
+      // Verify OTP code
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token: otpCode,
+        type: "recovery",
+        email: email,
+      });
+
+      if (verifyError) {
+        console.error("OTP verification error:", verifyError);
+        setError(`${verifyError.message}. The RESET code can only be used once.`);
+        setLoading(false);
+        return;
+      }
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        setError(updateError.message);
+      } else {
+        setMessage("Password reset successful! Redirecting...");
+        setTimeout(() => {
+          router.push("/auth/signin");
+        }, 3000);
+      }
+    } catch (err) {
+      console.error("Failed to reset password:", err);
+      setError("Failed to reset password.");
+    }
+
+    setLoading(false);
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
-      <div className="w-full max-w-sm bg-white p-4 rounded shadow">
-        <h2 className="text-2xl font-bold mb-4 text-center">Reset Password</h2>
-        <form onSubmit={handleResetPassword} className="flex flex-col gap-3">
-          <input
-            type="password"
-            placeholder="New Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="p-2 border rounded"
-            required
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Set New Password
-          </button>
-        </form>
-      </div>
+      <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
+      <form
+        onSubmit={handleResetPassword}
+        className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow"
+      >
+        <input
+          type="text"
+          placeholder="RESET CODE"
+          value={otpCode}
+          onChange={(e) => setOtpCode(e.target.value)}
+          className="p-2 border rounded w-full"
+          required
+        />
+        <input
+          type="password"
+          placeholder="NEW PASSWORD (min. 6 characters)"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="p-2 border rounded w-full"
+          required
+        />
+        <button
+          type="submit"
+          className="p-2 bg-blue-500 text-white rounded mt-2 w-full"
+          disabled={loading}
+        >
+          {loading ? "Resetting..." : "Reset Password"}
+        </button>
+      </form>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
+      {message && <p className="mt-4 text-green-500">{message}</p>}
     </div>
   );
 }
 
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
