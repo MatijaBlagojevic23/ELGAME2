@@ -16,6 +16,7 @@ export default function ELGAME() {
   const [target, setTarget] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
+  const [lastGuess, setLastGuess] = useState(""); // Store the last guess
   const [gameOver, setGameOver] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
@@ -125,7 +126,7 @@ export default function ELGAME() {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(timer);
-            handleSubmitGuess();
+            handleSubmitGuess(lastGuess); // Use the last guess for automatic submission
             return 15;
           }
           return prevTime - 1;
@@ -145,6 +146,8 @@ export default function ELGAME() {
       alert("Player not found! Check spelling.");
       return;
     }
+
+    setLastGuess(guessToCheck); // Store the last guess
 
     const newAttempts = [...attempts, player];
     setAttempts(newAttempts);
