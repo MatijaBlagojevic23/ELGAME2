@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
 
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo:
-        "https://elgame-matijablagojevic23s-projects.vercel.app/auth/reset-password",
+        `https://elgame-matijablagojevic23s-projects.vercel.app/auth/reset-password?email=${email}`,
     });
 
     if (error) {
