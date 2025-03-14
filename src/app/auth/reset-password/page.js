@@ -1,38 +1,17 @@
 "use client";
 
 import "../../../styles/globals.css";
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../../utils/supabaseClient";
 
 function ResetPasswordContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const token = searchParams.get("access_token");
-    const refreshToken = searchParams.get("refresh_token");
-
-    if (token && refreshToken) {
-      supabase.auth.setSession({
-        access_token: token,
-        refresh_token: refreshToken,
-      }).then(({ error }) => {
-        if (error) {
-          console.error("Failed to set session:", error);
-          setError("Failed to set session.");
-        } else {
-          console.log("Session set successfully");
-        }
-      });
-    } else {
-      setError("Missing access token or refresh token.");
-    }
-  }, [searchParams]);
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -40,25 +19,32 @@ function ResetPasswordContent() {
     setMessage(null);
     setLoading(true);
 
-    const token = searchParams.get("access_token");
-    if (!token) {
-      setError("Auth session missing or invalid.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const { error } = await supabase.auth.updateUser({
+      // Verify OTP code
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token: otpCode,
+        type: "recovery", // use recovery type
+      });
+
+      if (verifyError) {
+        console.error("OTP verification error:", verifyError);
+        setError(verifyError.message);
+        setLoading(false);
+        return;
+      }
+
+      // Update password
+      const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
-      if (error) {
-        console.error("Error updating password:", error);
-        setError(error.message);
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        setError(updateError.message);
       } else {
         setMessage("Password reset successful! Redirecting...");
         setTimeout(() => {
-          router.push("/auth/signin"); // Redirect to login page
+          router.push("/auth/signin");
         }, 3000);
       }
     } catch (err) {
@@ -72,7 +58,18 @@ function ResetPasswordContent() {
   return (
     <div className="flex flex-col items-center justify-center h-screen p-4 bg-gray-100">
       <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
-      <form onSubmit={handleResetPassword} className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow">
+      <form
+        onSubmit={handleResetPassword}
+        className="flex flex-col gap-3 w-full max-w-sm bg-white p-4 rounded shadow"
+      >
+        <input
+          type="text"
+          placeholder="OTP Code"
+          value={otpCode}
+          onChange={(e) => setOtpCode(e.target.value)}
+          className="p-2 border rounded w-full"
+          required
+        />
         <input
           type="password"
           placeholder="New Password"
