@@ -44,26 +44,26 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-400 to-indigo-600 text-white flex flex-col items-center">
-      <h1 className="text-4xl font-bold mt-10 mb-6">Leaderboard</h1>
-      <div className="w-full max-w-4xl bg-white text-black shadow-lg rounded-lg overflow-hidden">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
+      <h1 className="text-4xl font-bold mb-6 text-gray-800">Leaderboard</h1>
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-y-auto max-h-96">
-          <table className="w-full">
-            <thead className="bg-gray-300">
+          <table className="w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left">#</th>
-                <th className="px-6 py-3 text-left">User</th>
-                <th className="px-6 py-3 text-left">Avg Attempts</th>
-                <th className="px-6 py-3 text-left">Games Played</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Attempts</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Games Played</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200">
               {leaderboard.map((entry, index) => (
-                <tr key={index} className={`text-center ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
-                  <td className="px-6 py-4">{index + 1}</td>
-                  <td className="px-6 py-4">{entry.username.length > 12 ? `${entry.username.slice(0, 12)}...` : entry.username}</td>
-                  <td className="px-6 py-4">{entry.average_attempts.toFixed(2)}</td>
-                  <td className="px-6 py-4">{entry.games_played}</td>
+                <tr key={index} className="hover:bg-gray-100">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.username.length > 12 ? `${entry.username.slice(0, 12)}...` : entry.username}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.average_attempts.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.games_played}</td>
                 </tr>
               ))}
             </tbody>
@@ -72,7 +72,7 @@ export default function Leaderboard() {
       </div>
       <div className="mt-8">
         <Link href="/">
-          <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">Back to Game</a>
+          <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 shadow-md hover:shadow-lg">Back to Game</a>
         </Link>
       </div>
     </div>
