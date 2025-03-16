@@ -1,5 +1,5 @@
 "use client";
-import "../../../styles/globals.css";  
+import "../../../styles/globals.css";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../utils/supabase";
 import Link from "next/link";
@@ -12,13 +12,28 @@ export default function Leaderboard() {
       try {
         let { data, error } = await supabase
           .from("leaderboard")
-          .select("username, total_attempts, games_played, average_attempts")
-          .order("average_attempts", { ascending: true });
+          .select("username, total_attempts, games_played, average_attempts");
 
         if (error) {
           console.error("Error fetching leaderboard:", error.message);
         } else {
-          setLeaderboard(data);
+          // Find the maximum games played
+          const maxGamesPlayed = Math.max(...data.map(entry => entry.games_played));
+          const threshold = maxGamesPlayed * 0.8;
+
+          // Filter and sort players with at least 80% of the maximum games played
+          const topPlayers = data
+            .filter(entry => entry.games_played >= threshold)
+            .sort((a, b) => a.average_attempts - b.average_attempts);
+
+          // Filter and sort players with less than 80% of the maximum games played
+          const otherPlayers = data
+            .filter(entry => entry.games_played < threshold)
+            .sort((a, b) => a.average_attempts - b.average_attempts);
+
+          // Combine both lists
+          const sortedLeaderboard = [...topPlayers, ...otherPlayers];
+          setLeaderboard(sortedLeaderboard);
         }
       } catch (error) {
         console.error("Unexpected error:", error.message);
