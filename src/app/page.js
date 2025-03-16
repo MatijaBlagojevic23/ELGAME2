@@ -291,7 +291,7 @@ export default function ELGAME() {
           </>
         ) : (
           <Link href="/auth/signin">
-            <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform sm:ml-4 sm:self-center">
+            <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform">
               Login
             </a>
           </Link>
