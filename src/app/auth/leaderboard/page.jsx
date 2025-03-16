@@ -44,11 +44,11 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <h1 className="text-4xl font-bold mb-6 text-gray-800">Leaderboard</h1>
+    <div className="flex flex-col items-center p-4 min-h-screen bg-gray-100">
+      <h1 className="text-4xl font-bold mb-6 text-purple-800">Leaderboard</h1>
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-y-auto max-h-96">
-          <table className="w-full divide-y divide-gray-200">
+          <table className="w-full sm:w-11/12 mx-auto divide-y divide-gray-200">
             <thead className="bg-orange-500 text-white">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Rank</th>
