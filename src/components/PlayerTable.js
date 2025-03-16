@@ -95,7 +95,7 @@ export default function PlayerTable({ attempts, target }) {
                 <img
                   src={`/logo/${player.team}.png`}
                   alt={player.countryClub}
-                  className="w-4 h-4"
+                  className="w-4 h-4 object-contain"
                 />
               </div>
               {/* Country Box */}
@@ -178,7 +178,7 @@ export default function PlayerTable({ attempts, target }) {
             </div>
             {/* Team */}
             <div className={`px-1 py-1 border ${getBackgroundColor(player, target, "team")} flex items-center justify-center`}>
-              <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5" />
+              <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5 object-contain" />
             </div>
             {/* Country */}
             <div className={`px-1 py-1 border ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
