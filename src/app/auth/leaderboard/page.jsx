@@ -62,7 +62,7 @@ export default function Leaderboard() {
                 <tr key={index} className="hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.username.length > 12 ? `${entry.username.slice(0, 12)}...` : entry.username}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-orange-500">{entry.average_attempts.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.average_attempts.toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.games_played}</td>
                 </tr>
               ))}
