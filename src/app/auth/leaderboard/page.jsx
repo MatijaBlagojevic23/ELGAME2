@@ -45,16 +45,16 @@ export default function Leaderboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4">
-      <h1 className="text-4xl font-bold mb-6 text-gray-800">Leaderboard</h1>
+      <h1 className="text-4xl font-bold mb-6 text-purple-800">Leaderboard</h1>
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-y-auto max-h-96">
           <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Attempts</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Games Played</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Rank</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Avg Attempts</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-purple-600 uppercase tracking-wider">Games Played</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -72,7 +72,7 @@ export default function Leaderboard() {
       </div>
       <div className="mt-8">
         <Link href="/">
-          <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 shadow-md hover:shadow-lg">Back to Game</a>
+          <a className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 shadow-md hover:shadow-lg">Back to Game</a>
         </Link>
       </div>
     </div>
