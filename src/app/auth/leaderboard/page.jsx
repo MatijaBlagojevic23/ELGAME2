@@ -47,8 +47,8 @@ export default function Leaderboard() {
     <div className="flex flex-col items-center p-4 min-h-screen bg-gray-100">
       <h1 className="text-4xl font-bold mb-6 text-purple-800">Leaderboard</h1>
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="overflow-y-auto max-h-96">
-          <table className="w-full sm:w-11/12 mx-auto divide-y divide-gray-200">
+        <div className="w-full overflow-y-auto max-h-96">
+          <table className="w-full table-auto divide-y divide-gray-200">
             <thead className="bg-orange-500 text-white">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Rank</th>
@@ -62,7 +62,7 @@ export default function Leaderboard() {
                 <tr key={index} className="hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.username.length > 12 ? `${entry.username.slice(0, 12)}...` : entry.username}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.average_attempts.toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-orange-500">{entry.average_attempts.toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.games_played}</td>
                 </tr>
               ))}
