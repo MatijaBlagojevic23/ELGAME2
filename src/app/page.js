@@ -264,7 +264,7 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
-      <div className="absolute top-4 right-4 flex flex-col sm:flex-row gap-4">
+      <div className="absolute top-4 right-4 flex flex-col sm:flex-row gap-4 sm:items-center">
         <button
           onClick={() => setShowWelcomePopup(true)}
           className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform"
@@ -291,7 +291,7 @@ export default function ELGAME() {
           </>
         ) : (
           <Link href="/auth/signin">
-            <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform">
+            <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform sm:ml-4 sm:self-center">
               Login
             </a>
           </Link>
