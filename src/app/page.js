@@ -22,6 +22,7 @@ export default function ELGAME() {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(20);
 
   const attemptsRef = useRef(null);
 
@@ -47,7 +48,7 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-  
+
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
@@ -110,6 +111,29 @@ export default function ELGAME() {
       setShowWelcomePopup(true);
     }
   }, [user]);
+
+  // Timer useEffect: start a 20-second countdown for every attempt except the first one
+  useEffect(() => {
+    // Only start timer if there is at least one attempt and game is not over
+    if (attempts.length > 0 && !gameOver) {
+      setTimeLeft(20);
+      const interval = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(interval);
+            // Auto-submit the last attempted guess when time expires
+            const lastAttempt = attempts[attempts.length - 1];
+            if (lastAttempt) {
+              checkGuess(lastAttempt.name);
+            }
+            return 20;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [attempts, gameOver]);
 
   const handleCloseWelcomePopup = () => {
     localStorage.setItem("hasSeenPopup", "true");
@@ -214,7 +238,7 @@ export default function ELGAME() {
     // Check if the user already has an entry in the games table
     const { data: existingGame, error: fetchError } = await supabase
       .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
+      .select("id")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -348,7 +372,7 @@ export default function ELGAME() {
           </div>
         </div>
       )}
-  
+
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
@@ -389,6 +413,13 @@ export default function ELGAME() {
         <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
       </div>
       <h1 className="text-2xl font-bold text-center text-purple-800 mb-4">ELGAME - Euroleague Player Guessing Game</h1>
+
+      {/* Timer display: shown for every attempt after the first, when the game is still active */}
+      {attempts.length > 0 && !gameOver && (
+        <div className="mb-4 p-2 bg-yellow-200 rounded-md text-xl font-bold text-red-600">
+          Time left: {timeLeft} seconds
+        </div>
+      )}
 
       <PlayerInput
         guess={guess}
