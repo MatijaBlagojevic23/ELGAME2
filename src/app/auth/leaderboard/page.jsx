@@ -44,28 +44,26 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center p-4 min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">Leaderboard</h1>
-      <div className="w-full max-w-3xl bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-r from-blue-400 to-indigo-600 text-white flex flex-col items-center">
+      <h1 className="text-4xl font-bold mt-10 mb-6">Leaderboard</h1>
+      <div className="w-full max-w-4xl bg-white text-black shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-y-auto max-h-96">
           <table className="w-full">
-            <thead className="bg-gray-200">
+            <thead className="bg-gray-300">
               <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">User</th>
-                <th className="px-4 py-2">Avg Attempts</th>
-                <th className="px-4 py-2">Games Played</th>
+                <th className="px-6 py-3 text-left">#</th>
+                <th className="px-6 py-3 text-left">User</th>
+                <th className="px-6 py-3 text-left">Avg Attempts</th>
+                <th className="px-6 py-3 text-left">Games Played</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-200">
               {leaderboard.map((entry, index) => (
-                <tr key={index} className="border-t">
-                  <td className="px-4 py-2 text-center">{index + 1}</td>
-                  <td className="px-4 py-2 text-center">
-                    {entry.username.length > 12 ? `${entry.username.slice(0, 12)}...` : entry.username}
-                  </td>
-                  <td className="px-4 py-2 text-center">{entry.average_attempts.toFixed(2)}</td>
-                  <td className="px-4 py-2 text-center">{entry.games_played}</td>
+                <tr key={index} className={`text-center ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'}`}>
+                  <td className="px-6 py-4">{index + 1}</td>
+                  <td className="px-6 py-4">{entry.username.length > 12 ? `${entry.username.slice(0, 12)}...` : entry.username}</td>
+                  <td className="px-6 py-4">{entry.average_attempts.toFixed(2)}</td>
+                  <td className="px-6 py-4">{entry.games_played}</td>
                 </tr>
               ))}
             </tbody>
@@ -74,7 +72,7 @@ export default function Leaderboard() {
       </div>
       <div className="mt-8">
         <Link href="/">
-          <a className="bg-blue-500 text-white px-4 py-2 rounded-full shadow-md hover:scale-105">Back to Game</a>
+          <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300">Back to Game</a>
         </Link>
       </div>
     </div>
