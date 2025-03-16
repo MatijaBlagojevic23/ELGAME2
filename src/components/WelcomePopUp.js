@@ -12,7 +12,9 @@ const WelcomePopup = ({ onClose }) => {
           ✅ Green fields mean a perfect match. <br />
           🟡 Yellow fields indicate the attribute is close. <br />
           🟡 A yellow-filled team logo means the guessed player's team is from the same country as the target player's team. <br />
-          🏆 Try to guess the player in as few attempts as possible!
+          🏆 Try to guess the player in as few attempts as possible!<br />
+          🔓 You can play as many times as you want when logged out. <br />
+          🔒 When signed in, you can only play once a day and be added to the leaderboard.
         </p>
         <button
           onClick={onClose}
