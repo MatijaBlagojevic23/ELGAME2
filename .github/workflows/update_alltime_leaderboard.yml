@@ -1,0 +1,33 @@
+name: Update All-Time Leaderboard
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"  # Runs every Monday at 00:00 UTC
+  workflow_dispatch:  # Allows manual trigger if needed
+
+jobs:
+  update-alltime-leaderboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: pip install supabase
+
+      - name: Debug Supabase URL and API Key
+        run: echo "SUPABASE_URL and SUPABASE_API_KEY are set"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+
+      - name: Run all-time leaderboard update script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+        run: python scripts/update_alltime_leaderboard.py
