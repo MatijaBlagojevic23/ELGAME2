@@ -18,11 +18,11 @@ def update_alltime_leaderboard():
 
     try:
         # Fetch leaderboard data
-        response = supabase.table('leaderboard').select('user_id', 'games_played', 'total_attempts').execute()
+        response = supabase.table('leaderboard').select('user_id', 'username', 'games_played', 'total_attempts').execute()
         leaderboard_data = response.data
 
         # Fetch all-time leaderboard data
-        alltime_response = supabase.table('alltimeleaderboard').select('user_id', 'games_played', 'total_attempts').execute()
+        alltime_response = supabase.table('alltimeleaderboard').select('user_id', 'username', 'games_played', 'total_attempts').execute()
         alltime_data = alltime_response.data
 
         # Convert all-time leaderboard data to a dictionary for easy lookup
@@ -30,6 +30,7 @@ def update_alltime_leaderboard():
 
         for user in leaderboard_data:
             user_id = user['user_id']
+            username = user['username']
             games_played = user['games_played']
             total_attempts = user['total_attempts']
 
@@ -46,6 +47,7 @@ def update_alltime_leaderboard():
                 # Insert new entry
                 supabase.table('alltimeleaderboard').insert({
                     'user_id': user_id,
+                    'username': username,
                     'games_played': games_played,
                     'total_attempts': total_attempts
                 }).execute()
