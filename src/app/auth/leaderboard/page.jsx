@@ -74,7 +74,7 @@ export default function Leaderboard() {
         <Link href="/">
           <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg">Back to Game</a>
         </Link>
-        <Link href="/alltimeleaderboard">
+        <Link href="/auth/alltimeleaderboard">
           <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg">All-Time Leaderboard</a>
         </Link>
       </div>
