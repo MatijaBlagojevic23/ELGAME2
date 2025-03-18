@@ -24,8 +24,8 @@ const WelcomePopup = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-2xl w-full mx-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 overflow-auto"> {/* Added overflow-auto */}
+      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 my-8"> {/* Added my-8 for vertical spacing */}
         <h2 className="text-3xl font-semibold text-center text-indigo-700 mb-6">
           Welcome to ELGAME!
         </h2>
@@ -40,6 +40,8 @@ const WelcomePopup = ({ onClose }) => {
             the same country as the target player's team.
           </p>
           <p>🏆 Try to guess the player in as few attempts as possible!</p>
+          <p>Next champion in</p>
+          <p>Time zone: Europe (Midnight at UTC+2)</p>
         </div>
         <div className="text-center mb-8">
           <div className="text-2xl font-bold text-gray-800 mb-2">
