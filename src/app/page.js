@@ -412,7 +412,7 @@ export default function ELGAME() {
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
       </div>
-      <h1 className="text-2xl font-bold text-center text-purple-800 mb-4">ELGAME - Euroleague Player Guessing Game</h1>
+      <h1 className="text-2xl font-bold text-center text-purple-800 mb-4">ELGAME</h1>
 
       {/* Timer display: shown for every attempt after the first, when the game is still active */}
       {attempts.length > 0 && !gameOver && (
