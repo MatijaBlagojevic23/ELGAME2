@@ -289,12 +289,13 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
-      <UserMenu
-        user={user}
-        username={username}
-        onLogout={handleLogout}
-        onShowRules={() => setShowWelcomePopup(true)}
-      />
+      <div className="absolute top-4 right-4">
+        <UserMenu
+          user={user}
+          onLogout={handleLogout}
+          onShowRules={() => setShowWelcomePopup(true)}
+        />
+      </div>
 
       <div className="absolute top-4 left-4">
         <button
