@@ -26,7 +26,7 @@ const WelcomePopup = ({ onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg text-center">
-        <h2 className="text-xl font-bold mb-4">Welcome to ELGAME!</h2>
+        <h2 className="text-2xl font-bold mb-4">Welcome to ELGAME!</h2>
         <p className="mb-4">
           🎯 Guess the EuroLeague Player! <br />
           🏀 You have 10 attempts to find the correct player. <br />
@@ -36,9 +36,12 @@ const WelcomePopup = ({ onClose }) => {
           🟡 A yellow-filled team logo means the guessed player's team is from the same country as the target player's team. <br />
           🏆 Try to guess the player in as few attempts as possible!
         </p>
-        <p className="mb-4">
-          ⏳ New player release in: {`${timeRemaining.hours.toString().padStart(2, "0")}:${timeRemaining.minutes.toString().padStart(2, "0")}:${timeRemaining.seconds.toString().padStart(2, "0")}`}
-        </p>
+        <div className="my-6">
+          <div className="text-4xl font-extrabold text-purple-800">New player release in:</div>
+          <div className="text-6xl font-extrabold text-red-600">
+            {`${timeRemaining.hours.toString().padStart(2, "0")}:${timeRemaining.minutes.toString().padStart(2, "0")}:${timeRemaining.seconds.toString().padStart(2, "0")}`}
+          </div>
+        </div>
         <button
           onClick={onClose}
           className="bg-blue-500 text-white px-4 py-2 rounded-md"
