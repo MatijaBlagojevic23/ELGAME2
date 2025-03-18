@@ -24,9 +24,9 @@ const WelcomePopup = ({ onClose }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 overflow-auto p-4"> {/* Added p-4 for padding */}
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto my-auto max-h-[80vh]"> {/* Adjusted max-h */}
-        <div className="p-8 overflow-y-auto"> {/* Added overflow-y-auto to the content div */}
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 overflow-auto p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-auto my-auto max-h-[80vh] overflow-y-auto">
+        <div className="p-8">
           <h2 className="text-3xl font-semibold text-center text-indigo-700 mb-6">
             Welcome to ELGAME!
           </h2>
@@ -41,8 +41,8 @@ const WelcomePopup = ({ onClose }) => {
               the same country as the target player's team.
             </p>
             <p>🏆 Try to guess the player in as few attempts as possible!</p>
-            <p>Next champion in</p>
-            <p>Time zone: Europe (Midnight at UTC+2)</p>
+            <p>🔓 You can play as many times as you want when logged out.</p>
+            <p>🔒 When signed in, you can only play once a day and be added to the leaderboard.</p>
           </div>
           <div className="text-center mb-8">
             <div className="text-2xl font-bold text-gray-800 mb-2">
