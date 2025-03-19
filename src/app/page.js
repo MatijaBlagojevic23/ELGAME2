@@ -113,11 +113,14 @@ export default function ELGAME() {
       setShowWelcomePopup(true);
     }
 
-    const handleBeforeUnload = (event) => {
+    const handleBeforeUnload = async (event) => {
       if (attempts.length > 0 && !gameOver) {
         event.preventDefault();
         event.returnValue = '';
-        updateLeaderboard(user.id, 10);
+        // Update the leaderboard with 10 attempts
+        if (user) {
+          await updateLeaderboard(user.id, 10);
+        }
       }
     };
 
@@ -456,7 +459,7 @@ export default function ELGAME() {
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-      <h1 className="text-2xl font-bold text-center text-purple-800 mb-4">ELGAME - Euroleague Player Guessing Game</h1>
+      
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 bg-yellow-200 rounded-md text-xl font-bold text-red-600">
