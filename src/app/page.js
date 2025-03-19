@@ -225,61 +225,62 @@ export default function ELGAME() {
     setGuess("");
   };
 
-  const updateLeaderboard = async (userId, attempts) => {
+ const updateLeaderboard = async (userId, attempts) => {
     console.log('Updating leaderboard for user:', userId, 'with attempts:', attempts);
 
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("username")
-      .eq("user_id", userId)
-      .maybeSingle();
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("username")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-    if (userError || !userData) {
-      console.error("Error fetching username:", userError?.message || "User not found");
-      return;
-    }
+      if (userError || !userData) {
+        console.error("Error fetching username:", userError?.message || "User not found");
+        return;
+      }
 
-    const username = userData.username || "Unknown";
+      const username = userData.username || "Unknown";
 
-    const { data, error } = await supabase
-      .from("leaderboard")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error fetching leaderboard data:", error.message);
-      return;
-    }
-
-    if (data) {
-      const { error: updateError } = await supabase
+      const { data, error } = await supabase
         .from("leaderboard")
-        .update({
-          total_attempts: data.total_attempts + attempts,
-          games_played: data.games_played + 1,
-        })
-        .eq("user_id", userId);
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (updateError) {
-        console.error("Error updating leaderboard:", updateError.message);
-      } else {
-        console.log('Leaderboard updated for user:', userId);
+      if (error) {
+        console.error("Error fetching leaderboard data:", error.message);
+        return;
       }
-    } else {
-      const { error: insertError } = await supabase.from("leaderboard").insert([{
-        user_id: userId,
-        username: username,
-        total_attempts: attempts,
-        games_played: 1,
-      }]);
 
-      if (insertError) {
-        console.error("Error inserting into leaderboard:", insertError.message);
+      if (data) {
+        const { error: updateError } = await supabase
+          .from("leaderboard")
+          .update({
+            total_attempts: data.total_attempts + attempts,
+            games_played: data.games_played + 1,
+          })
+          .eq("user_id", userId);
+
+        if (updateError) {
+          console.error("Error updating leaderboard:", updateError.message);
+        } else {
+          console.log('Leaderboard updated for user:', userId);
+        }
       } else {
-        console.log('New leaderboard entry created for user:', userId);
+        const { error: insertError } = await supabase.from("leaderboard").insert([{
+          user_id: userId,
+          username: username,
+          total_attempts: attempts,
+          games_played: 1,
+        }]);
+
+        if (insertError) {
+          console.error("Error inserting into leaderboard:", insertError.message);
+        } else {
+          console.log('New leaderboard entry created for user:', userId);
+        }
       }
-    }
 
     // Log the game play for today to prevent multiple plays
     const today = new Date().toISOString().slice(0, 10);
