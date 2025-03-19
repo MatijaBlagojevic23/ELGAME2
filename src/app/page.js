@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import "../styles/globals.css";
 import { supabase } from "../utils/supabase";
+import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
@@ -48,7 +49,7 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-
+  
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
@@ -238,7 +239,7 @@ export default function ELGAME() {
     // Check if the user already has an entry in the games table
     const { data: existingGame, error: fetchError } = await supabase
       .from("games")
-      .select("id")
+      .select("id")  // Fetch only the ID to minimize data transfer
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -353,7 +354,7 @@ export default function ELGAME() {
           </div>
         </div>
       )}
-
+  
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
@@ -391,15 +392,9 @@ export default function ELGAME() {
       )}
 
       <div className="w-full flex justify-center mb-4">
-        <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
+        <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
       </div>
-
-      {/* Timer display: shown for every attempt after the first, when the game is still active */}
-      {attempts.length > 0 && !gameOver && (
-        <div className="mb-4 p-2 bg-yellow-200 rounded-md text-xl font-bold text-red-600">
-          Time left: {timeLeft} seconds
-        </div>
-      )}
+      <h1 className="text-2xl font-bold text-center text-purple-800 mb-4">ELGAME - Euroleague Player Guessing Game</h1>
 
       <PlayerInput
         guess={guess}
