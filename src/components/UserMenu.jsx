@@ -8,6 +8,10 @@ const UserMenu = ({ user, onLogout, onShowRules }) => {
     setIsOpen(!isOpen);
   };
 
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
+
   return (
     <div className="relative">
       <button
@@ -19,28 +23,38 @@ const UserMenu = ({ user, onLogout, onShowRules }) => {
         <div className="w-6 h-0.5 bg-white"></div>
       </button>
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 transition-opacity duration-300 ease-in-out">
-          <div className="py-2">
-            <button
-              onClick={onShowRules}
-              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-            >
-              Rules
-            </button>
-            {user ? (
+        <div className="fixed inset-0 flex items-end justify-end z-50">
+          <div className="bg-white h-full w-64 shadow-lg transition-transform duration-300 ease-in-out">
+            <div className="flex justify-end">
               <button
-                onClick={onLogout}
+                onClick={closeMenu}
+                className="text-gray-700 px-4 py-2"
+              >
+                &#10005;
+              </button>
+            </div>
+            <div className="py-2">
+              <button
+                onClick={() => { closeMenu(); onShowRules(); }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
-                Logout
+                Rules
               </button>
-            ) : (
-              <Link href="/auth/signin">
-                <a className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
-                  Login
-                </a>
-              </Link>
-            )}
+              {user ? (
+                <button
+                  onClick={() => { closeMenu(); onLogout(); }}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link href="/auth/signin">
+                  <a className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
+                    Login
+                  </a>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}
