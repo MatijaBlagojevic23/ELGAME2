@@ -289,12 +289,24 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
-      <div className="absolute top-4 right-4">
-        <UserMenu
-          user={user}
-          onLogout={handleLogout}
-          onShowRules={() => setShowWelcomePopup(true)}
-        />
+      <div className="absolute top-4 right-4 flex gap-4">
+        {user ? (
+          <UserMenu
+            onLogout={handleLogout}
+            onShowRules={() => setShowWelcomePopup(true)}
+          />
+        ) : (
+          <>
+            <Link href="/auth/signin">
+              <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform">
+                Login
+              </a>
+            </Link>
+            <UserMenu
+              onShowRules={() => setShowWelcomePopup(true)}
+            />
+          </>
+        )}
       </div>
 
       <div className="absolute top-4 left-4">
@@ -385,7 +397,7 @@ export default function ELGAME() {
       )}
 
       <div className="w-full flex justify-center mb-4">
-        <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
+        <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
 
       {/* Timer display: shown for every attempt after the first, when the game is still active */}
