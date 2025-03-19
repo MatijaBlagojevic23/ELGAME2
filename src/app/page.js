@@ -195,7 +195,7 @@ export default function ELGAME() {
 
   const confirmLogout = async () => {
     if (user) {
-      await updateLeaderboard(user.id, attempts.length);
+      await updateLeaderboard(user.id, 10);
     }
     await supabase.auth.signOut();
     setUser(null);
@@ -308,7 +308,7 @@ export default function ELGAME() {
   const handleConfirmLeaderboard = async () => {
     if (user) {
       // Update attempts to 10 for registered users
-      await updateLeaderboard(user.id, attempts.length);
+      await updateLeaderboard(user.id, 10);
     }
     window.location.href = '/auth/leaderboard';
   };
