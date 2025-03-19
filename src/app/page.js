@@ -118,6 +118,7 @@ export default function ELGAME() {
       if (user && attempts.length > 0 && !gameOver) {
         event.preventDefault();
         event.returnValue = '';
+        console.log('Before unload: updating leaderboard');
         await updateLeaderboard(user.id, 10);
       }
     };
@@ -209,6 +210,7 @@ export default function ELGAME() {
 
   const confirmLogout = async () => {
     if (user) {
+      console.log('Confirm logout: updating leaderboard');
       await updateLeaderboard(user.id, 10);
     }
     await supabase.auth.signOut();
@@ -224,6 +226,8 @@ export default function ELGAME() {
   };
 
   const updateLeaderboard = async (userId, attempts) => {
+    console.log('Updating leaderboard for user:', userId, 'with attempts:', attempts);
+
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("username")
@@ -259,6 +263,8 @@ export default function ELGAME() {
 
       if (updateError) {
         console.error("Error updating leaderboard:", updateError.message);
+      } else {
+        console.log('Leaderboard updated for user:', userId);
       }
     } else {
       const { error: insertError } = await supabase.from("leaderboard").insert([{
@@ -270,6 +276,8 @@ export default function ELGAME() {
 
       if (insertError) {
         console.error("Error inserting into leaderboard:", insertError.message);
+      } else {
+        console.log('New leaderboard entry created for user:', userId);
       }
     }
 
@@ -294,6 +302,8 @@ export default function ELGAME() {
 
       if (updateError) {
         console.error("Error updating game play:", updateError.message);
+      } else {
+        console.log('Game play updated for user:', userId);
       }
     } else {
       // If no existing entry, insert a new row
@@ -307,6 +317,8 @@ export default function ELGAME() {
 
       if (insertError) {
         console.error("Error inserting new game play:", insertError.message);
+      } else {
+        console.log('New game play entry created for user:', userId);
       }
     }
   };
@@ -321,6 +333,7 @@ export default function ELGAME() {
 
   const handleConfirmLeaderboard = async () => {
     if (user) {
+      console.log('Confirm leaderboard: updating leaderboard');
       // Update attempts to 10 for registered users
       await updateLeaderboard(user.id, 10);
     }
@@ -337,6 +350,7 @@ export default function ELGAME() {
 
   const handleConfirmPlayAgain = async () => {
     if (user) {
+      console.log('Confirm play again: updating leaderboard');
       await updateLeaderboard(user.id, 10);
     }
     window.location.reload();
@@ -489,6 +503,8 @@ export default function ELGAME() {
           </div>
         </div>
       )}
+
+     
 
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
