@@ -70,12 +70,12 @@ export default function Leaderboard() {
           </table>
         </div>
       </div>
-      <div className="mt-8 flex space-x-4">
+      <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
         <Link href="/">
-          <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg">Back to Game</a>
+          <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-4 sm:px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg text-center">Back to Game</a>
         </Link>
         <Link href="/auth/alltimeleaderboard">
-          <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg">All-Time Leaderboard</a>
+          <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-4 sm:px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg text-center">All-Time Leaderboard</a>
         </Link>
       </div>
     </div>
