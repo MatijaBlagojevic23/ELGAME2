@@ -51,7 +51,7 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-  
+
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
@@ -118,7 +118,7 @@ export default function ELGAME() {
       if (attempts.length > 0 && !gameOver) {
         event.preventDefault();
         event.returnValue = '';
-        // Update the leaderboard and games with 10 attempts
+        // Update the leaderboard with 10 attempts
         if (user) {
           await updateLeaderboard(user.id, 10);
         }
