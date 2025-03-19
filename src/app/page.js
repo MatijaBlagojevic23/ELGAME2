@@ -3,8 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import "../styles/globals.css";
-import { supabase } from "../utils/supabase";
-import { loadPlayers } from "../components/PlayerData";
+import { supabase } from "../../../utils/supabase";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
@@ -289,24 +288,19 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
-      <div className="absolute top-4 right-4 flex gap-4">
-        {user ? (
-          <UserMenu
-            onLogout={handleLogout}
-            onShowRules={() => setShowWelcomePopup(true)}
-          />
-        ) : (
-          <>
-            <Link href="/auth/signin">
-              <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform">
-                Login
-              </a>
-            </Link>
-            <UserMenu
-              onShowRules={() => setShowWelcomePopup(true)}
-            />
-          </>
+      <div className="absolute top-4 right-4 flex flex-col sm:flex-row items-center gap-4">
+        {!user && (
+          <Link href="/auth/signin">
+            <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform">
+              Login
+            </a>
+          </Link>
         )}
+        <UserMenu
+          user={user}
+          onLogout={handleLogout}
+          onShowRules={() => setShowWelcomePopup(true)}
+        />
       </div>
 
       <div className="absolute top-4 left-4">
