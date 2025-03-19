@@ -1,7 +1,6 @@
 import { useState } from "react";
-import Link from "next/link";
 
-const UserMenu = ({ user, onLogout, onShowRules }) => {
+const UserMenu = ({ onLogout, onShowRules }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -16,7 +15,7 @@ const UserMenu = ({ user, onLogout, onShowRules }) => {
     <div className="relative">
       <button
         onClick={toggleMenu}
-        className="flex flex-col items-center justify-center w-10 h-10 bg-gray-700 text-white rounded-md"
+        className="flex flex-col items-center justify-center w-10 h-10 bg-gray-700 text-white rounded-full"
       >
         <div className="w-6 h-0.5 bg-white mb-1"></div>
         <div className="w-6 h-0.5 bg-white mb-1"></div>
@@ -28,7 +27,7 @@ const UserMenu = ({ user, onLogout, onShowRules }) => {
             <div className="flex justify-end">
               <button
                 onClick={closeMenu}
-                className="text-gray-700 px-4 py-2"
+                className="text-gray-700 px-4 py-2 text-lg"
               >
                 &#10005;
               </button>
@@ -41,31 +40,21 @@ const UserMenu = ({ user, onLogout, onShowRules }) => {
                 Rules
               </button>
               <button
-                onClick={() => { closeMenu(); }}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-gray-700 cursor-not-allowed"
               >
-                Create New League (Coming Soon)
+                Create New League <span className="text-sm text-gray-400">(Coming Soon)</span>
               </button>
               <button
-                onClick={() => { closeMenu(); }}
+                className="block w-full text-left px-4 py-2 text-gray-700 cursor-not-allowed"
+              >
+                Join League <span className="text-sm text-gray-400">(Coming Soon)</span>
+              </button>
+              <button
+                onClick={() => { closeMenu(); onLogout(); }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
-                Join League (Coming Soon)
+                Logout
               </button>
-              {user ? (
-                <button
-                  onClick={() => { closeMenu(); onLogout(); }}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link href="/auth/signin">
-                  <a className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
-                    Login
-                  </a>
-                </Link>
-              )}
             </div>
           </div>
         </div>
