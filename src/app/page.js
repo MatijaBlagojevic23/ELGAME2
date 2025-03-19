@@ -385,7 +385,7 @@ export default function ELGAME() {
       )}
 
       <div className="w-full flex justify-center mb-4">
-        <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
+        <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
 
       {/* Timer display: shown for every attempt after the first, when the game is still active */}
