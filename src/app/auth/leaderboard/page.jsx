@@ -102,7 +102,7 @@ export default function Leaderboard() {
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="w-full overflow-y-auto max-h-96">
           <table className="w-full table-auto divide-y divide-gray-200">
-            <thead className="bg-orange-500 text-white">
+            <thead className="bg-orange-500 text-white sticky top-0">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Rank</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">User</th>
