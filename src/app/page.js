@@ -385,7 +385,7 @@ export default function ELGAME() {
       )}
 
       <div className="w-full flex justify-center mb-4">
-        <img src="/public/logo.jpeg" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
+        <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
       </div>
 
       {/* Timer display: shown for every attempt after the first, when the game is still active */}
