@@ -3,7 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import "../styles/globals.css";
-import { supabase } from "../../../utils/supabase";
+import { supabase } from "../utils/supabase";
+import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
