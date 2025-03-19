@@ -78,19 +78,27 @@ export default function Leaderboard() {
     fetchAllTimeLeaderboard();
   }, []);
 
-  const toggleLeaderboard = () => {
-    setIsShowingAllTime(!isShowingAllTime);
+  const toggleLeaderboard = (showAllTime) => {
+    setIsShowingAllTime(showAllTime);
   }
 
   return (
     <div className="flex flex-col items-center p-4 min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold mb-6 text-purple-800">{isShowingAllTime ? "All-Time Leaderboard" : "Leaderboard"}</h1>
-      <button
-        onClick={toggleLeaderboard}
-        className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg mb-4"
-      >
-        {isShowingAllTime ? "Show Leaderboard" : "Show All-Time Leaderboard"}
-      </button>
+      <h1 className="text-4xl font-bold mb-6 text-purple-800">Leaderboard</h1>
+      <div className="flex space-x-4 mb-4">
+        <button
+          onClick={() => toggleLeaderboard(false)}
+          className={`px-4 py-2 rounded-md shadow-md transition duration-300 transform ${!isShowingAllTime ? 'bg-orange-500 text-white' : 'bg-gray-300 text-gray-700'} hover:scale-105 hover:shadow-lg`}
+        >
+          Leaderboard
+        </button>
+        <button
+          onClick={() => toggleLeaderboard(true)}
+          className={`px-4 py-2 rounded-md shadow-md transition duration-300 transform ${isShowingAllTime ? 'bg-orange-500 text-white' : 'bg-gray-300 text-gray-700'} hover:scale-105 hover:shadow-lg`}
+        >
+          All-Time Leaderboard
+        </button>
+      </div>
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="w-full overflow-y-auto max-h-96">
           <table className="w-full table-auto divide-y divide-gray-200">
@@ -115,7 +123,7 @@ export default function Leaderboard() {
           </table>
         </div>
       </div>
-      <div className="mt-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+      <div className="mt-8 flex">
         <Link href="/">
           <a className="bg-gradient-to-r from-purple-500 to-orange-500 text-white font-semibold py-2 px-4 sm:px-6 rounded-md shadow-md transition duration-300 transform hover:scale-105 hover:shadow-lg text-center">Back to Game</a>
         </Link>
