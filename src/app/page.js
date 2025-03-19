@@ -118,7 +118,7 @@ export default function ELGAME() {
       if (attempts.length > 0 && !gameOver) {
         event.preventDefault();
         event.returnValue = '';
-        // Update the leaderboard with 10 attempts
+        // Update the leaderboard and games with 10 attempts
         if (user) {
           await updateLeaderboard(user.id, 10);
         }
@@ -494,7 +494,8 @@ export default function ELGAME() {
         </div>
       )}
 
-      <div className="w-full flex justify-center mb-4">
+      
+<div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
      
