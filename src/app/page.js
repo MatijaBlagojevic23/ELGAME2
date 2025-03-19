@@ -24,6 +24,7 @@ export default function ELGAME() {
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [showPlayAgainPopup, setShowPlayAgainPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
 
   const attemptsRef = useRef(null);
@@ -330,6 +331,21 @@ export default function ELGAME() {
     window.location.href = '/auth/leaderboard';
   };
 
+  const handlePlayAgainClick = () => {
+    if (attempts.length > 0 && !gameOver) {
+      setShowPlayAgainPopup(true);
+    } else {
+      window.location.reload();
+    }
+  };
+
+  const handleConfirmPlayAgain = async () => {
+    if (user) {
+      await updateLeaderboard(user.id, 10);
+    }
+    window.location.reload();
+  };
+
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
@@ -363,7 +379,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Great job! You guessed correctly!</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={handlePlayAgainClick}
               className="bg-blue-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -383,7 +399,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Too many attempts! The target player was {target?.name}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={handlePlayAgainClick}
               className="bg-red-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -456,10 +472,32 @@ export default function ELGAME() {
         </div>
       )}
 
+      {showPlayAgainPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg text-center">
+            <p className="text-lg font-bold mb-4">Are you sure you want to play again? You will lose your data.</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleConfirmPlayAgain}
+                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setShowPlayAgainPopup(false)}
+                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-      
+     
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 bg-yellow-200 rounded-md text-xl font-bold text-red-600">
