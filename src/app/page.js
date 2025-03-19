@@ -114,31 +114,23 @@ export default function ELGAME() {
       setShowWelcomePopup(true);
     }
 
-     const handleBeforeUnload = async (event) => {
-    if (user && attempts.length > 0 && !gameOver) {
-      event.preventDefault();
-      event.returnValue = '';
-      await updateLeaderboard(user.id, 10);
-    }
-  };
+    const handleBeforeUnload = async (event) => {
+      if (user && attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = '';
+        await updateLeaderboard(user.id, 10);
+      }
+    };
 
-  const handleConfirmPlayAgain = async () => {
-    if (user) {
-      await updateLeaderboard(user.id, 10);
-    }
-    window.location.reload();
-  };
-
-  useEffect(() => {
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
+  }, [user, attempts, gameOver]);
 
-  // Timer useEffect: start a 20-second countdown for every attempt except the first one
   useEffect(() => {
-    // Only start timer if there is at least one attempt and game is not over
+    // Timer useEffect: start a 20-second countdown for every attempt except the first one
     if (attempts.length > 0 && !gameOver) {
       setTimeLeft(20);
       const interval = setInterval(() => {
@@ -338,12 +330,17 @@ export default function ELGAME() {
   const handlePlayAgainClick = () => {
     if (attempts.length > 0 && !gameOver) {
       setShowPlayAgainPopup(true);
-    } 
+    } else {
       window.location.reload();
-    
+    }
   };
 
-  
+  const handleConfirmPlayAgain = async () => {
+    if (user) {
+      await updateLeaderboard(user.id, 10);
+    }
+    window.location.reload();
+  };
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
@@ -493,17 +490,17 @@ export default function ELGAME() {
         </div>
       )}
 
-      
-<div className="w-full flex justify-center mb-4">
+      <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-     
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 bg-yellow-200 rounded-md text-xl font-bold text-red-600">
           Time left: {timeLeft} seconds
         </div>
       )}
+
+      
 
       <PlayerInput
         guess={guess}
