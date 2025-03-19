@@ -40,6 +40,18 @@ const UserMenu = ({ user, onLogout, onShowRules }) => {
               >
                 Rules
               </button>
+              <button
+                onClick={() => { closeMenu(); }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Create New League (Coming Soon)
+              </button>
+              <button
+                onClick={() => { closeMenu(); }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+              >
+                Join League (Coming Soon)
+              </button>
               {user ? (
                 <button
                   onClick={() => { closeMenu(); onLogout(); }}
