@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const UserMenu = ({ onLogout, onShowRules }) => {
+const UserMenu = ({ user, onLogout, onShowRules }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -49,12 +49,14 @@ const UserMenu = ({ onLogout, onShowRules }) => {
               >
                 Join League <span className="text-sm text-gray-400">(Coming Soon)</span>
               </button>
-              <button
-                onClick={() => { closeMenu(); onLogout(); }}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-              >
-                Logout
-              </button>
+              {user && (
+                <button
+                  onClick={() => { closeMenu(); onLogout(); }}
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>
