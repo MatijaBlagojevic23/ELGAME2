@@ -227,7 +227,7 @@ export default function ELGAME() {
     console.log('Updating leaderboard for user:', userId, 'with attempts:', attempts);
 
     try {
-      const response = await fetch('http://localhost:3000/update-leaderboard', {
+      const response = await fetch('/api/leaderboard', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -235,8 +235,12 @@ export default function ELGAME() {
         body: JSON.stringify({ userId, attempts }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
-      console.log(data.message);
+      console.log('Leaderboard update response:', data.message);
     } catch (error) {
       console.error("Error updating leaderboard:", error);
     }
@@ -274,6 +278,7 @@ export default function ELGAME() {
     }
     window.location.reload();
   };
+
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
