@@ -321,14 +321,11 @@ export default function ELGAME() {
         event.returnValue = '';
 
         if (user) {
-          const data = {
-            user_id: user.id,
-            total_attempts: 10, // Set to maximum attempts
-            games_played: 1,
-          };
-
-          const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-          navigator.sendBeacon('/api/update-leaderboard', blob); // Adjust the URL to your actual endpoint
+          return new Promise((resolve) => {
+            updateLeaderboard(user.id, 10).then(() => {
+              resolve();
+            });
+          });
         }
       }
     };
