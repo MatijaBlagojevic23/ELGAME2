@@ -225,7 +225,7 @@ export default function ELGAME() {
     setGuess("");
   };
 
- const updateLeaderboard = async (userId, attempts) => {
+  const updateLeaderboard = async (userId, attempts) => {
     console.log('Updating leaderboard for user:', userId, 'with attempts:', attempts);
 
     try {
@@ -282,45 +282,48 @@ export default function ELGAME() {
         }
       }
 
-    // Log the game play for today to prevent multiple plays
-    const today = new Date().toISOString().slice(0, 10);
+      // Log the game play for today to prevent multiple plays
+      const today = new Date().toISOString().slice(0, 10);
 
-    // Check if the user already has an entry in the games table
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      // If the user has played before, update the date and attempts
-      const { error: updateError } = await supabase
+      // Check if the user already has an entry in the games table
+      const { data: existingGame, error: fetchError } = await supabase
         .from("games")
-        .update({ date: today, attempts })
-        .eq("id", existingGame.id);
+        .select("id")  // Fetch only the ID to minimize data transfer
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (updateError) {
-        console.error("Error updating game play:", updateError.message);
-      } else {
-        console.log('Game play updated for user:', userId);
-      }
-    } else {
-      // If no existing entry, insert a new row
-      const { error: insertError } = await supabase.from("games").insert([
-        {
-          user_id: userId,
-          date: today,
-          attempts: attempts,
-        },
-      ]);
+      if (fetchError) {
+        console.error("Error checking existing game play:", fetchError.message);
+      } else if (existingGame) {
+        // If the user has played before, update the date and attempts
+        const { error: updateError } = await supabase
+          .from("games")
+          .update({ date: today, attempts })
+          .eq("id", existingGame.id);
 
-      if (insertError) {
-        console.error("Error inserting new game play:", insertError.message);
+        if (updateError) {
+          console.error("Error updating game play:", updateError.message);
+        } else {
+          console.log('Game play updated for user:', userId);
+        }
       } else {
-        console.log('New game play entry created for user:', userId);
+        // If no existing entry, insert a new row
+        const { error: insertError } = await supabase.from("games").insert([
+          {
+            user_id: userId,
+            date: today,
+            attempts: attempts,
+          },
+        ]);
+
+        if (insertError) {
+          console.error("Error inserting new game play:", insertError.message);
+        } else {
+          console.log('New game play entry created for user:', userId);
+        }
       }
+    } catch (e) {
+      console.error("Fetch error:", e);
     }
   };
 
