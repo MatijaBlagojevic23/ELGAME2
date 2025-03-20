@@ -313,23 +313,28 @@ export default function ELGAME() {
     window.location.href = '/auth/leaderboard';
   };
 
-  // Add useEffect to handle beforeunload event
+  // Add useEffect to handle visibilitychange and beforeunload events
   useEffect(() => {
-    const handleBeforeUnload = async (event) => {
-      if (attempts.length > 0 && !gameOver) {
-        event.preventDefault();
-        event.returnValue = ''; // Prompt the user with a confirmation dialog
-
-        // Update the leaderboard with maximum attempts before closing/reloading
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden' && attempts.length > 0 && !gameOver) {
         if (user) {
           await updateLeaderboard(user.id, 10);
         }
       }
     };
 
+    const handleBeforeUnload = (event) => {
+      if (attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = ''; // Prompt the user with a confirmation dialog
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [attempts, gameOver, user]);
