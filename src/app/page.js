@@ -313,6 +313,27 @@ export default function ELGAME() {
     window.location.href = '/auth/leaderboard';
   };
 
+  // Add useEffect to handle beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = async (event) => {
+      if (attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = ''; // Prompt the user with a confirmation dialog
+
+        // Update the leaderboard with maximum attempts before closing/reloading
+        if (user) {
+          await updateLeaderboard(user.id, 10);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [attempts, gameOver, user]);
+
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
