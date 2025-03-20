@@ -262,14 +262,39 @@ export default function ELGAME() {
     // Log the game play for today to prevent multiple plays
     const today = new Date().toISOString().slice(0, 10);
 
-    // Use `navigator.sendBeacon` to ensure the request is sent before the page unloads
-    const blob = new Blob([JSON.stringify({
-      user_id: userId,
-      date: today,
-      attempts: attempts,
-    })], { type: 'application/json' });
+    // Check if the user already has an entry in the games table
+    const { data: existingGame, error: fetchError } = await supabase
+      .from("games")
+      .select("id")  // Fetch only the ID to minimize data transfer
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    navigator.sendBeacon('/path/to/your/api', blob);
+    if (fetchError) {
+      console.error("Error checking existing game play:", fetchError.message);
+    } else if (existingGame) {
+      // If the user has played before, update the date and attempts
+      const { error: updateError } = await supabase
+        .from("games")
+        .update({ date: today, attempts })
+        .eq("id", existingGame.id);
+
+      if (updateError) {
+        console.error("Error updating game play:", updateError.message);
+      }
+    } else {
+      // If no existing entry, insert a new row
+      const { error: insertError } = await supabase.from("games").insert([
+        {
+          user_id: userId,
+          date: today,
+          attempts: attempts,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error inserting new game play:", insertError.message);
+      }
+    }
   };
 
   const handleLeaderboardClick = () => {
@@ -288,28 +313,29 @@ export default function ELGAME() {
     window.location.href = '/auth/leaderboard';
   };
 
-  // Add useEffect to handle visibilitychange and beforeunload events
+  // Add useEffect to handle beforeunload event
   useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'hidden' && attempts.length > 0 && !gameOver) {
+    const handleBeforeUnload = (event) => {
+      if (attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = '';
+
         if (user) {
-          await updateLeaderboard(user.id, 10);
+          const data = {
+            user_id: user.id,
+            total_attempts: 10, // Set to maximum attempts
+            games_played: 1,
+          };
+
+          const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+          navigator.sendBeacon('/api/update-leaderboard', blob); // Adjust the URL to your actual endpoint
         }
       }
     };
 
-    const handleBeforeUnload = (event) => {
-      if (attempts.length > 0 && !gameOver) {
-        event.preventDefault();
-        event.returnValue = ''; // Prompt the user with a confirmation dialog
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [attempts, gameOver, user]);
