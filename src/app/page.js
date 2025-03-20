@@ -114,19 +114,17 @@ export default function ELGAME() {
       setShowWelcomePopup(true);
     }
 
-    const handleBeforeUnload = async (event) => {
+    const handleUnload = async (event) => {
       if (user && attempts.length > 0 && !gameOver) {
-        event.preventDefault();
-        event.returnValue = '';
-        console.log('Before unload: updating leaderboard');
+        console.log('Unload: updating leaderboard');
         await updateLeaderboard(user.id, 10);
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('unload', handleUnload);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('unload', handleUnload);
     };
   }, [user, attempts, gameOver]);
 
