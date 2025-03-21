@@ -211,22 +211,28 @@ export default function ELGAME() {
 
   const updateLeaderboard = async (userId, attempts) => {
     try {
-      const response = await fetch('/api/updateLeaderboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, attempts }),
-      });
+        const response = await fetch('/api/updateLeaderboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, attempts }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update leaderboard');
-      }
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update leaderboard');
+        } else if (response.status !== 204) { //check for 204 No Content.
+            const responseData = await response.json();
+            console.log(responseData.message);
+        } else {
+            console.log("update successfull with no content returned");
+        }
+
     } catch (error) {
-      console.error('Error updating leaderboard:', error);
+        console.error('Error updating leaderboard:', error);
     }
-  };
+};
 
   const handleLeaderboardClick = () => {
     if (user && attempts.length > 0 && !gameOver) {
