@@ -219,11 +219,10 @@ export default function ELGAME() {
         body: JSON.stringify({ userId, attempts }),
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update leaderboard');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update leaderboard');
       }
-      console.log(data.message); // Log success message
     } catch (error) {
       console.error('Error updating leaderboard:', error);
     }
