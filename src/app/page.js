@@ -45,6 +45,14 @@ export default function ELGAME() {
         } else {
           setUsername(data?.username || "Unknown");
         }
+
+        const gameState = await fetchGameState(user.id);
+        if (gameState) {
+          setAttempts(gameState.attempts);
+          setTarget(gameState.target);
+          setGameOver(gameState.gameOver);
+          setTimeLeft(gameState.timeLeft);
+        }
       }
     };
 
@@ -116,6 +124,16 @@ export default function ELGAME() {
 
   // Timer useEffect: start a 20-second countdown for every attempt except the first one
   useEffect(() => {
+    if (user) {
+      const saveInterval = setInterval(() => {
+        saveGameState(user.id, { attempts, target, gameOver, timeLeft });
+      }, 5000); // Save the game state every 5 seconds
+
+      return () => clearInterval(saveInterval);
+    }
+  }, [user, attempts, target, gameOver, timeLeft]);
+
+  useEffect(() => {
     // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
       setTimeLeft(20);
@@ -174,6 +192,11 @@ export default function ELGAME() {
         attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
       }
     }, 100);
+
+    // Save game state
+    if (user) {
+      await saveGameState(user.id, { attempts: newAttempts, target, gameOver, timeLeft });
+    }
   };
 
   const handleLogout = async () => {
@@ -210,29 +233,133 @@ export default function ELGAME() {
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    try {
-        const response = await fetch('/api/updateLeaderboard', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, attempts }),
-        });
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to update leaderboard');
-        } else if (response.status !== 204) { //check for 204 No Content.
-            const responseData = await response.json();
-            console.log(responseData.message);
-        } else {
-            console.log("update successfull with no content returned");
-        }
-
-    } catch (error) {
-        console.error('Error updating leaderboard:', error);
+    if (userError || !userData) {
+      console.error("Error fetching username:", userError?.message || "User not found");
+      return;
     }
-};
+
+    const username = userData.username || "Unknown";
+
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching leaderboard data:", error.message);
+      return;
+    }
+
+    if (data) {
+      const { error: updateError } = await supabase
+        .from("leaderboard")
+        .update({
+          total_attempts: data.total_attempts + attempts,
+          games_played: data.games_played + 1,
+        })
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("Error updating leaderboard:", updateError.message);
+      }
+    } else {
+      const { error: insertError } = await supabase.from("leaderboard").insert([{
+        user_id: userId,
+        username: username,
+        total_attempts: attempts,
+        games_played: 1,
+      }]);
+
+      if (insertError) {
+        console.error("Error inserting into leaderboard:", insertError.message);
+      }
+    }
+
+    // Log the game play for today to prevent multiple plays
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Check if the user already has an entry in the games table
+    const { data: existingGame, error: fetchError } = await supabase
+      .from("games")
+      .select("id")  // Fetch only the ID to minimize data transfer
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error("Error checking existing game play:", fetchError.message);
+    } else if (existingGame) {
+      // If the user has played before, update the date and attempts
+      const { error: updateError } = await supabase
+        .from("games")
+        .update({ date: today, attempts })
+        .eq("id", existingGame.id);
+
+      if (updateError) {
+        console.error("Error updating game play:", updateError.message);
+      }
+    } else {
+      // If no existing entry, insert a new row
+      const { error: insertError } = await supabase.from("games").insert([
+        {
+          user_id: userId,
+          date: today,
+          attempts: attempts,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error inserting new game play:", insertError.message);
+      }
+    }
+  };
+
+  const saveGameState = async (userId, gameState) => {
+    try {
+      const response = await fetch('/api/gameState', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, gameState }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save game state');
+      }
+
+      const data = await response.json();
+      console.log(data.message); // Log success message
+    } catch (error) {
+      console.error('Error saving game state:', error);
+    }
+  };
+
+  const fetchGameState = async (userId) => {
+    try {
+      const response = await fetch(`/api/gameState?userId=${userId}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch game state');
+      }
+
+      const data = await response.json();
+      return data.state;
+    } catch (error) {
+      console.error('Error fetching game state:', error);
+      return null;
+    }
+  };
 
   const handleLeaderboardClick = () => {
     if (user && attempts.length > 0 && !gameOver) {
@@ -249,26 +376,6 @@ export default function ELGAME() {
     }
     window.location.href = '/auth/leaderboard';
   };
-
-  // Add useEffect to handle beforeunload event
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      if (attempts.length > 0 && !gameOver) {
-        event.preventDefault();
-        event.returnValue = '';
-
-        if (user) {
-          updateLeaderboard(user.id, 10);
-        }
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [attempts, gameOver, user]);
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
