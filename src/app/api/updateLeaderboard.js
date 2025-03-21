@@ -1,7 +1,7 @@
 import { supabase } from "../../../utils/supabase";
 
 export default async function handler(req, res) {
-    console.log("Request received:", req.method, req.body); // Log the request
+    console.log("Request received:", req.method, req.body);
 
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const { userId, attempts } = req.body;
 
     if (!userId || !attempts) {
-        console.log("Missing required fields:", { userId, attempts }); // Log missing fields
+        console.log("Missing required fields:", { userId, attempts });
         return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -22,12 +22,12 @@ export default async function handler(req, res) {
             .maybeSingle();
 
         if (userError || !userData) {
-            console.error("Error fetching user:", userError?.message); // Log user fetch error
-            throw new Error(userError?.message || "User not found");
+            console.error("Error fetching user:", userError?.message);
+            return res.status(404).json({ message: userError?.message || "User not found" }); // send error
         }
 
         const username = userData.username || "Unknown";
-        console.log("User found:", username); // Log user information
+        console.log("User found:", username);
 
         const { data, error } = await supabase
             .from("leaderboard")
@@ -36,8 +36,8 @@ export default async function handler(req, res) {
             .maybeSingle();
 
         if (error) {
-            console.error("Error fetching leaderboard:", error.message); // Log leaderboard fetch error
-            throw new Error(error.message);
+            console.error("Error fetching leaderboard:", error.message);
+            return res.status(500).json({ message: error.message }); // send error
         }
 
         if (data) {
@@ -50,8 +50,8 @@ export default async function handler(req, res) {
                 .eq("user_id", userId);
 
             if (updateError) {
-                console.error("Error updating leaderboard:", updateError.message); // Log leaderboard update error
-                throw new Error(updateError.message);
+                console.error("Error updating leaderboard:", updateError.message);
+                return res.status(500).json({ message: updateError.message }); // send error
             }
         } else {
             const { error: insertError } = await supabase.from("leaderboard").insert([{
@@ -61,8 +61,8 @@ export default async function handler(req, res) {
                 games_played: 1,
             }]);
             if (insertError) {
-                console.error("Error inserting into leaderboard:", insertError.message); // Log leaderboard insert error
-                throw new Error(insertError.message);
+                console.error("Error inserting into leaderboard:", insertError.message);
+                return res.status(500).json({ message: insertError.message }); // send error
             }
         }
 
@@ -74,8 +74,8 @@ export default async function handler(req, res) {
             .maybeSingle();
 
         if (fetchError) {
-            console.error("Error checking existing game play:", fetchError.message); // Log game fetch error
-            throw new Error(fetchError.message);
+            console.error("Error checking existing game play:", fetchError.message);
+            return res.status(500).json({ message: fetchError.message }); // send error
         } else if (existingGame) {
             const { error: updateError } = await supabase
                 .from("games")
@@ -83,8 +83,8 @@ export default async function handler(req, res) {
                 .eq("id", existingGame.id);
 
             if (updateError) {
-                console.error("Error updating game play:", updateError.message); // Log game update error
-                throw new Error(updateError.message);
+                console.error("Error updating game play:", updateError.message);
+                return res.status(500).json({ message: updateError.message }); // send error
             }
         } else {
             const { error: insertError } = await supabase.from("games").insert([
@@ -96,15 +96,15 @@ export default async function handler(req, res) {
             ]);
 
             if (insertError) {
-                console.error("Error inserting new game play:", insertError.message); // Log game insert error
-                throw new Error(insertError.message);
+                console.error("Error inserting new game play:", insertError.message);
+                return res.status(500).json({ message: insertError.message }); // send error
             }
         }
 
-        console.log("Leaderboard updated successfully"); // Log success
+        console.log("Leaderboard updated successfully");
         return res.status(200).json({ message: "Leaderboard updated successfully" });
     } catch (error) {
-        console.error("Error updating leaderboard:", error); // Log errors
-        return res.status(500).json({ message: error.message });
+        console.error("Error updating leaderboard:", error);
+        return res.status(500).json({ message: error.message || "Internal Server Error" }); // send error
     }
 }
