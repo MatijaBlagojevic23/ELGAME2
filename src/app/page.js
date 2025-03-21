@@ -210,90 +210,20 @@ export default function ELGAME() {
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("username")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (userError || !userData) {
-      console.error("Error fetching username:", userError?.message || "User not found");
-      return;
-    }
-
-    const username = userData.username || "Unknown";
-
-    const { data, error } = await supabase
-      .from("leaderboard")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error fetching leaderboard data:", error.message);
-      return;
-    }
-
-    if (data) {
-      const { error: updateError } = await supabase
-        .from("leaderboard")
-        .update({
-          total_attempts: data.total_attempts + attempts,
-          games_played: data.games_played + 1,
-        })
-        .eq("user_id", userId);
-
-      if (updateError) {
-        console.error("Error updating leaderboard:", updateError.message);
-      }
-    } else {
-      const { error: insertError } = await supabase.from("leaderboard").insert([{
-        user_id: userId,
-        username: username,
-        total_attempts: attempts,
-        games_played: 1,
-      }]);
-
-      if (insertError) {
-        console.error("Error inserting into leaderboard:", insertError.message);
-      }
-    }
-
-    // Log the game play for today to prevent multiple plays
-    const today = new Date().toISOString().slice(0, 10);
-
-    // Check if the user already has an entry in the games table
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      // If the user has played before, update the date and attempts
-      const { error: updateError } = await supabase
-        .from("games")
-        .update({ date: today, attempts })
-        .eq("id", existingGame.id);
-
-      if (updateError) {
-        console.error("Error updating game play:", updateError.message);
-      }
-    } else {
-      // If no existing entry, insert a new row
-      const { error: insertError } = await supabase.from("games").insert([
-        {
-          user_id: userId,
-          date: today,
-          attempts: attempts,
+    try {
+      const response = await fetch('/api/updateLeaderboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ]);
+        body: JSON.stringify({ userId, attempts }),
+      });
 
-      if (insertError) {
-        console.error("Error inserting new game play:", insertError.message);
+      if (!response.ok) {
+        throw new Error('Failed to update leaderboard');
       }
+    } catch (error) {
+      console.error('Error updating leaderboard:', error);
     }
   };
 
@@ -321,11 +251,7 @@ export default function ELGAME() {
         event.returnValue = '';
 
         if (user) {
-          return new Promise((resolve) => {
-            updateLeaderboard(user.id, 10).then(() => {
-              resolve();
-            });
-          });
+          updateLeaderboard(user.id, 10);
         }
       }
     };
