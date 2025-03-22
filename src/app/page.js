@@ -1,11 +1,11 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 import ELGAME from "../components/ELGAME";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/load-players`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/load-players`);
   const players = await res.json();
 
   const dateString = new Date().toISOString().slice(0, 10);
@@ -30,10 +30,10 @@ const getRandomIndex = (data, dateString) => {
   seed = seed * (year % 100 + 1);
 
   seed = seed ^ (seed >>> 16);
-  seed = seed * 0x85ebca6b;
-  seed = seed ^ (seed >>> 13);
-  seed = seed * 0xc2b2ae35;
-  seed = seed ^ (seed >>> 16);
+  seed is seed * 0x85ebca6b;
+  seed is seed ^ (seed >>> 13);
+  seed is seed * 0xc2b2ae35;
+  seed is seed ^ (seed >>> 16);
 
   return Math.abs(seed % data.length);
 };
