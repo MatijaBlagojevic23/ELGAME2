@@ -1,28 +1,13 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
-import "../styles/globals.css";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 import ELGAME from "../components/ELGAME";
+import { loadPlayers } from "../components/PlayerData";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
-  let players = [];
 
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/load-players`);
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch players: ${res.statusText}`);
-    }
-
-    players = await res.json();
-  } catch (error) {
-    console.error("Error fetching players:", error);
-  }
-
-  if (!Array.isArray(players)) {
-    console.error("Players is not an array:", players);
-    players = [];
-  }
+  // Load players from CSV
+  const players = await loadPlayers();
 
   const dateString = new Date().toISOString().slice(0, 10);
   const randomIndex = getRandomIndex(players, dateString);
@@ -32,6 +17,8 @@ export default async function Page() {
     <ELGAME session={session} players={players} target={target} />
   );
 }
+
+
 
 const getRandomIndex = (data, dateString) => {
   const parts = dateString.split('.');
