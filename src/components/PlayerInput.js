@@ -16,12 +16,16 @@ const PlayerInput = ({
 
   useEffect(() => {
     if (guess.length >= 2) {
-      const filteredPlayers = players.filter((player) =>
-        player.name.toLowerCase().includes(guess.toLowerCase())
-      );
-      setSuggestions(filteredPlayers);
-      setIsDropdownOpen(filteredPlayers.length > 0);
-      setHighlightedIndex(-1);
+      if (Array.isArray(players)) {
+        const filteredPlayers = players.filter((player) =>
+          player.name.toLowerCase().includes(guess.toLowerCase())
+        );
+        setSuggestions(filteredPlayers);
+        setIsDropdownOpen(filteredPlayers.length > 0);
+        setHighlightedIndex(-1);
+      } else {
+        console.error("Players is not an array:", players);
+      }
     } else {
       setSuggestions([]);
       setIsDropdownOpen(false);
@@ -36,6 +40,7 @@ const PlayerInput = ({
   }, [attempts]);
 
   const handleChange = (e) => {
+    console.log("handleChange called with value:", e.target.value);
     setGuess(e.target.value);
   };
 
