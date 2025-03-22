@@ -8,6 +8,7 @@ import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
+import UserMenu from "../components/UserMenu";
 
 export default function ELGAME() {
   const [user, setUser] = useState(null);
@@ -22,6 +23,8 @@ export default function ELGAME() {
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(20);
 
   const attemptsRef = useRef(null);
 
@@ -111,6 +114,29 @@ export default function ELGAME() {
     }
   }, [user]);
 
+  // Timer useEffect: start a 20-second countdown for every attempt except the first one
+  useEffect(() => {
+    // Only start timer if there is at least one attempt and game is not over
+    if (attempts.length > 0 && !gameOver) {
+      setTimeLeft(20);
+      const interval = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(interval);
+            // Auto-submit the last attempted guess when time expires
+            const lastAttempt = attempts[attempts.length - 1];
+            if (lastAttempt) {
+              checkGuess(lastAttempt.name);
+            }
+            return 20;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [attempts, gameOver]);
+
   const handleCloseWelcomePopup = () => {
     localStorage.setItem("hasSeenPopup", "true");
     setShowWelcomePopup(false);
@@ -151,11 +177,36 @@ export default function ELGAME() {
   };
 
   const handleLogout = async () => {
+    if (attempts.length > 0 && !gameOver) {
+      setShowLogoutPopup(true);
+      return;
+    }
+
     await supabase.auth.signOut();
     setUser(null);
     setUsername("");
     setGameOver(false);
-    //loadGame(); // Reload game for unauthenticated user
+    // Reset game state
+    setPlayers([]);
+    setTarget(null);
+    setAttempts([]);
+    setGuess("");
+  };
+
+  const confirmLogout = async () => {
+    if (user) {
+      await updateLeaderboard(user.id, 10);
+    }
+    await supabase.auth.signOut();
+    setUser(null);
+    setUsername("");
+    setGameOver(false);
+    setShowLogoutPopup(false);
+    // Reset game state
+    setPlayers([]);
+    setTarget(null);
+    setAttempts([]);
+    setGuess("");
   };
 
   const updateLeaderboard = async (userId, attempts) => {
@@ -264,38 +315,19 @@ export default function ELGAME() {
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
-      <div className="absolute top-4 right-4 flex flex-col sm:flex-row gap-4 sm:items-center">
-        <button
-          onClick={() => setShowWelcomePopup(true)}
-          className="bg-gradient-to-r from-purple-500 to-orange-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform"
-        >
-          Rules
-        </button>
-
-        {user ? (
-          <>
-            <div className="bg-gray-700 text-white px-4 py-2 rounded-md text-center sm:text-left">
-              <span className="block sm:hidden">
-                {username.length > 8 ? `${username.slice(0, 8)}...` : username}
-              </span>
-              <span className="hidden sm:block">
-                {username}
-              </span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
+      <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
+        {!user && (
           <Link href="/auth/signin">
             <a className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md hover:scale-105 transition-transform">
               Login
             </a>
           </Link>
         )}
+        <UserMenu
+          user={user}
+          onLogout={handleLogout}
+          onShowRules={() => setShowWelcomePopup(true)}
+        />
       </div>
 
       <div className="absolute top-4 left-4">
@@ -385,10 +417,40 @@ export default function ELGAME() {
         </div>
       )}
 
+      {showLogoutPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg text-center">
+            <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={confirmLogout}
+                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setShowLogoutPopup(false)}
+                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full flex justify-center mb-4">
-        <img src="/images/logo.png" alt="EuroLeague Logo" className="w-1/2 sm:w-[20%] max-w-[180px]" />
+        <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-      <h1 className="text-2xl font-bold text-center text-purple-800 mb-4">ELGAME - Euroleague Player Guessing Game</h1>
+     
+
+      {attempts.length > 0 && !gameOver && (
+        <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
+  <span className="text-xl font-bold text-red-600">
+    Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
+  </span>
+</div>
+      )}
 
       <PlayerInput
         guess={guess}
