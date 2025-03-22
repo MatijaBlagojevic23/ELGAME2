@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { supabase } from "../utils/supabase";
 import PlayerInput from "./PlayerInput";
 import PlayerTable from "./PlayerTable";
 import WelcomePopup from "./WelcomePopUp";
@@ -9,9 +10,16 @@ import UserMenu from "./UserMenu";
 
 export default function ELGAME({ session, players, target }) {
   const [user, setUser] = useState(session?.user || null);
-  const [guess, setGuess] = useState("");
+  const [username, setUsername] = useState("");
   const [attempts, setAttempts] = useState([]);
+  const [guess, setGuess] = useState("");
   const [gameOver, setGameOver] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [showExceedPopup, setShowExceedPopup] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [showPlayedPopup, setShowPlayedPopup] = useState(false);
+  const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
 
   const attemptsRef = useRef(null);
@@ -42,12 +50,17 @@ export default function ELGAME({ session, players, target }) {
     }
   }, [attempts, gameOver]);
 
+  const handleCloseWelcomePopup = () => {
+    localStorage.setItem("hasSeenPopup", "true");
+    setShowWelcomePopup(false);
+  };
+
   const checkGuess = async (submittedGuess) => {
     if (gameOver) return;
 
     const guessToCheck = submittedGuess || guess;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check-guess`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/check-guess`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -94,6 +107,7 @@ export default function ELGAME({ session, players, target }) {
 
     await supabase.auth.signOut();
     setUser(null);
+    setUsername("");
     setGameOver(false);
     setAttempts([]);
     setGuess("");
@@ -105,6 +119,7 @@ export default function ELGAME({ session, players, target }) {
     }
     await supabase.auth.signOut();
     setUser(null);
+    setUsername("");
     setGameOver(false);
     setShowLogoutPopup(false);
     setAttempts([]);
@@ -112,17 +127,102 @@ export default function ELGAME({ session, players, target }) {
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/update-leaderboard`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, attempts }),
-    });
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (!res.ok) {
-      console.error("Error updating leaderboard");
+    if (userError || !userData) {
+      console.error("Error fetching username:", userError?.message || "User not found");
+      return;
     }
+
+    const username = userData.username || "Unknown";
+
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching leaderboard data:", error.message);
+      return;
+    }
+
+    if (data) {
+      const { error: updateError } = await supabase
+        .from("leaderboard")
+        .update({
+          total_attempts: data.total_attempts + attempts,
+          games_played: data.games_played + 1,
+        })
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("Error updating leaderboard:", updateError.message);
+      }
+    } else {
+      const { error: insertError } = await supabase.from("leaderboard").insert([{
+        user_id: userId,
+        username: username,
+        total_attempts: attempts,
+        games_played: 1,
+      }]);
+
+      if (insertError) {
+        console.error("Error inserting into leaderboard:", insertError.message);
+      }
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    const { data: existingGame, error: fetchError } = await supabase
+      .from("games")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error("Error checking existing game play:", fetchError.message);
+    } else if (existingGame) {
+      const { error: updateError } = await supabase
+        .from("games")
+        .update({ date: today, attempts })
+        .eq("id", existingGame.id);
+
+      if (updateError) {
+        console.error("Error updating game play:", updateError.message);
+      }
+    } else {
+      const { error: insertError } = await supabase.from("games").insert([
+        {
+          user_id: userId,
+          date: today,
+          attempts: attempts,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error inserting new game play:", insertError.message);
+      }
+    }
+  };
+
+  const handleLeaderboardClick = () => {
+    if (user && attempts.length > 0 && !gameOver) {
+      setShowLeaderboardPopup(true);
+    } else {
+      window.location.href = "/auth/leaderboard";
+    }
+  };
+
+  const handleConfirmLeaderboard = async () => {
+    if (user) {
+      await updateLeaderboard(user.id, 10);
+    }
+    window.location.href = "/auth/leaderboard";
   };
 
   return (
@@ -192,7 +292,7 @@ export default function ELGAME({ session, players, target }) {
           </div>
         </div>
       )}
-  
+
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
@@ -254,14 +354,13 @@ export default function ELGAME({ session, players, target }) {
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-     
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
-  <span className="text-xl font-bold text-red-600">
-    Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
-  </span>
-</div>
+          <span className="text-xl font-bold text-red-600">
+            Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
+          </span>
+        </div>
       )}
 
       <PlayerInput
