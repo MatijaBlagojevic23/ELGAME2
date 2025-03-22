@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import "../styles/globals.css";
 import { authOptions } from "./api/auth/[...nextauth]/route"; // Adjust the path if needed
 import ELGAME from "../components/ELGAME";
 
