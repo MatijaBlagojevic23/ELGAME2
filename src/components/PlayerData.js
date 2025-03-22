@@ -38,21 +38,21 @@ export async function loadPlayers() {
 
 // 🟢 Function to calculate age dynamically
 function calculateAge(birthdate) {
-    if (!birthdate) return 0; // Return 0 if birthdate is missing
+  if (!birthdate) return 0; // Return 0 if birthdate is missing
 
-    const [day, month, year] = birthdate.split(".").map(Number); // Convert "15.5.2006" to numbers
-    if (!day || !month || !year) return 0; // Handle invalid dates
+  const [day, month, year] = birthdate.split(".").map(Number); // Convert "15.5.2006" to numbers
+  if (!day || !month || !year) return 0; // Handle invalid dates
 
-    const birth = new Date(year, month - 1, day); // Month is 0-indexed in JS
-    const today = new Date();
+  const birth = new Date(year, month - 1, day); // Month is 0-indexed in JS
+  const today = new Date();
 
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    const dayDiff = today.getDate() - birth.getDate();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  const dayDiff = today.getDate() - birth.getDate();
 
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-        age--;
-    }
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
 
-    return age;
+  return age;
 }
