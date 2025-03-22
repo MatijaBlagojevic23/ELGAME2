@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route"; // Adjust the path if needed
+import { authOptions } from "./api/auth/[...nextauth]/route"; // Adjust the path if needed
 import ELGAME from "../components/ELGAME";
 
 export default async function Page() {
