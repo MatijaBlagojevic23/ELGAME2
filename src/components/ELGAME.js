@@ -2,14 +2,13 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import "../styles/globals.css";
 import { supabase } from "../utils/supabase";
 import PlayerInput from "./PlayerInput";
 import PlayerTable from "./PlayerTable";
 import WelcomePopup from "./WelcomePopUp";
 import UserMenu from "./UserMenu";
 
-export default function ELGAME({ session, players, target }) {
+export default function ELGAME({ session, players = [], target }) {
   const [user, setUser] = useState(session?.user || null);
   const [username, setUsername] = useState("");
   const [attempts, setAttempts] = useState([]);
@@ -61,43 +60,47 @@ export default function ELGAME({ session, players, target }) {
 
     const guessToCheck = submittedGuess || guess;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/check-guess`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        guess: guessToCheck,
-        userId: user.id,
-        dateString: new Date().toISOString().slice(0, 10),
-      }),
-    });
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/check-guess`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          guess: guessToCheck,
+          userId: user.id,
+          dateString: new Date().toISOString().slice(0, 10),
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (res.status === 404) {
-      alert("Player not found! Check spelling.");
-      return;
-    }
-
-    const newAttempts = [...attempts, data.player];
-    setAttempts(newAttempts);
-
-    if (data.success) {
-      setShowPopup(true);
-      setGameOver(true);
-    } else if (newAttempts.length >= 10) {
-      setShowExceedPopup(true);
-      setGameOver(true);
-    }
-
-    setGuess("");
-
-    setTimeout(() => {
-      if (attemptsRef.current) {
-        attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
+      if (res.status === 404) {
+        alert("Player not found! Check spelling.");
+        return;
       }
-    }, 100);
+
+      const newAttempts = [...attempts, data.player];
+      setAttempts(newAttempts);
+
+      if (data.success) {
+        setShowPopup(true);
+        setGameOver(true);
+      } else if (newAttempts.length >= 10) {
+        setShowExceedPopup(true);
+        setGameOver(true);
+      }
+
+      setGuess("");
+
+      setTimeout(() => {
+        if (attemptsRef.current) {
+          attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error checking guess:", error);
+    }
   };
 
   const handleLogout = async () => {
@@ -128,86 +131,90 @@ export default function ELGAME({ session, players, target }) {
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("username")
-      .eq("user_id", userId)
-      .maybeSingle();
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("username")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-    if (userError || !userData) {
-      console.error("Error fetching username:", userError?.message || "User not found");
-      return;
-    }
+      if (userError || !userData) {
+        console.error("Error fetching username:", userError?.message || "User not found");
+        return;
+      }
 
-    const username = userData.username || "Unknown";
+      const username = userData.username || "Unknown";
 
-    const { data, error } = await supabase
-      .from("leaderboard")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error fetching leaderboard data:", error.message);
-      return;
-    }
-
-    if (data) {
-      const { error: updateError } = await supabase
+      const { data, error } = await supabase
         .from("leaderboard")
-        .update({
-          total_attempts: data.total_attempts + attempts,
-          games_played: data.games_played + 1,
-        })
-        .eq("user_id", userId);
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      if (updateError) {
-        console.error("Error updating leaderboard:", updateError.message);
+      if (error) {
+        console.error("Error fetching leaderboard data:", error.message);
+        return;
       }
-    } else {
-      const { error: insertError } = await supabase.from("leaderboard").insert([{
-        user_id: userId,
-        username: username,
-        total_attempts: attempts,
-        games_played: 1,
-      }]);
 
-      if (insertError) {
-        console.error("Error inserting into leaderboard:", insertError.message);
-      }
-    }
+      if (data) {
+        const { error: updateError } = await supabase
+          .from("leaderboard")
+          .update({
+            total_attempts: data.total_attempts + attempts,
+            games_played: data.games_played + 1,
+          })
+          .eq("user_id", userId);
 
-    const today = new Date().toISOString().slice(0, 10);
-
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("id")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      const { error: updateError } = await supabase
-        .from("games")
-        .update({ date: today, attempts })
-        .eq("id", existingGame.id);
-
-      if (updateError) {
-        console.error("Error updating game play:", updateError.message);
-      }
-    } else {
-      const { error: insertError } = await supabase.from("games").insert([
-        {
+        if (updateError) {
+          console.error("Error updating leaderboard:", updateError.message);
+        }
+      } else {
+        const { error: insertError } = await supabase.from("leaderboard").insert([{
           user_id: userId,
-          date: today,
-          attempts: attempts,
-        },
-      ]);
+          username: username,
+          total_attempts: attempts,
+          games_played: 1,
+        }]);
 
-      if (insertError) {
-        console.error("Error inserting new game play:", insertError.message);
+        if (insertError) {
+          console.error("Error inserting into leaderboard:", insertError.message);
+        }
       }
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      const { data: existingGame, error: fetchError } = await supabase
+        .from("games")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error("Error checking existing game play:", fetchError.message);
+      } else if (existingGame) {
+        const { error: updateError } = await supabase
+          .from("games")
+          .update({ date: today, attempts })
+          .eq("id", existingGame.id);
+
+        if (updateError) {
+          console.error("Error updating game play:", updateError.message);
+        }
+      } else {
+        const { error: insertError } = await supabase.from("games").insert([
+          {
+            user_id: userId,
+            date: today,
+            attempts: attempts,
+          },
+        ]);
+
+        if (insertError) {
+          console.error("Error inserting new game play:", insertError.message);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating leaderboard:", error);
     }
   };
 
