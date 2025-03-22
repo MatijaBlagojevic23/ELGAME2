@@ -1,147 +1,52 @@
-"use client";
-
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import "../styles/globals.css";
-import { supabase } from "../utils/supabase";
-import { loadPlayers } from "../components/PlayerData";
+import { getSession } from "next-auth/client";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
 import UserMenu from "../components/UserMenu";
 
-export default function ELGAME() {
-  const [user, setUser] = useState(null);
-  const [username, setUsername] = useState("");
-  const [players, setPlayers] = useState([]);
-  const [target, setTarget] = useState(null);
-  const [attempts, setAttempts] = useState([]);
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/load-players`);
+  const players = await res.json();
+
+  const dateString = new Date().toISOString().slice(0, 10);
+  const randomIndex = getRandomIndex(players, dateString);
+  const target = players[randomIndex];
+
+  return {
+    props: {
+      session,
+      players,
+      target,
+    },
+  };
+}
+
+export default function ELGAME({ session, players, target }) {
+  const [user, setUser] = useState(session?.user || null);
   const [guess, setGuess] = useState("");
+  const [attempts, setAttempts] = useState([]);
   const [gameOver, setGameOver] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [showExceedPopup, setShowExceedPopup] = useState(false);
-  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-  const [showPlayedPopup, setShowPlayedPopup] = useState(false);
-  const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
-  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
 
   const attemptsRef = useRef(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
-      if (user) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("username")
-          .eq("user_id", user.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching username:", error.message);
-        } else {
-          setUsername(data?.username || "Unknown");
-        }
-
-        const gameState = await fetchGameState(user.id);
-        if (gameState) {
-          setAttempts(gameState.attempts);
-          setTarget(gameState.target);
-          setGameOver(gameState.gameOver);
-          setTimeLeft(gameState.timeLeft);
-        }
-      }
-    };
-
-    getUser();
-  }, []);
-  
-  const getRandomIndex = (data, dateString) => {
-    const parts = dateString.split('.');
-    const day = parseInt(parts[0]);
-    const month = parseInt(parts[1]);
-    const year = parseInt(parts[2]);
-
-    let seed = year;
-    seed = (seed * 31) + month;
-    seed = (seed * 31) + day;
-    seed = seed ^ (year >> 16);
-    seed = seed * (year % 100 + 1);
-
-    seed = seed ^ (seed >>> 16);
-    seed = seed * 0x85ebca6b;
-    seed = seed ^ (seed >>> 13);
-    seed = seed * 0xc2b2ae35;
-    seed = seed ^ (seed >>> 16);
-
-    return Math.abs(seed % data.length);
-  };
-
-  const loadGame = async () => {
-    const data = await loadPlayers();
-    setPlayers(data);
-
-    const today = new Date();
-    const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
-
-    if (user) {
-      // Use deterministic function for signed-in users
-      const randomIndex = getRandomIndex(data, dateString);
-      setTarget(data[randomIndex]);
-
-      // Check if the user has already played today
-      const { data: gameData, error } = await supabase
-        .from("games")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", today.toISOString().slice(0, 10))
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error checking game data:", error.message);
-      } else if (gameData) {
-        setGameOver(true);
-        setShowPlayedPopup(true);
-      }
-    } else {
-      // Use a completely random selection for unauthenticated users
-      const randomIndex = Math.floor(Math.random() * data.length);
-      setTarget(data[randomIndex]);
+    if (session) {
+      setUser(session.user);
     }
-  };
+  }, [session]);
 
   useEffect(() => {
-    loadGame();
-
-    const hasSeenPopup = localStorage.getItem("hasSeenPopup");
-    if (!hasSeenPopup) {
-      setShowWelcomePopup(true);
-    }
-  }, [user]);
-
-  // Timer useEffect: start a 20-second countdown for every attempt except the first one
-  useEffect(() => {
-    if (user) {
-      const saveInterval = setInterval(() => {
-        saveGameState(user.id, { attempts, target, gameOver, timeLeft });
-      }, 5000); // Save the game state every 5 seconds
-
-      return () => clearInterval(saveInterval);
-    }
-  }, [user, attempts, target, gameOver, timeLeft]);
-
-  useEffect(() => {
-    // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
       setTimeLeft(20);
       const interval = setInterval(() => {
-        setTimeLeft(prevTime => {
+        setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(interval);
-            // Auto-submit the last attempted guess when time expires
             const lastAttempt = attempts[attempts.length - 1];
             if (lastAttempt) {
               checkGuess(lastAttempt.name);
@@ -155,34 +60,39 @@ export default function ELGAME() {
     }
   }, [attempts, gameOver]);
 
-  const handleCloseWelcomePopup = () => {
-    localStorage.setItem("hasSeenPopup", "true");
-    setShowWelcomePopup(false);
-  };
-
   const checkGuess = async (submittedGuess) => {
     if (gameOver) return;
 
     const guessToCheck = submittedGuess || guess;
-    const player = players.find(
-      (p) => p.name.toLowerCase() === guessToCheck.toLowerCase()
-    );
-    if (!player) {
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/check-guess`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guess: guessToCheck,
+        userId: user.id,
+        dateString: new Date().toISOString().slice(0, 10),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 404) {
       alert("Player not found! Check spelling.");
       return;
     }
 
-    const newAttempts = [...attempts, player];
+    const newAttempts = [...attempts, data.player];
     setAttempts(newAttempts);
 
-    if (player.name.toLowerCase() === target.name.toLowerCase()) {
+    if (data.success) {
       setShowPopup(true);
       setGameOver(true);
-      if (user) await updateLeaderboard(user.id, newAttempts.length);
     } else if (newAttempts.length >= 10) {
       setShowExceedPopup(true);
       setGameOver(true);
-      if (user) await updateLeaderboard(user.id, newAttempts.length);
     }
 
     setGuess("");
@@ -192,11 +102,6 @@ export default function ELGAME() {
         attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
       }
     }, 100);
-
-    // Save game state
-    if (user) {
-      await saveGameState(user.id, { attempts: newAttempts, target, gameOver, timeLeft });
-    }
   };
 
   const handleLogout = async () => {
@@ -207,11 +112,7 @@ export default function ELGAME() {
 
     await supabase.auth.signOut();
     setUser(null);
-    setUsername("");
     setGameOver(false);
-    // Reset game state
-    setPlayers([]);
-    setTarget(null);
     setAttempts([]);
     setGuess("");
   };
@@ -222,159 +123,24 @@ export default function ELGAME() {
     }
     await supabase.auth.signOut();
     setUser(null);
-    setUsername("");
     setGameOver(false);
     setShowLogoutPopup(false);
-    // Reset game state
-    setPlayers([]);
-    setTarget(null);
     setAttempts([]);
     setGuess("");
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("username")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/update-leaderboard`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, attempts }),
+    });
 
-    if (userError || !userData) {
-      console.error("Error fetching username:", userError?.message || "User not found");
-      return;
+    if (!res.ok) {
+      console.error("Error updating leaderboard");
     }
-
-    const username = userData.username || "Unknown";
-
-    const { data, error } = await supabase
-      .from("leaderboard")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error fetching leaderboard data:", error.message);
-      return;
-    }
-
-    if (data) {
-      const { error: updateError } = await supabase
-        .from("leaderboard")
-        .update({
-          total_attempts: data.total_attempts + attempts,
-          games_played: data.games_played + 1,
-        })
-        .eq("user_id", userId);
-
-      if (updateError) {
-        console.error("Error updating leaderboard:", updateError.message);
-      }
-    } else {
-      const { error: insertError } = await supabase.from("leaderboard").insert([{
-        user_id: userId,
-        username: username,
-        total_attempts: attempts,
-        games_played: 1,
-      }]);
-
-      if (insertError) {
-        console.error("Error inserting into leaderboard:", insertError.message);
-      }
-    }
-
-    // Log the game play for today to prevent multiple plays
-    const today = new Date().toISOString().slice(0, 10);
-
-    // Check if the user already has an entry in the games table
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      // If the user has played before, update the date and attempts
-      const { error: updateError } = await supabase
-        .from("games")
-        .update({ date: today, attempts })
-        .eq("id", existingGame.id);
-
-      if (updateError) {
-        console.error("Error updating game play:", updateError.message);
-      }
-    } else {
-      // If no existing entry, insert a new row
-      const { error: insertError } = await supabase.from("games").insert([
-        {
-          user_id: userId,
-          date: today,
-          attempts: attempts,
-        },
-      ]);
-
-      if (insertError) {
-        console.error("Error inserting new game play:", insertError.message);
-      }
-    }
-  };
-
-  const saveGameState = async (userId, gameState) => {
-    try {
-      const response = await fetch('/api/gameState', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, gameState }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save game state');
-      }
-
-      const data = await response.json();
-      console.log(data.message); // Log success message
-    } catch (error) {
-      console.error('Error saving game state:', error);
-    }
-  };
-
-  const fetchGameState = async (userId) => {
-    try {
-      const response = await fetch(`/api/gameState?userId=${userId}`, {
-        method: 'GET',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch game state');
-      }
-
-      const data = await response.json();
-      return data.state;
-    } catch (error) {
-      console.error('Error fetching game state:', error);
-      return null;
-    }
-  };
-
-  const handleLeaderboardClick = () => {
-    if (user && attempts.length > 0 && !gameOver) {
-      setShowLeaderboardPopup(true);
-    } else {
-      window.location.href = '/auth/leaderboard';
-    }
-  };
-
-  const handleConfirmLeaderboard = async () => {
-    if (user) {
-      // Update attempts to 10 for registered users
-      await updateLeaderboard(user.id, 10);
-    }
-    window.location.href = '/auth/leaderboard';
   };
 
   return (
