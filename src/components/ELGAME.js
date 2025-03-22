@@ -371,8 +371,20 @@ export default function ELGAME({ session, players = [], target }) {
         </div>
       )}
 
-      <PlayerInput
+       <PlayerInput
         guess={guess}
         setGuess={setGuess}
         checkGuess={checkGuess}
+        players={players}
+        gameOver={gameOver}
+        attempts={attempts}
+        target={target}
+      />
+
+      <div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-4">
+        <PlayerTable attempts={attempts} target={target} />
+      </div>
+    </div>
+  );
+}
        
