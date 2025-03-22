@@ -8,7 +8,7 @@ import PlayerTable from "./PlayerTable";
 import WelcomePopup from "./WelcomePopUp";
 import UserMenu from "./UserMenu";
 
-export default function ELGAME({ session, players = [], target }) {
+export default function ELGAME({ session, players, target }) {
   const [user, setUser] = useState(session?.user || null);
   const [username, setUsername] = useState("");
   const [attempts, setAttempts] = useState([]);
@@ -60,47 +60,43 @@ export default function ELGAME({ session, players = [], target }) {
 
     const guessToCheck = submittedGuess || guess;
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/check-guess`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          guess: guessToCheck,
-          userId: user.id,
-          dateString: new Date().toISOString().slice(0, 10),
-        }),
-      });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/check-guess`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guess: guessToCheck,
+        userId: user.id,
+        dateString: new Date().toISOString().slice(0, 10),
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (res.status === 404) {
-        alert("Player not found! Check spelling.");
-        return;
-      }
-
-      const newAttempts = [...attempts, data.player];
-      setAttempts(newAttempts);
-
-      if (data.success) {
-        setShowPopup(true);
-        setGameOver(true);
-      } else if (newAttempts.length >= 10) {
-        setShowExceedPopup(true);
-        setGameOver(true);
-      }
-
-      setGuess("");
-
-      setTimeout(() => {
-        if (attemptsRef.current) {
-          attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
-        }
-      }, 100);
-    } catch (error) {
-      console.error("Error checking guess:", error);
+    if (res.status === 404) {
+      alert("Player not found! Check spelling.");
+      return;
     }
+
+    const newAttempts = [...attempts, data.player];
+    setAttempts(newAttempts);
+
+    if (data.success) {
+      setShowPopup(true);
+      setGameOver(true);
+    } else if (newAttempts.length >= 10) {
+      setShowExceedPopup(true);
+      setGameOver(true);
+    }
+
+    setGuess("");
+
+    setTimeout(() => {
+      if (attemptsRef.current) {
+        attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
+      }
+    }, 100);
   };
 
   const handleLogout = async () => {
@@ -232,7 +228,6 @@ export default function ELGAME({ session, players = [], target }) {
     }
     window.location.href = "/auth/leaderboard";
   };
-
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
