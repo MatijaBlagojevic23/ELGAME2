@@ -1,13 +1,27 @@
 import { getServerSession } from "next-auth";
-import "../styles/globals.css";
-import { authOptions } from "./api/auth/[...nextauth]/route"; // Adjust the path if needed
+import { authOptions } from "../api/auth/[...nextauth]/route";
 import ELGAME from "../components/ELGAME";
 
 export default async function Page() {
   const session = await getServerSession(authOptions);
+  let players = [];
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/load-players`);
-  const players = await res.json();
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/load-players`);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch players: ${res.statusText}`);
+    }
+
+    players = await res.json();
+  } catch (error) {
+    console.error("Error fetching players:", error);
+  }
+
+  if (!Array.isArray(players)) {
+    console.error("Players is not an array:", players);
+    players = [];
+  }
 
   const dateString = new Date().toISOString().slice(0, 10);
   const randomIndex = getRandomIndex(players, dateString);
