@@ -27,6 +27,11 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
   const attemptsRef = useRef(null);
 
   useEffect(() => {
+    console.log("Game initialized with target player:", target);
+    console.log("Initial game state:", { players, attempts, gameOver });
+  }, [players, target, attempts, gameOver]);
+
+  useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
