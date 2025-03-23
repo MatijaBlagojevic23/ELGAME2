@@ -11,7 +11,6 @@ import UserMenu from "./UserMenu";
 
 export default function ELGAME({ initialUser, initialPlayers, initialTarget, initialAttempts, initialGameOver }) {
   const [user, setUser] = useState(initialUser);
-  const [username, setUsername] = useState("");
   const [players, setPlayers] = useState(initialPlayers);
   const [target, setTarget] = useState(initialTarget);
   const [attempts, setAttempts] = useState(initialAttempts);
@@ -49,13 +48,19 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
 
     getUser();
   }, []);
-  
+
   useEffect(() => {
-    const hasSeenPopup = localStorage.getItem("hasSeenPopup");
-    if (!hasSeenPopup) {
-      setShowWelcomePopup(true);
-    }
-  }, []);
+    const fetchGameState = async () => {
+      if (user) {
+        const res = await fetch(`/api/check-game-state?userId=${user.id}`);
+        const data = await res.json();
+        setAttempts(data.attempts);
+        setGameOver(data.gameOver);
+      }
+    };
+
+    fetchGameState();
+  }, [user]);
 
   useEffect(() => {
     if (attempts.length > 0 && !gameOver) {
@@ -134,7 +139,6 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
 
     await supabase.auth.signOut();
     setUser(null);
-    setUsername("");
     setGameOver(false);
     setPlayers([]);
     setTarget(null);
@@ -148,7 +152,6 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
     }
     await supabase.auth.signOut();
     setUser(null);
-    setUsername("");
     setGameOver(false);
     setShowLogoutPopup(false);
     setPlayers([]);
