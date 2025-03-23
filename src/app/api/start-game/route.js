@@ -4,6 +4,7 @@ import { loadPlayers } from "../../../components/PlayerData";
 export async function POST(request) {
   const { userId } = await request.json();
   const players = await loadPlayers();
+  console.log("Players loaded:", players);
 
   const today = new Date();
   const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
@@ -13,6 +14,7 @@ export async function POST(request) {
   if (userId) {
     const randomIndex = getRandomIndex(players, dateString);
     targetPlayer = players[randomIndex];
+    console.log("Target player chosen:", targetPlayer);
 
     const { data: gameData, error } = await supabase
       .from("games")
@@ -22,13 +24,16 @@ export async function POST(request) {
       .maybeSingle();
 
     if (error) {
+      console.error("Error fetching game data:", error.message);
       return new Response(JSON.stringify({ error: error.message }), { status: 500 });
     } else if (gameData) {
+      console.log("Game already played today:", gameData);
       return new Response(JSON.stringify({ gameOver: true, targetPlayer, attempts: gameData.attempts }), { status: 200 });
     }
   } else {
     const randomIndex = Math.floor(Math.random() * players.length);
     targetPlayer = players[randomIndex];
+    console.log("Target player chosen for unauthenticated user:", targetPlayer);
   }
 
   return new Response(JSON.stringify({ gameOver: false, targetPlayer, players }), { status: 200 });
