@@ -1,5 +1,5 @@
-import { supabase } from "../../../../utils/supabase";
-import { loadPlayers } from "../../../../components/PlayerData";
+import { supabase } from "../../../utils/supabase";
+import { loadPlayers } from "../../../components/PlayerData";
 
 export async function POST(request) {
   const { userId } = await request.json();
