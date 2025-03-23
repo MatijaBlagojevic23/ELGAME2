@@ -30,20 +30,6 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
-
-      if (user) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("username")
-          .eq("user_id", user.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching username:", error.message);
-        } else {
-          setUsername(data?.username || "Unknown");
-        }
-      }
     };
 
     getUser();
