@@ -2,17 +2,21 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import "../styles/globals.css";
 import { supabase } from "../utils/supabase";
 import PlayerInput from "./PlayerInput";
 import PlayerTable from "./PlayerTable";
 import WelcomePopup from "./WelcomePopUp";
 import UserMenu from "./UserMenu";
 
-export default function ELGAME({ session, players, target }) {
-  const [user, setUser] = useState(session?.user || null);
-  const [attempts, setAttempts] = useState([]);
+export default function ELGAME({ initialUser, initialPlayers, initialTarget, initialAttempts, initialGameOver }) {
+  const [user, setUser] = useState(initialUser);
+  const [username, setUsername] = useState("");
+  const [players, setPlayers] = useState(initialPlayers);
+  const [target, setTarget] = useState(initialTarget);
+  const [attempts, setAttempts] = useState(initialAttempts);
   const [guess, setGuess] = useState("");
-  const [gameOver, setGameOver] = useState(false);
+  const [gameOver, setGameOver] = useState(initialGameOver);
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
@@ -24,16 +28,40 @@ export default function ELGAME({ session, players, target }) {
   const attemptsRef = useRef(null);
 
   useEffect(() => {
-    if (session) {
-      setUser(session.user);
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("username")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching username:", error.message);
+        } else {
+          setUsername(data?.username || "Unknown");
+        }
+      }
+    };
+
+    getUser();
+  }, []);
+  
+  useEffect(() => {
+    const hasSeenPopup = localStorage.getItem("hasSeenPopup");
+    if (!hasSeenPopup) {
+      setShowWelcomePopup(true);
     }
-  }, [session]);
+  }, []);
 
   useEffect(() => {
     if (attempts.length > 0 && !gameOver) {
       setTimeLeft(20);
       const interval = setInterval(() => {
-        setTimeLeft((prevTime) => {
+        setTimeLeft(prevTime => {
           if (prevTime <= 1) {
             clearInterval(interval);
             const lastAttempt = attempts[attempts.length - 1];
@@ -59,52 +87,43 @@ export default function ELGAME({ session, players, target }) {
 
     const guessToCheck = submittedGuess || guess;
 
-    if (!user) {
-      console.error("User is not defined");
+    const res = await fetch("/api/make-guess", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user?.id,
+        guess: guessToCheck,
+        targetPlayer: target,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.status === 404) {
+      alert("Player not found! Check spelling.");
       return;
     }
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/api/check-guess`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          guess: guessToCheck,
-          userId: user.id,
-          dateString: new Date().toISOString().slice(0, 10),
-        }),
-      });
+    setAttempts(data.attempts);
 
-      const data = await res.json();
-
-      if (res.status === 404) {
-        alert("Player not found! Check spelling.");
-        return;
-      }
-
-      const newAttempts = [...attempts, data.player];
-      setAttempts(newAttempts);
-
-      if (data.success) {
+    if (data.gameOver) {
+      setGameOver(true);
+      if (data.attempts.some(attempt => attempt.isCorrect)) {
         setShowPopup(true);
-        setGameOver(true);
-      } else if (newAttempts.length >= 10) {
+      } else {
         setShowExceedPopup(true);
-        setGameOver(true);
       }
-
-      setGuess("");
-
-      setTimeout(() => {
-        if (attemptsRef.current) {
-          attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
-        }
-      }, 100);
-    } catch (error) {
-      console.error("Error checking guess:", error);
     }
+
+    setGuess("");
+
+    setTimeout(() => {
+      if (attemptsRef.current) {
+        attemptsRef.current.scrollTop = attemptsRef.current.scrollHeight;
+      }
+    }, 100);
   };
 
   const handleLogout = async () => {
@@ -115,7 +134,10 @@ export default function ELGAME({ session, players, target }) {
 
     await supabase.auth.signOut();
     setUser(null);
+    setUsername("");
     setGameOver(false);
+    setPlayers([]);
+    setTarget(null);
     setAttempts([]);
     setGuess("");
   };
@@ -126,97 +148,96 @@ export default function ELGAME({ session, players, target }) {
     }
     await supabase.auth.signOut();
     setUser(null);
+    setUsername("");
     setGameOver(false);
     setShowLogoutPopup(false);
+    setPlayers([]);
+    setTarget(null);
     setAttempts([]);
     setGuess("");
   };
 
   const updateLeaderboard = async (userId, attempts) => {
-    try {
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("username")
-        .eq("user_id", userId)
-        .maybeSingle();
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-      if (userError || !userData) {
-        console.error("Error fetching username:", userError?.message || "User not found");
-        return;
-      }
+    if (userError || !userData) {
+      console.error("Error fetching username:", userError?.message || "User not found");
+      return;
+    }
 
-      const username = userData.username || "Unknown";
+    const username = userData.username || "Unknown";
 
-      const { data, error } = await supabase
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching leaderboard data:", error.message);
+      return;
+    }
+
+    if (data) {
+      const { error: updateError } = await supabase
         .from("leaderboard")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .update({
+          total_attempts: data.total_attempts + attempts,
+          games_played: data.games_played + 1,
+        })
+        .eq("user_id", userId);
 
-      if (error) {
-        console.error("Error fetching leaderboard data:", error.message);
-        return;
+      if (updateError) {
+        console.error("Error updating leaderboard:", updateError.message);
       }
+    } else {
+      const { error: insertError } = await supabase.from("leaderboard").insert([{
+        user_id: userId,
+        username: username,
+        total_attempts: attempts,
+        games_played: 1,
+      }]);
 
-      if (data) {
-        const { error: updateError } = await supabase
-          .from("leaderboard")
-          .update({
-            total_attempts: data.total_attempts + attempts,
-            games_played: data.games_played + 1,
-          })
-          .eq("user_id", userId);
-
-        if (updateError) {
-          console.error("Error updating leaderboard:", updateError.message);
-        }
-      } else {
-        const { error: insertError } = await supabase.from("leaderboard").insert([{
-          user_id: userId,
-          username: username,
-          total_attempts: attempts,
-          games_played: 1,
-        }]);
-
-        if (insertError) {
-          console.error("Error inserting into leaderboard:", insertError.message);
-        }
+      if (insertError) {
+        console.error("Error inserting into leaderboard:", insertError.message);
       }
+    }
 
-      const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
 
-      const { data: existingGame, error: fetchError } = await supabase
+    const { data: existingGame, error: fetchError } = await supabase
+      .from("games")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error("Error checking existing game play:", fetchError.message);
+    } else if (existingGame) {
+      const { error: updateError } = await supabase
         .from("games")
-        .select("id")
-        .eq("user_id", userId)
-        .maybeSingle();
+        .update({ date: today, attempts })
+        .eq("id", existingGame.id);
 
-      if (fetchError) {
-        console.error("Error checking existing game play:", fetchError.message);
-      } else if (existingGame) {
-        const { error: updateError } = await supabase
-          .from("games")
-          .update({ date: today, attempts })
-          .eq("id", existingGame.id);
-
-        if (updateError) {
-          console.error("Error updating game play:", updateError.message);
-        }
-      } else {
-        const { error: insertError } = await supabase.from("games").insert([
-          {
-            user_id: userId,
-            date: today,
-            attempts: attempts,
-          },
-        ]);
-
-        if (insertError) {
-          console.error("Error inserting new game play:", insertError.message);
-        }
+      if (updateError) {
+        console.error("Error updating game play:", updateError.message);
       }
-    } catch (error) {
-      console.error("Error updating leaderboard:", error);
+    } else {
+      const { error: insertError } = await supabase.from("games").insert([
+        {
+          user_id: userId,
+          date: today,
+          attempts: attempts,
+        },
+      ]);
+
+      if (insertError) {
+        console.error("Error inserting new game play:", insertError.message);
+      }
     }
   };
 
@@ -224,7 +245,7 @@ export default function ELGAME({ session, players, target }) {
     if (user && attempts.length > 0 && !gameOver) {
       setShowLeaderboardPopup(true);
     } else {
-      window.location.href = "/auth/leaderboard";
+      window.location.href = '/auth/leaderboard';
     }
   };
 
@@ -232,8 +253,10 @@ export default function ELGAME({ session, players, target }) {
     if (user) {
       await updateLeaderboard(user.id, 10);
     }
-    window.location.href = "/auth/leaderboard";
+    window.location.href = '/auth/leaderboard';
   };
+
+ 
 
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
