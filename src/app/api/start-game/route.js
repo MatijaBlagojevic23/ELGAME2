@@ -31,7 +31,7 @@ export async function POST(request) {
     targetPlayer = players[randomIndex];
   }
 
-  return new Response(JSON.stringify({ gameOver: false, targetPlayer }), { status: 200 });
+  return new Response(JSON.stringify({ gameOver: false, targetPlayer, players }), { status: 200 });
 }
 
 function getRandomIndex(data, dateString) {
