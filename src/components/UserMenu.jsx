@@ -31,7 +31,7 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative">
       <button
         onClick={toggleMenu}
         className="flex flex-col items-center justify-center w-10 h-10 bg-gray-700 text-white rounded-full"
@@ -42,7 +42,7 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
       </button>
       {isOpen && (
         <div className="fixed inset-0 flex items-end justify-end z-50">
-          <div className="bg-white h-full w-64 shadow-lg transition-transform duration-300 ease-in-out">
+          <div className="bg-white h-full w-64 shadow-lg transition-transform duration-300 ease-in-out" ref={menuRef}>
             <div className="flex justify-end">
               <button
                 onClick={closeMenu}
