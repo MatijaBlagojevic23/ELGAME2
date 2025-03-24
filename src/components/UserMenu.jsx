@@ -1,8 +1,30 @@
 import { useState, useEffect, useRef } from "react";
+import { supabase } from "../utils/supabase";
 
 const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onShowContact }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [username, setUsername] = useState("");
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("username")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching username:", error.message);
+        } else {
+          setUsername(data?.username || "Unknown");
+        }
+      }
+    };
+
+    fetchUsername();
+  }, [user]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -52,11 +74,6 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
               </button>
             </div>
             <div className="py-2">
-              {user && (
-                <div className="block w-full text-left px-4 py-2 text-gray-700">
-                  <span className="font-semibold">Username:</span> {user.username}
-                </div>
-              )}
               <button
                 onClick={() => { closeMenu(); onShowRules(); }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
@@ -92,12 +109,17 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
                 Contact
               </button>
               {user && (
-                <button
-                  onClick={() => { closeMenu(); onLogout(); }}
-                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Logout
-                </button>
+                <>
+                  <div className="block w-full text-left px-4 py-2 text-gray-700">
+                    <span className="font-semibold">Username:</span> {username}
+                  </div>
+                  <button
+                    onClick={() => { closeMenu(); onLogout(); }}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </>
               )}
             </div>
           </div>
