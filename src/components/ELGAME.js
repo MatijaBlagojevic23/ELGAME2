@@ -48,11 +48,36 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
         console.log("Fetched game state:", data);
         setAttempts(data.attempts);
         setGameOver(data.gameOver);
+        setTarget(data.targetPlayer);
+        setPlayers(data.players);
       }
     };
 
     fetchGameState();
   }, [user]);
+
+  const handleTimer = async () => {
+    const res = await fetch("/api/timer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user?.id,
+        attempts: attempts,
+      }),
+    });
+
+    const data = await res.json();
+    setTimeLeft(data.timeLeft);
+    setGameOver(data.gameOver);
+
+    if (data.correct) {
+      setShowPopup(true);
+    } else if (data.gameOver) {
+      setShowExceedPopup(true);
+    }
+  };
 
   useEffect(() => {
     if (attempts.length > 0 && !gameOver) {
@@ -61,10 +86,7 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
             clearInterval(interval);
-            const lastAttempt = attempts[attempts.length - 1];
-            if (lastAttempt) {
-              checkGuess(lastAttempt.name);
-            }
+            handleTimer();
             return 20;
           }
           return prevTime - 1;
