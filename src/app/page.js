@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import "../styles/globals.css";
 import { supabase } from "../utils/supabase";
@@ -28,10 +28,8 @@ export default function ELGAME() {
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(45);
   const [reloadAttempted, setReloadAttempted] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const attemptsRef = useRef(null);
-  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -55,25 +53,7 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-
-  const handleClickOutside = useCallback((event) => {
-    if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-      setIsUserMenuOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isUserMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isUserMenuOpen, handleClickOutside]);
-
+  
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
