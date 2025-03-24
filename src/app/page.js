@@ -26,6 +26,7 @@ export default function ELGAME() {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showReloadPopup, setShowReloadPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
+  const [reloadAttempted, setReloadAttempted] = useState(false);
 
   const attemptsRef = useRef(null);
 
@@ -141,20 +142,29 @@ export default function ELGAME() {
     }
   }, [attempts, gameOver]);
 
-  // Effect for handling page reload
+  // Effect for handling page visibility change and page hide
   useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      if (attempts.length > 0 && !gameOver) {
-         event.preventDefault();
-        event.returnValue = '';
-        showReloadPopupWithTimeout();
-        return '';
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && attempts.length > 0 && !gameOver) {
+        setReloadAttempted(true);
+        showReloadPopupWithTimeout();//milsim da cu ovo izbrisati
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    const handlePageHide = (event) => {
+      if (attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        setReloadAttempted(true);
+        showReloadPopupWithTimeout();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
     };
   }, [attempts, gameOver]);
 
@@ -167,6 +177,9 @@ export default function ELGAME() {
     setShowReloadPopup(true);
     setTimeout(() => {
       setShowReloadPopup(false);
+      if (reloadAttempted) {
+        setReloadAttempted(false);
+      }
     }, 3000);
   };
 
