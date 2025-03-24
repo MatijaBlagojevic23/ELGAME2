@@ -395,7 +395,15 @@ export default function ELGAME() {
     window.location.reload();
   };
 
-    return (
+  const handleReload = () => {
+    setShowReloadPopup(true);
+    setTimeout(() => {
+      setShowReloadPopup(false);
+      window.location.reload();
+    }, 3000);
+  };
+
+  return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
         {!user && (
@@ -428,7 +436,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Great job! You guessed correctly!</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleReload}
               className="bg-blue-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -448,7 +456,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Too many attempts! The target player was {target?.name}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleReload}
               className="bg-red-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -462,7 +470,7 @@ export default function ELGAME() {
           </div>
         </div>
       )}
-  
+
       {showPlayedPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
@@ -510,64 +518,63 @@ export default function ELGAME() {
               >
                 Yes
               </button>
-              <button
-                onClick={() => setShowLogoutPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              <button         onClick={() => setShowLogoutPopup(false)}
+        className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
+      >
+        No
+      </button>
+    </div>
+  </div>
+</div>
+)}
 
-      {showReloadPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Are you sure you want to reload the page? You will lose your data.</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={handleConfirmReload}
-                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowReloadPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="w-full flex justify-center mb-4">
-        <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
-      </div>
-
-      {attempts.length > 0 && !gameOver && (
-        <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
-          <span className="text-xl font-bold text-red-600">
-            Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
-          </span>
-        </div>
-      )}
-
-      <PlayerInput
-        guess={guess}
-        setGuess={setGuess}
-        checkGuess={checkGuess}
-        players={players}
-        gameOver={gameOver}
-        attempts={attempts}
-        target={target}
-      />
-
-      <div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-4">
-        <PlayerTable attempts={attempts} target={target} />
+{showReloadPopup && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white p-6 rounded-md shadow-lg text-center">
+      <p className="text-lg font-bold mb-4">Are you sure you want to reload the page? You will lose your data.</p>
+      <div className="flex justify-center gap-4 mt-4">
+        <button
+          onClick={handleConfirmReload}
+          className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => setShowReloadPopup(false)}
+          className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
+        >
+          No
+        </button>
       </div>
     </div>
-  );
+  </div>
+)}
+
+<div className="w-full flex justify-center mb-4">
+  <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
+</div>
+
+{attempts.length > 0 && !gameOver && (
+  <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
+    <span className="text-xl font-bold text-red-600">
+      Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
+    </span>
+  </div>
+)}
+
+<PlayerInput
+  guess={guess}
+  setGuess={setGuess}
+  checkGuess={checkGuess}
+  players={players}
+  gameOver={gameOver}
+  attempts={attempts}
+  target={target}
+/>
+
+<div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-4">
+  <PlayerTable attempts={attempts} target={target} />
+</div>
+</div>
+);
 }
