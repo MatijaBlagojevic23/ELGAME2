@@ -30,6 +30,7 @@ export default function ELGAME() {
   const [reloadAttempted, setReloadAttempted] = useState(false);
 
   const attemptsRef = useRef(null);
+   const userMenuRef = useRef(null);
 
   useEffect(() => {
     const getUser = async () => {
