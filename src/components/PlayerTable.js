@@ -30,9 +30,9 @@ export default function PlayerTable({ attempts, target }) {
       const diff = Math.abs(player[key] - target[key]);
       if (diff === 0) {
         if (player.team === target.team && player.number === target.number && player.name !== target.name) {
-          return "bg-yellow-300"; // Yellow background for this special case
+          return "bg-yellow-300";
         }
-        return "bg-green-500"; // Green background if the number matches
+        return "bg-green-500";
       }
       if (diff <= 2) return "bg-yellow-300";
       return "bg-red-500";
@@ -41,165 +41,62 @@ export default function PlayerTable({ attempts, target }) {
   };
 
   return (
-    <div className="mt-2 w-full max-w-7xl mx-auto overflow-x-auto">
-      {/* PC Header Row (7 columns including Name) */}
-      <div className="hidden lg:grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-1 font-bold text-center p-2 bg-gray-800 text-white shadow-md text-[10px] sm:text-[11px] md:text-[12px]">
-        <div className="min-w-0 px-1 py-1">Name</div>
-        <div className="min-w-0 px-1 py-1">Team</div>
-        <div className="min-w-0 px-1 py-1">Country</div>
-        <div className="min-w-0 px-1 py-1">Position</div>
-        <div className="min-w-0 px-1 py-1">Height</div>
-        <div className="min-w-0 px-1 py-1">Age</div>
-        <div className="min-w-0 px-1 py-1">#</div>
+    <div className="mt-4 w-full max-w-7xl mx-auto overflow-x-auto">
+      {/* PC Header Row */}
+      <div className="hidden lg:grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-1 font-bold text-center p-3 bg-gray-900 text-white shadow-lg rounded-lg text-sm">
+        <div>Name</div>
+        <div>Team</div>
+        <div>Country</div>
+        <div>Position</div>
+        <div>Height</div>
+        <div>Age</div>
+        <div>#</div>
       </div>
 
-      {/* Mobile Header Row (6 columns, no Name) */}
-      <div className="lg:hidden grid grid-cols-6 gap-1 font-bold text-center p-2 bg-gray-800 text-white shadow-md text-[8px]">
-        <div className="min-w-0 px-1 py-1">Team</div>
-        <div className="min-w-0 px-1 py-1">Country</div>
-        <div className="min-w-0 px-1 py-1">Position</div>
-        <div className="min-w-0 px-1 py-1">Height</div>
-        <div className="min-w-0 px-1 py-1">Age</div>
-        <div className="min-w-0 px-1 py-1">#</div>
+      {/* Mobile Header Row */}
+      <div className="lg:hidden grid grid-cols-6 gap-1 font-bold text-center p-2 bg-gray-900 text-white shadow-lg rounded-lg text-xs">
+        <div>Team</div>
+        <div>Country</div>
+        <div>Position</div>
+        <div>Height</div>
+        <div>Age</div>
+        <div>#</div>
       </div>
 
       {attempts.map((player, index) => (
         <motion.div
           key={index}
-          className="mt-1 shadow-md bg-gray-100 border"
+          className="mt-2 shadow-lg bg-gray-100 border rounded-lg overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          {/* Mobile Version: Two-Line Stacked Layout */}
-          <div className="lg:hidden flex flex-col text-center">
-            {/* Top Line: Player Name with PC color logic */}
-            <div
-              className={`font-semibold py-1 px-2 overflow-hidden text-ellipsis whitespace-nowrap ${
-                player.name === target.name
-                  ? "bg-green-500 text-black"
-                  : "bg-white text-black"
-              }`}
-            >
-              {player.name}
-            </div>
-            {/* Bottom Line: Other Details in 6 equal boxes */}
-            <div className="flex justify-between gap-0.5 px-2 py-1">
-              {/* Team Box */}
-              <div
-                className={`border flex items-center justify-center w-[16.6%] ${getBackgroundColor(
-                  player,
-                  target,
-                  "team"
-                )}`}
-              >
-                <img
-                  src={`/logo/${player.team}.png`}
-                  alt={player.countryClub}
-                  className="w-4 h-4 object-contain"
-                />
-              </div>
-              {/* Country Box */}
-              <div
-                className={`border flex items-center justify-center w-[16.6%] ${
-                  player.country === target.country
-                    ? "bg-green-500 text-black"
-                    : "bg-red-500 text-black"
-                }`}
-              >
-                <div className="text-[0.6rem] truncate whitespace-nowrap">
-                  {player.country}
+          {/* Mobile Version */}
+          <div className="lg:hidden flex flex-col text-center border border-gray-300 rounded-lg overflow-hidden">
+            <div className={`font-semibold py-2 px-3 text-sm ${player.name === target.name ? "bg-green-500 text-black" : "bg-gray-200 text-black"}`}>{player.name}</div>
+            <div className="grid grid-cols-6 gap-1 p-2">
+              {['team', 'country', 'position', 'height', 'age', 'number'].map((key) => (
+                <div key={key} className={`border flex items-center justify-center p-2 rounded-md ${getBackgroundColor(player, target, key)}`}>
+                  {key === "team" ? (
+                    <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-6 h-6 object-contain" />
+                  ) : (
+                    <span className="text-xs font-medium">{player[key]} {getHint(player, target, key)}</span>
+                  )}
                 </div>
-              </div>
-              {/* Position Box */}
-              <div
-                className={`border flex items-center justify-center w-[16.6%] ${
-                  player.position === target.position
-                    ? "bg-green-500 text-black"
-                    : "bg-red-500 text-black"
-                }`}
-              >
-                <div className="text-[0.6rem] truncate whitespace-nowrap">
-                  {player.position}
-                </div>
-              </div>
-              {/* Height Box */}
-              <div
-                className={`border flex items-center justify-center w-[16.6%] ${getBackgroundColor(
-                  player,
-                  target,
-                  "height"
-                )}`}
-              >
-                <div className="text-[0.6rem] truncate whitespace-nowrap">
-                  {player.height}cm{" "}
-                  <span className="text-[0.5rem]">
-                    {getHint(player, target, "height")}
-                  </span>
-                </div>
-              </div>
-              {/* Age Box */}
-              <div
-                className={`border flex items-center justify-center w-[16.6%] ${getBackgroundColor(
-                  player,
-                  target,
-                  "age"
-                )}`}
-              >
-                <div className="text-[0.6rem] truncate whitespace-nowrap">
-                  {player.age}{" "}
-                  <span className="text-[0.5rem]">
-                    {getHint(player, target, "age")}
-                  </span>
-                </div>
-              </div>
-              {/* Number Box */}
-              <div
-                className={`border flex items-center justify-center w-[16.6%] ${getBackgroundColor(
-                  player,
-                  target,
-                  "number"
-                )}`}
-              >
-                <div className="text-[0.6rem] truncate whitespace-nowrap">
-                  #{player.number}{" "}
-                  <span className="text-[0.5rem]">
-                    {getHint(player, target, "number")}
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* PC Version: Table Row Layout */}
-          <div className="hidden lg:grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center text-center p-1 border bg-gray-100 text-[0.75rem]">
-            {/* Name */}
-            <div className={`px-1 py-1 border ${player.name === target.name ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center font-semibold overflow-hidden text-ellipsis whitespace-nowrap`}>
-              {player.name}
+          {/* PC Version */}
+          <div className="hidden lg:grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr_1fr] items-center text-center p-2 border bg-white shadow-md rounded-lg text-sm">
+            <div className={`px-3 py-2 font-semibold border rounded-md ${player.name === target.name ? "bg-green-500 text-black" : "bg-gray-200 text-black"}`}>{player.name}</div>
+            <div className={`px-3 py-2 border rounded-md ${getBackgroundColor(player, target, "team")}`}>
+              <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-6 h-6 object-contain" />
             </div>
-            {/* Team */}
-            <div className={`px-1 py-1 border ${getBackgroundColor(player, target, "team")} flex items-center justify-center`}>
-              <img src={`/logo/${player.team}.png`} alt={player.countryClub} className="w-5 h-5 object-contain" />
-            </div>
-            {/* Country */}
-            <div className={`px-1 py-1 border ${player.country === target.country ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
-              {player.country}
-            </div>
-            {/* Position */}
-            <div className={`px-1 py-1 border ${player.position === target.position ? 'bg-green-500 text-black' : 'bg-red-500 text-black'} flex items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap`}>
-              {player.position}
-            </div>
-            {/* Height */}
-            <div className={`px-1 py-1 border ${getBackgroundColor(player, target, "height")} flex items-center justify-center font-semibold`}>
-              {player.height} cm {getHint(player, target, "height")}
-            </div>
-            {/* Age */}
-            <div className={`px-1 py-1 border ${getBackgroundColor(player, target, "age")} flex items-center justify-center font-semibold`}>
-              {player.age} {getHint(player, target, "age")}
-            </div>
-            {/* Number */}
-            <div className={`px-1 py-1 border ${getBackgroundColor(player, target, "number")} flex items-center justify-center font-semibold`}>
-              #{player.number} {getHint(player, target, "number")}
-            </div>
+            {['country', 'position', 'height', 'age', 'number'].map((key) => (
+              <div key={key} className={`px-3 py-2 border rounded-md ${getBackgroundColor(player, target, key)}`}>
+                <span className="font-medium">{player[key]} {getHint(player, target, key)}</span>
+              </div>
+            ))}
           </div>
         </motion.div>
       ))}
