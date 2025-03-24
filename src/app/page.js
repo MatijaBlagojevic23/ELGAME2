@@ -25,7 +25,7 @@ export default function ELGAME() {
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showReloadPopup, setShowReloadPopup] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(20);
+  const [timeLeft, setTimeLeft] = useState(45);
   const [reloadAttempted, setReloadAttempted] = useState(false);
 
   const attemptsRef = useRef(null);
@@ -99,9 +99,6 @@ export default function ELGAME() {
       } else if (gameData) {
         setGameOver(true);
         setShowPlayedPopup(true);
-      } else {
-        // Update leaderboard and games with maximum attempts at the beginning
-        await updateLeaderboard(user.id, 10);
       }
     } else {
       // Use a completely random selection for unauthenticated users
@@ -119,11 +116,11 @@ export default function ELGAME() {
     }
   }, [user]);
 
-  // Timer useEffect: start a 20-second countdown for every attempt except the first one
+  // Timer useEffect: start a 45-second countdown for every attempt except the first one
   useEffect(() => {
     // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
-      setTimeLeft(20);
+      setTimeLeft(45);
       const interval = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
@@ -133,7 +130,7 @@ export default function ELGAME() {
             if (lastAttempt) {
               checkGuess(lastAttempt.name);
             }
-            return 20;
+            return 45;
           }
           return prevTime - 1;
         });
@@ -149,7 +146,6 @@ export default function ELGAME() {
         event.preventDefault();
         event.returnValue = '';
         setReloadAttempted(true);
-        showReloadPopupWithTimeout();
         return '';
       }
     };
@@ -164,16 +160,14 @@ export default function ELGAME() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden" && attempts.length > 0 && !gameOver) {
-        setReloadAttempted(true);
-        showReloadPopupWithTimeout();
+        window.location.reload();
       }
     };
 
     const handlePageHide = (event) => {
       if (attempts.length > 0 && !gameOver) {
         event.preventDefault();
-        setReloadAttempted(true);
-        showReloadPopupWithTimeout();
+        window.location.reload();
       }
     };
 
@@ -191,16 +185,6 @@ export default function ELGAME() {
     setShowWelcomePopup(false);
   };
 
-  const showReloadPopupWithTimeout = () => {
-    setShowReloadPopup(true);
-    setTimeout(() => {
-      setShowReloadPopup(false);
-      if (reloadAttempted) {
-        setReloadAttempted(false);
-      }
-    }, 3000);
-  };
-
   const checkGuess = async (submittedGuess) => {
     if (gameOver) return;
 
@@ -215,6 +199,10 @@ export default function ELGAME() {
 
     const newAttempts = [...attempts, player];
     setAttempts(newAttempts);
+
+    if (newAttempts.length === 1 && user) {
+      await updateLeaderboard(user.id, 10);
+    }
 
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
       setShowPopup(true);
@@ -432,17 +420,6 @@ export default function ELGAME() {
     window.location.reload();
   };
 
-  const handleCustomReload = () => {
-    setShowReloadPopup(true);
-    setTimeout(() => {
-      if (reloadAttempted) {
-        window.location.reload();
-      } else {
-        setShowReloadPopup(false);
-      }
-    }, 3000);
-  };
-
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
@@ -476,7 +453,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Great job! You guessed correctly!</p>
             <button
-              onClick={handleCustomReload}
+              onClick={handleConfirmReload}
               className="bg-blue-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -496,7 +473,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Too many attempts! The target player was {target?.name}</p>
             <button
-              onClick={handleCustomReload}
+              onClick={handleConfirmReload}
               className="bg-red-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -525,7 +502,7 @@ export default function ELGAME() {
         </div>
       )}
 
-            {showLeaderboardPopup && (
+      {showLeaderboardPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to go to the leaderboard? You will lose your data.</p>
@@ -547,7 +524,7 @@ export default function ELGAME() {
         </div>
       )}
 
-      {showLogoutPopup && (
+            {showLogoutPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
