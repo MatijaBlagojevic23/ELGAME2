@@ -111,12 +111,11 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
               {user && (
                 <>
                   <button
-                onClick={() => { closeMenu(); onShowTerms(); }}
-                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-              >
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-default"
+                  >
                     {username}
-              </button>
-                    
+                  </button>
+                  <button
                     onClick={() => { closeMenu(); onLogout(); }}
                     className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
