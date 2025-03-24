@@ -166,7 +166,7 @@ export default function ELGAME() {
 
     const handlePageHide = (event) => {
       if (user && attempts.length > 0 && !gameOver) {
-        event.preventDefault();
+        
         window.location.reload();
       }
     };
