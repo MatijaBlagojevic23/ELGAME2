@@ -269,7 +269,7 @@ export default function ELGAME() {
         user_id: userId,
         username: username,
         total_attempts: initialUpdate ? 10 : attempts,
-        games_played: initialUpdate ? 0 : 1,
+        games_played:  1,
       }]);
 
       if (insertError) {
