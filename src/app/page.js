@@ -147,7 +147,7 @@ export default function ELGAME() {
     const handleBeforeUnload = (event) => {
       if (attempts.length > 0 && !gameOver) {
         event.preventDefault();
-        
+        event.returnValue = '';
         setReloadAttempted(true);
         showReloadPopupWithTimeout();
         return '';
@@ -432,6 +432,17 @@ export default function ELGAME() {
     window.location.reload();
   };
 
+  const handleCustomReload = () => {
+    setShowReloadPopup(true);
+    setTimeout(() => {
+      if (reloadAttempted) {
+        window.location.reload();
+      } else {
+        setShowReloadPopup(false);
+      }
+    }, 3000);
+  };
+
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
@@ -465,7 +476,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Great job! You guessed correctly!</p>
             <button
-              onClick={handleConfirmReload}
+              onClick={handleCustomReload}
               className="bg-blue-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -485,7 +496,7 @@ export default function ELGAME() {
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Too many attempts! The target player was {target?.name}</p>
             <button
-              onClick={handleConfirmReload}
+              onClick={handleCustomReload}
               className="bg-red-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
             >
               Play Again
@@ -514,7 +525,7 @@ export default function ELGAME() {
         </div>
       )}
 
-      {showLeaderboardPopup && (
+            {showLeaderboardPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to go to the leaderboard? You will lose your data.</p>
@@ -536,7 +547,7 @@ export default function ELGAME() {
         </div>
       )}
 
-           {showLogoutPopup && (
+      {showLogoutPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
