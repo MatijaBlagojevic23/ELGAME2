@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import "../styles/globals.css";
 import { supabase } from "../utils/supabase";
@@ -25,10 +25,13 @@ export default function ELGAME() {
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showReloadPopup, setShowReloadPopup] = useState(false);
+  const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(45);
   const [reloadAttempted, setReloadAttempted] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const attemptsRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -52,7 +55,25 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-  
+
+  const handleClickOutside = useCallback((event) => {
+    if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+      setIsUserMenuOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isUserMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isUserMenuOpen, handleClickOutside]);
+
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
@@ -99,6 +120,9 @@ export default function ELGAME() {
       } else if (gameData) {
         setGameOver(true);
         setShowPlayedPopup(true);
+      } else {
+        // Show warning popup for logged-in users who haven't played yet
+        setShowWarningPopup(true);
       }
     } else {
       // Use a completely random selection for unauthenticated users
@@ -116,7 +140,7 @@ export default function ELGAME() {
     }
   }, [user]);
 
-
+  // Timer useEffect: start a 45-second countdown for every attempt except the first one
   useEffect(() => {
     // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
@@ -166,7 +190,6 @@ export default function ELGAME() {
 
     const handlePageHide = (event) => {
       if (user && attempts.length > 0 && !gameOver) {
-        
         window.location.reload();
       }
     };
@@ -419,7 +442,11 @@ export default function ELGAME() {
   const handleConfirmReload = () => {
     window.location.reload();
   };
-  
+
+  const handleCloseWarningPopup = () => {
+    setShowWarningPopup(false);
+  };
+
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
@@ -431,6 +458,7 @@ export default function ELGAME() {
           </Link>
         )}
         <UserMenu
+          ref={userMenuRef}
           user={user}
           onLogout={handleLogout}
           onShowRules={() => setShowWelcomePopup(true)}
@@ -447,6 +475,21 @@ export default function ELGAME() {
       </div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
+
+      {showWarningPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg text-center">
+            <p className="text-lg font-bold mb-4">Important Information</p>
+            <p className="mb-4">Please be aware that every refresh, closing the tab, or changing the tab will cause you to lose your progress. You will earn the maximum 10 points as if you haven't played today.</p>
+            <button
+              onClick={handleCloseWarningPopup}
+              className="bg-blue-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
+            >
+              I Understand
+            </button>
+          </div>
+        </div>
+      )}
 
       {showPopup && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
@@ -481,7 +524,7 @@ export default function ELGAME() {
             <button
               onClick={() => setShowExceedPopup(false)}
               className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
+           >
               Close
             </button>
           </div>
@@ -524,7 +567,7 @@ export default function ELGAME() {
         </div>
       )}
 
-            {showLogoutPopup && (
+      {showLogoutPopup && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
