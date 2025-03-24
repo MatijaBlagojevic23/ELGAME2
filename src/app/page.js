@@ -181,11 +181,11 @@ export default function ELGAME() {
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
       setShowPopup(true);
       setGameOver(true);
-      if (user) await updateLeaderboard(user.id, newAttempts.length);
+      if (user) await refreshLeaderboard(user.id, newAttempts.length);
     } else if (newAttempts.length >= 10) {
       setShowExceedPopup(true);
       setGameOver(true);
-      if (user) await updateLeaderboard(user.id, newAttempts.length);
+      // No need to update the leaderboard here since it was already updated with max attempts
     }
 
     setGuess("");
@@ -311,6 +311,69 @@ export default function ELGAME() {
 
       if (insertError) {
         console.error("Error inserting new game play:", insertError.message);
+      }
+    }
+  };
+
+  const refreshLeaderboard = async (userId, actualAttempts) => {
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (userError || !userData) {
+      console.error("Error fetching username:", userError?.message || "User not found");
+      return;
+    }
+
+    const username = userData.username || "Unknown";
+
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching leaderboard data:", error.message);
+      return;
+    }
+
+    if (data) {
+      const { error: updateError } = await supabase
+        .from("leaderboard")
+        .update({
+          total_attempts: data.total_attempts - 10 + actualAttempts,
+        })
+        .eq("user_id", userId);
+
+      if (updateError) {
+        console.error("Error refreshing leaderboard:", updateError.message);
+      }
+    }
+
+    // Update the games table with the actual number of attempts
+    const today = new Date().toISOString().slice(0, 10);
+
+    const { data: existingGame, error: fetchError } = await supabase
+      .from("games")
+      .select("id")  // Fetch only the ID to minimize data transfer
+      .eq("user_id", userId)
+      .eq("date", today)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error("Error checking existing game play:", fetchError.message);
+    } else if (existingGame) {
+      // If the user has played today, update the attempts
+      const { error: updateError } = await supabase
+        .from("games")
+        .update({ attempts: actualAttempts })
+        .eq("id", existingGame.id);
+
+      if (updateError) {
+        console.error("Error updating game play:", updateError.message);
       }
     }
   };
@@ -448,8 +511,7 @@ export default function ELGAME() {
         </div>
       )}
 
-      {showLogoutPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
             <div className="flex justify-center gap-4 mt-4">
@@ -492,19 +554,17 @@ export default function ELGAME() {
         </div>
       )}
 
-      
-
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-     
+
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
-  <span className="text-xl font-bold text-red-600">
-    Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
-  </span>
-</div>
+          <span className="text-xl font-bold text-red-600">
+            Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
+          </span>
+        </div>
       )}
 
       <PlayerInput
