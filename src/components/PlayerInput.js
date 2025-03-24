@@ -100,18 +100,18 @@ const PlayerInput = ({
           disabled={gameOver}
         />
         <button
-          onClick={() => checkGuess()}
-          disabled={gameOver}
-          className="bg-gradient-to-r from-orange-500 to-orange-700 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
-        >
-          Submit
-        </button>
-        <button
-          onClick={() => window.location.reload()}
-          className="bg-gradient-to-r from-green-500 to-green-700 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
-        >
-          Play Again
-        </button>
+  onClick={() => checkGuess()}
+  disabled={gameOver}
+  className="bg-orange-600 text-white px-6 py-3 rounded-sm shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+>
+  Submit
+</button>
+<button
+  onClick={() => window.location.reload()}
+  className="bg-green-600 text-white px-6 py-3 rounded-sm shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+>
+  Play Again
+</button>
       </div>
 
       {isDropdownOpen && (
