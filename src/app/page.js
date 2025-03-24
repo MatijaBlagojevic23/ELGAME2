@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import "../styles/globals.css";
@@ -8,25 +10,105 @@ import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
 import UserMenu from "../components/UserMenu";
 
-export default function ELGAME({ initialUser, initialPlayers, initialTarget, initialGameData }) {
-  const [user, setUser] = useState(initialUser);
-  const [username, setUsername] = useState(initialUser?.username || "");
-  const [players, setPlayers] = useState(initialPlayers);
-  const [target, setTarget] = useState(initialTarget);
-  const [attempts, setAttempts] = useState(initialGameData?.attempts || []);
+export default function ELGAME() {
+  const [user, setUser] = useState(null);
+  const [username, setUsername] = useState("");
+  const [players, setPlayers] = useState([]);
+  const [target, setTarget] = useState(null);
+  const [attempts, setAttempts] = useState([]);
   const [guess, setGuess] = useState("");
-  const [gameOver, setGameOver] = useState(!!initialGameData);
+  const [gameOver, setGameOver] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [showExceedPopup, setShowExceedPopup] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [showReloadPopup, setShowReloadPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
 
   const attemptsRef = useRef(null);
 
   useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("username")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching username:", error.message);
+        } else {
+          setUsername(data?.username || "Unknown");
+        }
+      }
+    };
+
+    getUser();
+  }, []);
+  
+  const getRandomIndex = (data, dateString) => {
+    const parts = dateString.split('.');
+    const day = parseInt(parts[0]);
+    const month = parseInt(parts[1]);
+    const year = parseInt(parts[2]);
+
+    let seed = year;
+    seed = (seed * 31) + month;
+    seed = (seed * 31) + day;
+    seed = seed ^ (year >> 16);
+    seed = seed * (year % 100 + 1);
+
+    seed = seed ^ (seed >>> 16);
+    seed = seed * 0x85ebca6b;
+    seed = seed ^ (seed >>> 13);
+    seed = seed * 0xc2b2ae35;
+    seed = seed ^ (seed >>> 16);
+
+    return Math.abs(seed % data.length);
+  };
+
+  const loadGame = async () => {
+    const data = await loadPlayers();
+    setPlayers(data);
+
+    const today = new Date();
+    const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
+
+    if (user) {
+      // Use deterministic function for signed-in users
+      const randomIndex = getRandomIndex(data, dateString);
+      setTarget(data[randomIndex]);
+
+      // Check if the user has already played today
+      const { data: gameData, error } = await supabase
+        .from("games")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", today.toISOString().slice(0, 10))
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking game data:", error.message);
+      } else if (gameData) {
+        setGameOver(true);
+        setShowPlayedPopup(true);
+      }
+    } else {
+      // Use a completely random selection for unauthenticated users
+      const randomIndex = Math.floor(Math.random() * data.length);
+      setTarget(data[randomIndex]);
+    }
+  };
+
+  useEffect(() => {
+    loadGame();
+
     const hasSeenPopup = localStorage.getItem("hasSeenPopup");
     if (!hasSeenPopup) {
       setShowWelcomePopup(true);
@@ -54,6 +136,23 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
       }, 1000);
       return () => clearInterval(interval);
     }
+  }, [attempts, gameOver]);
+
+  // Effect for handling page reload
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = '';
+        setShowReloadPopup(true);
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [attempts, gameOver]);
 
   const handleCloseWelcomePopup = () => {
@@ -232,6 +331,19 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
     window.location.href = '/auth/leaderboard';
   };
 
+  const handleConfirmReload = () => {
+    if (user) {
+      // Update attempts to 10 for registered users
+      updateLeaderboard(user.id, 10).then(() => {
+        setShowReloadPopup(false);
+        window.location.reload();
+      });
+    } else {
+      setShowReloadPopup(false);
+      window.location.reload();
+    }
+  };
+  
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
@@ -386,86 +498,4 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
       </div>
     </div>
   );
-}
-
-export async function getServerSideProps(context) {
-  const { data: { user } } = await supabase.auth.getUser();
-  let initialUser = null;
-  let initialPlayers = [];
-  let initialTarget = null;
-  let initialGameData = null;
-
-  const loadGameData = async () => {
-    const data = await loadPlayers();
-    initialPlayers = data;
-
-    const today = new Date();
-    const dateString = `${today.getUTCDate()}.${today.getUTCMonth() + 1}.${today.getUTCFullYear()}`;
-
-    if (user) {
-      initialUser = user;
-
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("username")
-        .eq("user_id", user.id)
-        .single();
-
-      if (userError) {
-        console.error("Error fetching username:", userError.message);
-      } else {
-        initialUser.username = userData.username || "Unknown";
-      }
-
-      const getRandomIndex = (data, dateString) => {
-        const parts = dateString.split('.');
-        const day = parseInt(parts[0]);
-        const month = parseInt(parts[1]);
-        const year = parseInt(parts[2]);
-
-        let seed = year;
-        seed = (seed * 31) + month;
-        seed = (seed * 31) + day;
-        seed = seed ^ (year >> 16);
-        seed = seed * (year % 100 + 1);
-
-        seed = seed ^ (seed >>> 16);
-        seed = seed * 0x85ebca6b;
-        seed = seed ^ (seed >>> 13);
-        seed = seed * 0xc2b2ae35;
-        seed = seed ^ (seed >>> 16);
-
-        return Math.abs(seed % data.length);
-      };
-      const randomIndex = getRandomIndex(data, dateString);
-      initialTarget = data[randomIndex];
-
-      const { data: gameData, error: gameError } = await supabase
-        .from("games")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", today.toISOString().slice(0, 10))
-        .maybeSingle();
-
-      if (gameError) {
-        console.error("Error checking game data:", gameError.message);
-      } else if (gameData) {
-        initialGameData = gameData;
-      }
-    } else {
-      const randomIndex = Math.floor(Math.random() * data.length);
-      initialTarget = data[randomIndex];
-    }
-  };
-
-  await loadGameData();
-
-  return {
-    props: {
-      initialUser,
-      initialPlayers,
-      initialTarget,
-      initialGameData,
-    },
-  };
 }
