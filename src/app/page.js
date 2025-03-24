@@ -145,7 +145,8 @@ export default function ELGAME() {
   useEffect(() => {
     const handleBeforeUnload = (event) => {
       if (attempts.length > 0 && !gameOver) {
-       
+         event.preventDefault();
+        event.returnValue = '';
         showReloadPopupWithTimeout();
         return '';
       }
