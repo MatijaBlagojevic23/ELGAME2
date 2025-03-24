@@ -102,13 +102,13 @@ const PlayerInput = ({
         <button
   onClick={() => checkGuess()}
   disabled={gameOver}
-  className="bg-orange-600 text-white px-6 py-3 rounded-sm shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+  className="bg-orange-600 text-white px-6 py-3 rounded text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
 >
   Submit
 </button>
 <button
   onClick={() => window.location.reload()}
-  className="bg-green-600 text-white px-6 py-3 rounded-sm shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+  className="bg-green-600 text-white px-6 py-3 rounded text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
 >
   Play Again
 </button>
