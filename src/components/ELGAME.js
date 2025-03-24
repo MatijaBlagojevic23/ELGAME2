@@ -45,6 +45,7 @@ export default function ELGAME({ initialUser, initialPlayers, initialTarget, ini
       if (user) {
         const res = await fetch(`/api/check-game-state?userId=${user.id}`);
         const data = await res.json();
+        console.log("Fetched game state:", data);
         setAttempts(data.attempts);
         setGameOver(data.gameOver);
       }
