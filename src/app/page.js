@@ -142,7 +142,7 @@ export default function ELGAME() {
   // Effect for handling page reload
   useEffect(() => {
     const handleBeforeUnload = (event) => {
-      if (attempts.length > 0 && !gameOver) {
+      if (user && attempts.length > 0 && !gameOver) {
         event.preventDefault();
         event.returnValue = '';
         setReloadAttempted(true);
@@ -154,18 +154,18 @@ export default function ELGAME() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [attempts, gameOver]);
+  }, [user, attempts, gameOver]);
 
   // Effect for handling page visibility change and page hide
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden" && attempts.length > 0 && !gameOver) {
+      if (user && document.visibilityState === "hidden" && attempts.length > 0 && !gameOver) {
         window.location.reload();
       }
     };
 
     const handlePageHide = (event) => {
-      if (attempts.length > 0 && !gameOver) {
+      if (user && attempts.length > 0 && !gameOver) {
         event.preventDefault();
         window.location.reload();
       }
@@ -178,7 +178,7 @@ export default function ELGAME() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
     };
-  }, [attempts, gameOver]);
+  }, [user, attempts, gameOver]);
 
   const handleCloseWelcomePopup = () => {
     localStorage.setItem("hasSeenPopup", "true");
@@ -419,7 +419,7 @@ export default function ELGAME() {
   const handleConfirmReload = () => {
     window.location.reload();
   };
-
+  
   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
