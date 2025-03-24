@@ -52,6 +52,11 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
               </button>
             </div>
             <div className="py-2">
+              {user && (
+                <div className="block w-full text-left px-4 py-2 text-gray-700">
+                  <span className="font-semibold">Username:</span> {user.username}
+                </div>
+              )}
               <button
                 onClick={() => { closeMenu(); onShowRules(); }}
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
