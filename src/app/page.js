@@ -116,7 +116,7 @@ export default function ELGAME() {
     }
   }, [user]);
 
-  // Timer useEffect: start a 45-second countdown for every attempt except the first one
+
   useEffect(() => {
     // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
