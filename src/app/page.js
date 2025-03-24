@@ -142,12 +142,30 @@ export default function ELGAME() {
     }
   }, [attempts, gameOver]);
 
+  // Effect for handling page reload
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = '';
+        setReloadAttempted(true);
+        showReloadPopupWithTimeout();
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [attempts, gameOver]);
+
   // Effect for handling page visibility change and page hide
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden" && attempts.length > 0 && !gameOver) {
         setReloadAttempted(true);
-        showReloadPopupWithTimeout();//milsim da cu ovo izbrisati
+        showReloadPopupWithTimeout();
       }
     };
 
