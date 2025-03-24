@@ -90,7 +90,7 @@ const PlayerInput = ({
                     attempt.name.toLowerCase() === target?.name.toLowerCase()
                 )
                 ? `You guessed it in ${attempts.length} attempts!`
-                : `The correct player was ${target?.name || "unknown"}.`
+                : `You have already played today`
               : guess
           }
           onChange={handleChange}
