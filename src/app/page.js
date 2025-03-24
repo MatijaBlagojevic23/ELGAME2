@@ -407,7 +407,7 @@ export default function ELGAME() {
     }
   };
 
-  return (
+    return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
         {!user && (
@@ -510,9 +510,9 @@ export default function ELGAME() {
           </div>
         </div>
       )}
-  {showLogout && (
-  
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+
+      {showLogoutPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-lg text-center">
             <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
             <div className="flex justify-center gap-4 mt-4">
@@ -558,7 +558,6 @@ export default function ELGAME() {
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
