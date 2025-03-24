@@ -427,7 +427,7 @@ export default function ELGAME() {
     setShowWarningPopup(false);
   };
 
-  return (
+   return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
         {!user && (
@@ -437,12 +437,16 @@ export default function ELGAME() {
             </a>
           </Link>
         )}
-        <UserMenu
-          ref={userMenuRef}
-          user={user}
-          onLogout={handleLogout}
-          onShowRules={() => setShowWelcomePopup(true)}
-        />
+        <div ref={userMenuRef}>
+          <UserMenu
+            user={user}
+            onLogout={handleLogout}
+            onShowRules={() => setShowWelcomePopup(true)}
+            onShowPrivacy={() => {}}
+            onShowTerms={() => {}}
+            onShowContact={() => {}}
+          />
+        </div>
       </div>
 
       <div className="absolute top-4 left-4">
@@ -465,7 +469,7 @@ export default function ELGAME() {
               onClick={handleCloseWarningPopup}
               className="bg-blue-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
             >
-              Understand
+              I Understand
             </button>
           </div>
         </div>
@@ -504,7 +508,7 @@ export default function ELGAME() {
             <button
               onClick={() => setShowExceedPopup(false)}
               className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-           >
+            >
               Close
             </button>
           </div>
