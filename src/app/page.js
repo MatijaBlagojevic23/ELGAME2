@@ -8,6 +8,13 @@ import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
+import WarningPopup from "../components/WarningPopup";
+import GameOverPopup from "../components/GameOverPopup";
+import ExceedAttemptsPopup from "../components/ExceedAttemptsPopup";
+import AlreadyPlayedPopup from "../components/AlreadyPlayedPopup";
+import LeaderboardPopup from "../components/LeaderboardPopup";
+import LogoutPopup from "../components/LogoutPopup";
+import ReloadPopup from "../components/ReloadPopup";
 import UserMenu from "../components/UserMenu";
 
 export default function ELGAME() {
@@ -30,7 +37,7 @@ export default function ELGAME() {
   const [reloadAttempted, setReloadAttempted] = useState(false);
 
   const attemptsRef = useRef(null);
-   const userMenuRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -54,7 +61,7 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-  
+
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
@@ -428,7 +435,7 @@ export default function ELGAME() {
     setShowWarningPopup(false);
   };
 
-   return (
+  return (
     <div className="relative flex flex-col items-center gap-4 p-4 bg-gray-50 min-h-screen">
       <div className="absolute top-4 right-4 flex flex-col-reverse sm:flex-row items-center gap-4">
         {!user && (
@@ -460,141 +467,13 @@ export default function ELGAME() {
       </div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
-
-      {showWarningPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Important Information</p>
-            <p className="mb-4">Please be aware that every refresh, closing the tab, or changing the tab will cause you to lose your progress. You will earn the maximum 10 points as if you haven't played today.</p>
-            <button
-              onClick={handleCloseWarningPopup}
-              className="bg-blue-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-            >
-              Understand
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Great job! You guessed correctly!</p>
-            <button
-              onClick={handleConfirmReload}
-              className="bg-blue-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
-            >
-              Play Again
-            </button>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showExceedPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Too many attempts! The target player was {target?.name}</p>
-            <button
-              onClick={handleConfirmReload}
-              className="bg-red-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
-            >
-              Play Again
-            </button>
-            <button
-              onClick={() => setShowExceedPopup(false)}
-              className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-  
-      {showPlayedPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">You have already played today.</p>
-            <button
-              onClick={() => setShowPlayedPopup(false)}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showLeaderboardPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Are you sure you want to go to the leaderboard? You will lose your data.</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={handleConfirmLeaderboard}
-                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowLeaderboardPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLogoutPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={confirmLogout}
-                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowLogoutPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showReloadPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Are you sure you want to reload the page? You will lose your data.</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={handleConfirmReload}
-                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowReloadPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showWarningPopup && <WarningPopup onClose={handleCloseWarningPopup} />}
+      {showPopup && <GameOverPopup onReload={handleConfirmReload} onClose={() => setShowPopup(false)} />}
+      {showExceedPopup && <ExceedAttemptsPopup target={target} onReload={handleConfirmReload} onClose={() => setShowExceedPopup(false)} />}
+      {showPlayedPopup && <AlreadyPlayedPopup onClose={() => setShowPlayedPopup(false)} />}
+      {showLeaderboardPopup && <LeaderboardPopup onConfirm={handleConfirmLeaderboard} onClose={() => setShowLeaderboardPopup(false)} />}
+      {showLogoutPopup && <LogoutPopup onConfirm={confirmLogout} onClose={() => setShowLogoutPopup(false)} />}
+      {showReloadPopup && <ReloadPopup onConfirm={handleConfirmReload} onClose={() => setShowReloadPopup(false)} />}
 
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
