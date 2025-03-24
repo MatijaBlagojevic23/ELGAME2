@@ -100,7 +100,7 @@ export default function ELGAME() {
         setShowPlayedPopup(true);
       } else {
         // Update leaderboard and games with maximum attempts at the beginning
-        await updateLeaderboard(user.id, 10, true);
+        await updateLeaderboard(user.id, 10);
       }
     } else {
       // Use a completely random selection for unauthenticated users
@@ -227,7 +227,7 @@ export default function ELGAME() {
     setGuess("");
   };
 
-  const updateLeaderboard = async (userId, attempts, initialUpdate = false) => {
+  const updateLeaderboard = async (userId, attempts) => {
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("username")
@@ -256,8 +256,8 @@ export default function ELGAME() {
       const { error: updateError } = await supabase
         .from("leaderboard")
         .update({
-          total_attempts: initialUpdate ? data.total_attempts + 10 : data.total_attempts + attempts,
-          games_played: initialUpdate ? data.games_played : data.games_played + 1,
+          total_attempts: data.total_attempts + 10,
+          games_played: data.games_played + 1,
         })
         .eq("user_id", userId);
 
@@ -268,8 +268,8 @@ export default function ELGAME() {
       const { error: insertError } = await supabase.from("leaderboard").insert([{
         user_id: userId,
         username: username,
-        total_attempts: initialUpdate ? 10 : attempts,
-        games_played:  1,
+        total_attempts: 10,
+        games_played: 1,
       }]);
 
       if (insertError) {
@@ -293,7 +293,7 @@ export default function ELGAME() {
       // If the user has played before, update the date and attempts
       const { error: updateError } = await supabase
         .from("games")
-        .update({ date: today, attempts: initialUpdate ? 10 : attempts })
+        .update({ date: today, attempts: 10 })
         .eq("id", existingGame.id);
 
       if (updateError) {
@@ -305,7 +305,7 @@ export default function ELGAME() {
         {
           user_id: userId,
           date: today,
-          attempts: initialUpdate ? 10 : attempts,
+          attempts: 10,
         },
       ]);
 
@@ -386,25 +386,13 @@ export default function ELGAME() {
     }
   };
 
-  const handleConfirmLeaderboard = async () => {
-    if (user) {
-      // Update attempts to 10 for registered users
-      await updateLeaderboard(user.id, 10);
-    }
+  const handleConfirmLeaderboard = () => {
     window.location.href = '/auth/leaderboard';
   };
 
   const handleConfirmReload = () => {
-    if (user) {
-      // Update attempts to 10 for registered users
-      updateLeaderboard(user.id, 10).then(() => {
-        setShowReloadPopup(false);
-        window.location.reload();
-      });
-    } else {
-      setShowReloadPopup(false);
-      window.location.reload();
-    }
+    setShowReloadPopup(false);
+    window.location.reload();
   };
 
     return (
