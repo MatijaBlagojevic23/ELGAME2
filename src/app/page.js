@@ -470,7 +470,7 @@ export default function ELGAME() {
               onClick={handleCloseWarningPopup}
               className="bg-blue-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
             >
-              I Understand
+              Understand
             </button>
           </div>
         </div>
