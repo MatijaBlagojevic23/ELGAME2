@@ -56,11 +56,11 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
     <div className="relative">
       <button
         onClick={toggleMenu}
-        className="flex flex-col items-center justify-center w-10 h-10 text-white"
+        className="flex flex-col items-center justify-center w-10 h-10 text-black"
       >
-        <div className="w-8 h-0.8 bg-black my-1"></div>
-        <div className="w-8 h-0.8 bg-black my-1"></div>
-        <div className="w-8 h-0.8 bg-black my-1"></div>
+        <div className="w-8 h-1 bg-black my-1"></div>
+        <div className="w-8 h-1 bg-black my-1"></div>
+        <div className="w-8 h-1 bg-black my-1"></div>
       </button>
       {isOpen && (
         <div className="fixed inset-0 flex items-end justify-end z-50">
