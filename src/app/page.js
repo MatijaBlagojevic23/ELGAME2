@@ -468,8 +468,8 @@ export default function ELGAME() {
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
       {showWarningPopup && <WarningPopup onClose={handleCloseWarningPopup} />}
-      {showPopup && <GameOverPopup onReload={handleConfirmReload} onClose={() => setShowPopup(false)} />}
-      {showExceedPopup && <ExceedAttemptsPopup target={target} onReload={handleConfirmReload} onClose={() => setShowExceedPopup(false)} />}
+      {showPopup && <GameOverPopup user={user} onReload={handleConfirmReload} onClose={() => setShowPopup(false)} />}
+      {showExceedPopup && <ExceedAttemptsPopup user={user} target={target} onReload={handleConfirmReload} onClose={() => setShowExceedPopup(false)} />}
       {showPlayedPopup && <AlreadyPlayedPopup onClose={() => setShowPlayedPopup(false)} />}
       {showLeaderboardPopup && <LeaderboardPopup onConfirm={handleConfirmLeaderboard} onClose={() => setShowLeaderboardPopup(false)} />}
       {showLogoutPopup && <LogoutPopup onConfirm={confirmLogout} onClose={() => setShowLogoutPopup(false)} />}
