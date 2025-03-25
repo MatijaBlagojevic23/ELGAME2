@@ -212,13 +212,13 @@ export default function ELGAME() {
     setAttempts(newAttempts);
 
     if (newAttempts.length === 1 && user) {
-      await updateLeaderboard(user.id, 10);
+      updateLeaderboard(user.id, 10);
     }
 
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
       setShowPopup(true);
       setGameOver(true);
-      if (user) await refreshLeaderboard(user.id, newAttempts.length);
+      if (user) refreshLeaderboard(user.id, newAttempts.length);
     } else if (newAttempts.length >= 10) {
       setShowExceedPopup(true);
       setGameOver(true);
