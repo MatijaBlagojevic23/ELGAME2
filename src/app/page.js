@@ -323,8 +323,9 @@ export default function ELGAME() {
     // Check if the user already has an entry in the games table
     const { data: existingGame, error: fetchError } = await supabase
       .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
+      .select("*")  // Fetch all columns to minimize data transfer 
       .eq("user_id", userId)
+      .eq("date", today)
       .maybeSingle();
 
     if (fetchError) {
@@ -334,7 +335,8 @@ export default function ELGAME() {
       const { error: updateError } = await supabase
         .from("games")
         .update({ date: today, attempts: 10, player: chosenPlayer }) // Include the player column
-        .eq("id", existingGame.id);
+        .eq("user_id", userId)
+        .eq("date", today);
 
       if (updateError) {
         console.error("Error updating game play:", updateError.message);
@@ -399,7 +401,7 @@ export default function ELGAME() {
 
     const { data: existingGame, error: fetchError } = await supabase
       .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
+      .select("*")  // Fetch all columns to minimize data transfer
       .eq("user_id", userId)
       .eq("date", today)
       .maybeSingle();
@@ -411,7 +413,8 @@ export default function ELGAME() {
       const { error: updateError } = await supabase
         .from("games")
         .update({ attempts: actualAttempts, player: chosenPlayer }) // Include the player column
-        .eq("id", existingGame.id);
+        .eq("user_id", userId)
+        .eq("date", today);
 
       if (updateError) {
         console.error("Error updating game play:", updateError.message);
