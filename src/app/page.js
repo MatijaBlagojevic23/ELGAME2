@@ -35,9 +35,11 @@ export default function ELGAME() {
   const [showWarningPopup, setShowWarningPopup] = useState(false);
   const [timeLeft, setTimeLeft] = useState(45);
   const [reloadAttempted, setReloadAttempted] = useState(false);
+  const [chosenPlayer, setChosenPlayer] = useState("");
+
   const attemptsRef = useRef(null);
   const userMenuRef = useRef(null);
-  
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -92,7 +94,9 @@ export default function ELGAME() {
     if (user) {
       // Use deterministic function for signed-in users
       const randomIndex = getRandomIndex(data, dateString);
-      setTarget(data[randomIndex]);
+      const targetPlayer = data[randomIndex];
+      setTarget(targetPlayer);
+      setChosenPlayer(targetPlayer.name); // Set the chosen player
 
       // Check if the user has already played today
       const { data: gameData, error } = await supabase
@@ -329,7 +333,7 @@ export default function ELGAME() {
       // If the user has played before, update the date and attempts
       const { error: updateError } = await supabase
         .from("games")
-        .update({ date: today, attempts: 10 })
+        .update({ date: today, attempts: 10, player: chosenPlayer }) // Include the player column
         .eq("id", existingGame.id);
 
       if (updateError) {
@@ -342,6 +346,7 @@ export default function ELGAME() {
           user_id: userId,
           date: today,
           attempts: 10,
+          player: chosenPlayer, // Include the player column
         },
       ]);
 
@@ -405,7 +410,7 @@ export default function ELGAME() {
       // If the user has played today, update the attempts
       const { error: updateError } = await supabase
         .from("games")
-        .update({ attempts: actualAttempts })
+        .update({ attempts: actualAttempts, player: chosenPlayer }) // Include the player column
         .eq("id", existingGame.id);
 
       if (updateError) {
