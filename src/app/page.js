@@ -33,7 +33,7 @@ export default function ELGAME() {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showReloadPopup, setShowReloadPopup] = useState(false);
   const [showWarningPopup, setShowWarningPopup] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(45);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [reloadAttempted, setReloadAttempted] = useState(false);
   const [chosenPlayer, setChosenPlayer] = useState("");
 
@@ -131,11 +131,11 @@ export default function ELGAME() {
     }
   }, [user]);
 
-  // Timer useEffect: start a 45-second countdown for every attempt except the first one
+  // Timer useEffect: start a 30-second countdown for every attempt except the first one
   useEffect(() => {
     // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
-      setTimeLeft(45);
+      setTimeLeft(30);
       const interval = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
@@ -145,7 +145,7 @@ export default function ELGAME() {
             if (lastAttempt) {
               checkGuess(lastAttempt.name);
             }
-            return 45;
+            return 30;
           }
           return prevTime - 1;
         });
@@ -474,7 +474,7 @@ export default function ELGAME() {
       {showWarningPopup && <WarningPopup onClose={handleCloseWarningPopup} />}
       {showPopup && <GameOverPopup user={user} onReload={handleConfirmReload} onClose={() => setShowPopup(false)} />}
       {showExceedPopup && <ExceedAttemptsPopup user={user} target={target} onReload={handleConfirmReload} onClose={() => setShowExceedPopup(false)} />}
-      {showPlayedPopup && <AlreadyPlayedPopup onClose={() => setShowPlayedPopup(false)} />}
+      {showPlayedPopup && <AlreadyPlayedPopup userId={user?.id} onClose={() => setShowPlayedPopup(false)} />}
       {showLeaderboardPopup && <LeaderboardPopup onConfirm={handleConfirmLeaderboard} onClose={() => setShowLeaderboardPopup(false)} />}
       {showLogoutPopup && <LogoutPopup onConfirm={confirmLogout} onClose={() => setShowLogoutPopup(false)} />}
       {showReloadPopup && <ReloadPopup onConfirm={handleConfirmReload} onClose={() => setShowReloadPopup(false)} />}
