@@ -40,7 +40,7 @@ const PlayerInput = ({
   }, [attempts]);
 
   const handleChange = (e) => {
-    console.log("handleChange called with value:", e.target.value);
+    //console.log("handleChange called with value:", e.target.value);
     setGuess(e.target.value);
   };
 
