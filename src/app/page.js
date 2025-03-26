@@ -320,41 +320,16 @@ export default function ELGAME() {
     // Log the game play for today to prevent multiple plays
     const today = new Date().toISOString().slice(0, 10);
 
-    // Check if the user already has an entry in the games table
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("*")  // Fetch all columns to minimize data transfer 
-      .eq("user_id", userId)
-      .eq("date", today)
-      .maybeSingle();
+    // Upsert the entry in the games table
+    const { error: upsertError } = await supabase.from("games").upsert({
+      user_id: userId,
+      date: today,
+      attempts: 10,
+      player: chosenPlayer, // Include the player column
+    });
 
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      // If the user has played before, update the date and attempts
-      const { error: updateError } = await supabase
-        .from("games")
-        .update({ date: today, attempts: 10, player: chosenPlayer }) // Include the player column
-        .eq("user_id", userId)
-        .eq("date", today);
-
-      if (updateError) {
-        console.error("Error updating game play:", updateError.message);
-      }
-    } else {
-      // If no existing entry, insert a new row
-      const { error: insertError } = await supabase.from("games").insert([
-        {
-          user_id: userId,
-          date: today,
-          attempts: 10,
-          player: chosenPlayer, // Include the player column
-        },
-      ]);
-
-      if (insertError) {
-        console.error("Error inserting new game play:", insertError.message);
-      }
+    if (upsertError) {
+      console.error("Error upserting game play:", upsertError.message);
     }
   };
 
@@ -399,26 +374,15 @@ export default function ELGAME() {
     // Update the games table with the actual number of attempts
     const today = new Date().toISOString().slice(0, 10);
 
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("*")  // Fetch all columns to minimize data transfer
-      .eq("user_id", userId)
-      .eq("date", today)
-      .maybeSingle();
+    const { error: upsertError } = await supabase.from("games").upsert({
+      user_id: userId,
+      date: today,
+      attempts: actualAttempts,
+      player: chosenPlayer, // Include the player column
+    });
 
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      // If the user has played today, update the attempts
-      const { error: updateError } = await supabase
-        .from("games")
-        .update({ attempts: actualAttempts, player: chosenPlayer }) // Include the player column
-        .eq("user_id", userId)
-        .eq("date", today);
-
-      if (updateError) {
-        console.error("Error updating game play:", updateError.message);
-      }
+    if (upsertError) {
+      console.error("Error upserting game play:", upsertError.message);
     }
   };
 
