@@ -22,7 +22,7 @@ const PlayerInput = ({
       if (userId) {
         const { data, error } = await supabase
           .from("games")
-          .select("player")
+          .select("player, attempts")
           .eq("user_id", userId)
           .order("date", { ascending: false })
           .limit(1)
@@ -104,11 +104,19 @@ const PlayerInput = ({
 
   const renderInputValue = () => {
     if (gameOver) {
-      const attemptsText = `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}`;
       if (userId) {
-        return `${attemptsText}! The player was ${playerFromDB}.`;
+        if (attempts.some((attempt) => attempt.name.toLowerCase() === target?.name.toLowerCase())) {
+          return `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}! The player was ${playerFromDB}.`;
+        } else {
+          return `The correct player was ${target?.name || "unknown"}.`;
+        }
+      } else {
+        if (attempts.some((attempt) => attempt.name.toLowerCase() === target?.name.toLowerCase())) {
+          return `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}.`;
+        } else {
+          return `The correct player was ${target?.name || "unknown"}.`;
+        }
       }
-      return attemptsText;
     }
     return guess;
   };
@@ -145,9 +153,7 @@ const PlayerInput = ({
           {suggestions.map((player, index) => (
             <li
               key={player.name}
-              className={`p-2 cursor-pointer hover:bg-gray-200 ${
-                index === highlightedIndex ? "bg-gray-300" : ""
-              }`}
+              className={`p-2 cursor-pointer hover:bg-gray-200 ${index === highlightedIndex ? "bg-gray-300" : ""}`}
               onClick={() => handleSelect(player.name)}
             >
               {player.name}
