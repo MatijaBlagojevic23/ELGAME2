@@ -56,7 +56,7 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
 
   const handleCreateLeague = () => {
     closeMenu();
-    router.push("/create-league");
+    window.location.href = '/auth/create-league';
   };
 
   return (
