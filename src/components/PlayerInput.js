@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { supabase } from "../utils/supabase";
 
 const PlayerInput = ({
   guess,
@@ -8,20 +9,48 @@ const PlayerInput = ({
   gameOver,
   attempts,
   target,
+  userId,
 }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [playerFromDB, setPlayerFromDB] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
+    const fetchPlayerFromDB = async () => {
+      if (userId) {
+        const { data, error } = await supabase
+          .from("games")
+          .select("player, attempts")
+          .eq("user_id", userId)
+          .order("date", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) {
+          console.error("Error fetching player from DB:", error.message);
+        } else {
+          setPlayerFromDB(data?.player || "unknown");
+        }
+      }
+    };
+
+    fetchPlayerFromDB();
+  }, [userId]);
+
+  useEffect(() => {
     if (guess.length >= 2) {
-      const filteredPlayers = players.filter((player) =>
-        player.name.toLowerCase().includes(guess.toLowerCase())
-      );
-      setSuggestions(filteredPlayers);
-      setIsDropdownOpen(filteredPlayers.length > 0);
-      setHighlightedIndex(-1);
+      if (Array.isArray(players)) {
+        const filteredPlayers = players.filter((player) =>
+          player.name.toLowerCase().includes(guess.toLowerCase())
+        );
+        setSuggestions(filteredPlayers);
+        setIsDropdownOpen(filteredPlayers.length > 0);
+        setHighlightedIndex(-1);
+      } else {
+        console.error("Players is not an array:", players);
+      }
     } else {
       setSuggestions([]);
       setIsDropdownOpen(false);
@@ -73,21 +102,31 @@ const PlayerInput = ({
     checkGuess(name);
   };
 
+  const renderInputValue = () => {
+    if (gameOver) {
+      if (userId) {
+        if (attempts.some((attempt) => attempt.name.toLowerCase() === target?.name.toLowerCase())) {
+          return `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}! The player was ${playerFromDB}.`;
+        } else {
+          return `The correct player was ${target?.name || "unknown"}.`;
+        }
+      } else {
+        if (attempts.some((attempt) => attempt.name.toLowerCase() === target?.name.toLowerCase())) {
+          return `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}.`;
+        } else {
+          return `The correct player was ${target?.name || "unknown"}.`;
+        }
+      }
+    }
+    return guess;
+  };
+
   return (
     <div className="relative w-full flex flex-col items-center gap-2" ref={inputRef}>
       <div className="w-full flex items-center gap-2">
         <input
           type="text"
-          value={
-            gameOver
-              ? attempts.some(
-                  (attempt) =>
-                    attempt.name.toLowerCase() === target?.name.toLowerCase()
-                )
-                ? `You guessed it in ${attempts.length} attempts!`
-                : `The correct player was ${target?.name || "unknown"}.`
-              : guess
-          }
+          value={renderInputValue()}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           className="w-full p-2 border rounded-md"
@@ -97,13 +136,13 @@ const PlayerInput = ({
         <button
           onClick={() => checkGuess()}
           disabled={gameOver}
-          className="bg-gradient-to-r from-orange-500 to-orange-700 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+          className="bg-orange-600 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
         >
           Submit
         </button>
         <button
           onClick={() => window.location.reload()}
-          className="bg-gradient-to-r from-green-500 to-green-700 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+          className="bg-green-600 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
         >
           Play Again
         </button>
@@ -114,9 +153,7 @@ const PlayerInput = ({
           {suggestions.map((player, index) => (
             <li
               key={player.name}
-              className={`p-2 cursor-pointer hover:bg-gray-200 ${
-                index === highlightedIndex ? "bg-gray-300" : ""
-              }`}
+              className={`p-2 cursor-pointer hover:bg-gray-200 ${index === highlightedIndex ? "bg-gray-300" : ""}`}
               onClick={() => handleSelect(player.name)}
             >
               {player.name}
