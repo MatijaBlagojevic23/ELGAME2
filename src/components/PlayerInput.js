@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import { supabase } from "../utils/supabase";
 
 const PlayerInput = ({
   guess,
@@ -8,11 +9,35 @@ const PlayerInput = ({
   gameOver,
   attempts,
   target,
+  userId,
 }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [playerFromDB, setPlayerFromDB] = useState("");
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchPlayerFromDB = async () => {
+      if (userId) {
+        const { data, error } = await supabase
+          .from("games")
+          .select("player")
+          .eq("user_id", userId)
+          .order("date", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) {
+          console.error("Error fetching player from DB:", error.message);
+        } else {
+          setPlayerFromDB(data?.player || "unknown");
+        }
+      }
+    };
+
+    fetchPlayerFromDB();
+  }, [userId]);
 
   useEffect(() => {
     if (guess.length >= 2) {
@@ -40,7 +65,6 @@ const PlayerInput = ({
   }, [attempts]);
 
   const handleChange = (e) => {
-    //console.log("handleChange called with value:", e.target.value);
     setGuess(e.target.value);
   };
 
@@ -89,8 +113,8 @@ const PlayerInput = ({
                   (attempt) =>
                     attempt.name.toLowerCase() === target?.name.toLowerCase()
                 )
-                ? `You guessed it in ${attempts.length} attempts!`
-                : `You have already played today`
+                ? `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}! The player was ${playerFromDB}.`
+                : `The correct player was ${target?.name || "unknown"}.`
               : guess
           }
           onChange={handleChange}
@@ -100,18 +124,18 @@ const PlayerInput = ({
           disabled={gameOver}
         />
         <button
-  onClick={() => checkGuess()}
-  disabled={gameOver}
-  className="bg-orange-600 text-white px-6 py-3 rounded text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
->
-  Submit
-</button>
-<button
-  onClick={() => window.location.reload()}
-  className="bg-green-600 text-white px-6 py-3 rounded text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
->
-  Play Again
-</button>
+          onClick={() => checkGuess()}
+          disabled={gameOver}
+          className="bg-orange-600 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+        >
+          Submit
+        </button>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-green-600 text-white px-6 py-3 rounded-md shadow-md transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+        >
+          Play Again
+        </button>
       </div>
 
       {isDropdownOpen && (
