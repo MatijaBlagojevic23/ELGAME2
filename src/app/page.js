@@ -8,6 +8,13 @@ import { loadPlayers } from "../components/PlayerData";
 import PlayerInput from "../components/PlayerInput";
 import PlayerTable from "../components/PlayerTable";
 import WelcomePopup from "../components/WelcomePopUp";
+import WarningPopup from "../components/WarningPopup";
+import GameOverPopup from "../components/GameOverPopup";
+import ExceedAttemptsPopup from "../components/ExceedAttemptsPopup";
+import AlreadyPlayedPopup from "../components/AlreadyPlayedPopup";
+import LeaderboardPopup from "../components/LeaderboardPopup";
+import LogoutPopup from "../components/LogoutPopup";
+import ReloadPopup from "../components/ReloadPopup";
 import UserMenu from "../components/UserMenu";
 
 export default function ELGAME() {
@@ -24,9 +31,14 @@ export default function ELGAME() {
   const [showPlayedPopup, setShowPlayedPopup] = useState(false);
   const [showLeaderboardPopup, setShowLeaderboardPopup] = useState(false);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(20);
+  const [showReloadPopup, setShowReloadPopup] = useState(false);
+  const [showWarningPopup, setShowWarningPopup] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [reloadAttempted, setReloadAttempted] = useState(false);
+  const [chosenPlayer, setChosenPlayer] = useState("");
 
   const attemptsRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -50,7 +62,7 @@ export default function ELGAME() {
 
     getUser();
   }, []);
-  
+
   const getRandomIndex = (data, dateString) => {
     const parts = dateString.split('.');
     const day = parseInt(parts[0]);
@@ -82,7 +94,9 @@ export default function ELGAME() {
     if (user) {
       // Use deterministic function for signed-in users
       const randomIndex = getRandomIndex(data, dateString);
-      setTarget(data[randomIndex]);
+      const targetPlayer = data[randomIndex];
+      setTarget(targetPlayer);
+      setChosenPlayer(targetPlayer.name); // Set the chosen player
 
       // Check if the user has already played today
       const { data: gameData, error } = await supabase
@@ -97,6 +111,9 @@ export default function ELGAME() {
       } else if (gameData) {
         setGameOver(true);
         setShowPlayedPopup(true);
+      } else {
+        // Show warning popup for logged-in users who haven't played yet
+        setShowWarningPopup(true);
       }
     } else {
       // Use a completely random selection for unauthenticated users
@@ -114,11 +131,11 @@ export default function ELGAME() {
     }
   }, [user]);
 
-  // Timer useEffect: start a 20-second countdown for every attempt except the first one
+  // Timer useEffect: start a 30-second countdown for every attempt except the first one
   useEffect(() => {
     // Only start timer if there is at least one attempt and game is not over
     if (attempts.length > 0 && !gameOver) {
-      setTimeLeft(20);
+      setTimeLeft(30);
       const interval = setInterval(() => {
         setTimeLeft(prevTime => {
           if (prevTime <= 1) {
@@ -128,7 +145,7 @@ export default function ELGAME() {
             if (lastAttempt) {
               checkGuess(lastAttempt.name);
             }
-            return 20;
+            return 30;
           }
           return prevTime - 1;
         });
@@ -136,6 +153,46 @@ export default function ELGAME() {
       return () => clearInterval(interval);
     }
   }, [attempts, gameOver]);
+
+  // Effect for handling page reload
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (user && attempts.length > 0 && !gameOver) {
+        event.preventDefault();
+        event.returnValue = '';
+        setReloadAttempted(true);
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [user, attempts, gameOver]);
+
+  // Effect for handling page visibility change and page hide
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (user && document.visibilityState === "hidden" && attempts.length > 0 && !gameOver) {
+        window.location.reload();
+      }
+    };
+
+    const handlePageHide = (event) => {
+      if (user && attempts.length > 0 && !gameOver) {
+        window.location.reload();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [user, attempts, gameOver]);
 
   const handleCloseWelcomePopup = () => {
     localStorage.setItem("hasSeenPopup", "true");
@@ -157,14 +214,18 @@ export default function ELGAME() {
     const newAttempts = [...attempts, player];
     setAttempts(newAttempts);
 
+    if (newAttempts.length === 1 && user) {
+      updateLeaderboard(user.id, 10);
+    }
+
     if (player.name.toLowerCase() === target.name.toLowerCase()) {
       setShowPopup(true);
       setGameOver(true);
-      if (user) await updateLeaderboard(user.id, newAttempts.length);
+      if (user) refreshLeaderboard(user.id, newAttempts.length);
     } else if (newAttempts.length >= 10) {
       setShowExceedPopup(true);
       setGameOver(true);
-      if (user) await updateLeaderboard(user.id, newAttempts.length);
+      // No need to update the leaderboard here since it was already updated with max attempts
     }
 
     setGuess("");
@@ -194,9 +255,6 @@ export default function ELGAME() {
   };
 
   const confirmLogout = async () => {
-    if (user) {
-      await updateLeaderboard(user.id, 10);
-    }
     await supabase.auth.signOut();
     setUser(null);
     setUsername("");
@@ -238,7 +296,7 @@ export default function ELGAME() {
       const { error: updateError } = await supabase
         .from("leaderboard")
         .update({
-          total_attempts: data.total_attempts + attempts,
+          total_attempts: data.total_attempts + 10,
           games_played: data.games_played + 1,
         })
         .eq("user_id", userId);
@@ -250,7 +308,7 @@ export default function ELGAME() {
       const { error: insertError } = await supabase.from("leaderboard").insert([{
         user_id: userId,
         username: username,
-        total_attempts: attempts,
+        total_attempts: 10,
         games_played: 1,
       }]);
 
@@ -262,38 +320,69 @@ export default function ELGAME() {
     // Log the game play for today to prevent multiple plays
     const today = new Date().toISOString().slice(0, 10);
 
-    // Check if the user already has an entry in the games table
-    const { data: existingGame, error: fetchError } = await supabase
-      .from("games")
-      .select("id")  // Fetch only the ID to minimize data transfer
+    // Upsert the entry in the games table
+    const { error: upsertError } = await supabase.from("games").upsert({
+      user_id: userId,
+      date: today,
+      attempts: 10,
+      player: chosenPlayer, // Include the player column
+    });
+
+    if (upsertError) {
+      console.error("Error upserting game play:", upsertError.message);
+    }
+  };
+
+  const refreshLeaderboard = async (userId, actualAttempts) => {
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
       .eq("user_id", userId)
       .maybeSingle();
 
-    if (fetchError) {
-      console.error("Error checking existing game play:", fetchError.message);
-    } else if (existingGame) {
-      // If the user has played before, update the date and attempts
+    if (userError || !userData) {
+      console.error("Error fetching username:", userError?.message || "User not found");
+      return;
+    }
+
+    const username = userData.username || "Unknown";
+
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching leaderboard data:", error.message);
+      return;
+    }
+
+    if (data) {
       const { error: updateError } = await supabase
-        .from("games")
-        .update({ date: today, attempts })
-        .eq("id", existingGame.id);
+        .from("leaderboard")
+        .update({
+          total_attempts: data.total_attempts - 10 + actualAttempts,
+        })
+        .eq("user_id", userId);
 
       if (updateError) {
-        console.error("Error updating game play:", updateError.message);
+        console.error("Error refreshing leaderboard:", updateError.message);
       }
-    } else {
-      // If no existing entry, insert a new row
-      const { error: insertError } = await supabase.from("games").insert([
-        {
-          user_id: userId,
-          date: today,
-          attempts: attempts,
-        },
-      ]);
+    }
 
-      if (insertError) {
-        console.error("Error inserting new game play:", insertError.message);
-      }
+    // Update the games table with the actual number of attempts
+    const today = new Date().toISOString().slice(0, 10);
+
+    const { error: upsertError } = await supabase.from("games").upsert({
+      user_id: userId,
+      date: today,
+      attempts: actualAttempts,
+      player: chosenPlayer, // Include the player column
+    });
+
+    if (upsertError) {
+      console.error("Error upserting game play:", upsertError.message);
     }
   };
 
@@ -305,12 +394,16 @@ export default function ELGAME() {
     }
   };
 
-  const handleConfirmLeaderboard = async () => {
-    if (user) {
-      // Update attempts to 10 for registered users
-      await updateLeaderboard(user.id, 10);
-    }
+  const handleConfirmLeaderboard = () => {
     window.location.href = '/auth/leaderboard';
+  };
+
+  const handleConfirmReload = () => {
+    window.location.reload();
+  };
+
+  const handleCloseWarningPopup = () => {
+    setShowWarningPopup(false);
   };
 
   return (
@@ -323,11 +416,16 @@ export default function ELGAME() {
             </a>
           </Link>
         )}
-        <UserMenu
-          user={user}
-          onLogout={handleLogout}
-          onShowRules={() => setShowWelcomePopup(true)}
-        />
+        <div ref={userMenuRef}>
+          <UserMenu
+            user={user}
+            onLogout={handleLogout}
+            onShowRules={() => setShowWelcomePopup(true)}
+            onShowPrivacy={() => {}}
+            onShowTerms={() => {}}
+            onShowContact={() => {}}
+          />
+        </div>
       </div>
 
       <div className="absolute top-4 left-4">
@@ -340,116 +438,24 @@ export default function ELGAME() {
       </div>
 
       {showWelcomePopup && <WelcomePopup onClose={handleCloseWelcomePopup} />}
-
-      {showPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Great job! You guessed correctly!</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
-            >
-              Play Again
-            </button>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showExceedPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Too many attempts! The target player was {target?.name}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-red-600 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform mb-2"
-            >
-              Play Again
-            </button>
-            <button
-              onClick={() => setShowExceedPopup(false)}
-              className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-  
-      {showPlayedPopup && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">You have already played today. The correct player was {target?.name}</p>
-            <button
-              onClick={() => setShowPlayedPopup(false)}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showLeaderboardPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Are you sure you want to go to the leaderboard? You will lose your data.</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={handleConfirmLeaderboard}
-                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowLeaderboardPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLogoutPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg text-center">
-            <p className="text-lg font-bold mb-4">Are you sure you want to log out? You will lose your data.</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <button
-                onClick={confirmLogout}
-                className="bg-red-500 text-white px-6 py-3 rounded-md hover:scale-105 transition-transform"
-              >
-                Yes
-              </button>
-              <button
-                onClick={() => setShowLogoutPopup(false)}
-                className="bg-gray-500 text-white px-6 py-3 rounded-md shadow-md transition-transform hover:scale-105 hover:bg-gray-600"
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showWarningPopup && <WarningPopup onClose={handleCloseWarningPopup} />}
+      {showPopup && <GameOverPopup user={user} onReload={handleConfirmReload} onClose={() => setShowPopup(false)} />}
+      {showExceedPopup && <ExceedAttemptsPopup user={user} target={target} onReload={handleConfirmReload} onClose={() => setShowExceedPopup(false)} />}
+      {showPlayedPopup && <AlreadyPlayedPopup userId={user?.id} onClose={() => setShowPlayedPopup(false)} />}
+      {showLeaderboardPopup && <LeaderboardPopup onConfirm={handleConfirmLeaderboard} onClose={() => setShowLeaderboardPopup(false)} />}
+      {showLogoutPopup && <LogoutPopup onConfirm={confirmLogout} onClose={() => setShowLogoutPopup(false)} />}
+      {showReloadPopup && <ReloadPopup onConfirm={handleConfirmReload} onClose={() => setShowReloadPopup(false)} />}
 
       <div className="w-full flex justify-center mb-4">
         <img src="/images/logo.png" alt="ELGAME Logo" className="w-1/2 sm:w-[30%] lg:w-[25%] xl:w-[20%] max-w-[300px]" />
       </div>
-     
 
       {attempts.length > 0 && !gameOver && (
         <div className="mb-4 p-2 rounded-md bg-gradient-to-r from-yellow-200 to-yellow-100">
-  <span className="text-xl font-bold text-red-600">
-    Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
-  </span>
-</div>
+          <span className="text-xl font-bold text-red-600">
+            Time Left: <span className="inline-block ml-1 text-2xl font-semibold">{timeLeft}</span> seconds
+          </span>
+        </div>
       )}
 
       <PlayerInput
@@ -460,6 +466,7 @@ export default function ELGAME() {
         gameOver={gameOver}
         attempts={attempts}
         target={target}
+        userId={user?.id}
       />
 
       <div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-4">
