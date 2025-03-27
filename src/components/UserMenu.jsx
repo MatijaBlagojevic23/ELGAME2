@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
 import { supabase } from "../utils/supabase";
 
 const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onShowContact }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [username, setUsername] = useState("");
   const menuRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUsername = async () => {
@@ -52,6 +54,11 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
     };
   }, [isOpen]);
 
+  const handleCreateLeague = () => {
+    closeMenu();
+    router.push("/create-league");
+  };
+
   return (
     <div className="relative">
       <button
@@ -81,9 +88,10 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
                 Rules
               </button>
               <button
-                className="block w-full text-left px-4 py-2 text-gray-700 cursor-not-allowed"
+                onClick={handleCreateLeague}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
-                Create New League <span className="text-sm text-gray-400">(Coming Soon)</span>
+                Create New League
               </button>
               <button
                 className="block w-full text-left px-4 py-2 text-gray-700 cursor-not-allowed"
