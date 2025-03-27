@@ -466,6 +466,7 @@ export default function ELGAME() {
         gameOver={gameOver}
         attempts={attempts}
         target={target}
+        userId={user?.id}
       />
 
       <div ref={attemptsRef} className="w-full overflow-x-auto max-h-64 mt-4">
