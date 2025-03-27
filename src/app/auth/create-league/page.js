@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import "../../../styles/globals.css"; 
 
 export default function CreateLeague() {
   const [leagueName, setLeagueName] = useState("");
