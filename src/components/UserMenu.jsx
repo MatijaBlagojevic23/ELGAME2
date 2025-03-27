@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { supabase } from "../utils/supabase";
 
 const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onShowContact }) => {
@@ -56,7 +56,7 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
 
   const handleCreateLeague = () => {
     closeMenu();
-    router.push("/api/auth/createLeague");
+    router.push("/api/auth/createLeague/pages");
   };
 
   return (
