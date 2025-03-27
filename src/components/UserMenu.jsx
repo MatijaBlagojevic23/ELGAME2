@@ -56,7 +56,7 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
 
   const handleCreateLeague = () => {
     closeMenu();
-    router.push("/create-league");
+    router.push("/api/auth/createLeague");
   };
 
   return (
