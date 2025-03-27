@@ -102,21 +102,23 @@ const PlayerInput = ({
     checkGuess(name);
   };
 
+  const renderInputValue = () => {
+    if (gameOver) {
+      const attemptsText = `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}`;
+      if (userId) {
+        return `${attemptsText}! The player was ${playerFromDB}.`;
+      }
+      return attemptsText;
+    }
+    return guess;
+  };
+
   return (
     <div className="relative w-full flex flex-col items-center gap-2" ref={inputRef}>
       <div className="w-full flex items-center gap-2">
         <input
           type="text"
-          value={
-            gameOver
-              ? attempts.some(
-                  (attempt) =>
-                    attempt.name.toLowerCase() === target?.name.toLowerCase()
-                )
-                ? `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}! The player was ${playerFromDB}.`
-                : `The correct player was ${target?.name || "unknown"}.`
-              : guess
-          }
+          value={renderInputValue()}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           className="w-full p-2 border rounded-md"
