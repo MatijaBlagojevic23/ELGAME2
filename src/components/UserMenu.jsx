@@ -56,7 +56,11 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
 
   const handleCreateLeague = () => {
     closeMenu();
-    window.location.href = '/auth/create-league';
+    if (user) {
+      window.location.href = '/auth/create-league';
+    } else {
+      window.location.href = '/auth/signin';
+    }
   };
 
   return (
@@ -92,6 +96,11 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
                 className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               >
                 Create New League
+              </button>
+               <button
+                className="block w-full text-left px-4 py-2 text-gray-700 cursor-not-allowed"
+              >
+                My leagues <span className="text-sm text-gray-400">(Coming Soon)</span>
               </button>
               <button
                 className="block w-full text-left px-4 py-2 text-gray-700 cursor-not-allowed"
