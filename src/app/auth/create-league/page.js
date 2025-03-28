@@ -1,14 +1,17 @@
 "use client";
 import "../../../styles/globals.css"; 
 import { useState } from "react";
+import { supabase } from "../utils/supabase";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function CreateLeague() {
   const [leagueName, setLeagueName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [duration, setDuration] = useState("7 Days");
+  const [percentage, setPercentage] = useState("100%");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if the start date is valid
@@ -24,11 +27,52 @@ export default function CreateLeague() {
 
     setErrorMessage("");
 
-    // Handle form submission logic here
-    console.log("League Name:", leagueName);
-    console.log("Start Date:", startDate);
-    console.log("Duration:", duration);
-    // Add your API call or other logic here
+    // Calculate the end date
+    let endDate = new Date(startDate);
+    switch (duration) {
+      case "7 Days":
+        endDate.setDate(endDate.getDate() + 7);
+        break;
+      case "1 Month":
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
+      case "3 Months":
+        endDate.setMonth(endDate.getMonth() + 3);
+        break;
+      case "6 Months":
+        endDate.setMonth(endDate.getMonth() + 6);
+        break;
+      case "1 Year":
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        break;
+      default:
+        break;
+    }
+
+    // Generate a unique league ID and invitation code
+    const leagueId = uuidv4();
+    const invitationCode = uuidv4();
+
+    // Insert the league details into the Supabase leagues table
+    const { data, error } = await supabase
+      .from('leagues')
+      .insert({
+        league_id: leagueId,
+        name: leagueName,
+        start_date: startDate,
+        end_date: endDate,
+        participants: 1,
+        percentage: parseInt(percentage),
+        invitation_code: invitationCode,
+        logo: 'default_logo_url' // Change this to the actual logo URL if you have one
+      });
+
+    if (error) {
+      console.error('Error creating league:', error);
+      return;
+    }
+
+    console.log('League created successfully:', data);
   };
 
   return (
@@ -78,6 +122,24 @@ export default function CreateLeague() {
               <option value="3 Months">3 Months</option>
               <option value="6 Months">6 Months</option>
               <option value="1 Year">1 Year</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="percentage" className="block text-sm font-medium text-gray-700 mb-1">
+              Amount of Total Games Played
+            </label>
+            <select
+              id="percentage"
+              value={percentage}
+              onChange={(e) => setPercentage(e.target.value)}
+              className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="100%">100%</option>
+              <option value="90%">90%</option>
+              <option value="80%">80%</option>
+              <option value="70%">70%</option>
+              <option value="60%">60%</option>
             </select>
           </div>
           {errorMessage && (
