@@ -57,7 +57,7 @@ const UserMenu = ({ user, onLogout, onShowRules, onShowPrivacy, onShowTerms, onS
   const handleCreateLeague = () => {
     closeMenu();
     if (user) {
-      window.location.href = '/auth/create-league';
+      window.location.href = `/auth/create-league?user_id=${user.id}&user_email=${user.email}`;
     } else {
       window.location.href = '/auth/signin';
     }
