@@ -10,13 +10,13 @@ export default async (req, res) => {
       const transporter = nodemailer.createTransport({
         service: 'Gmail',
         auth: {
-          user: process.env.EMAIL_USER,
+          user: 'elgameguess@gmail.com',
           pass: process.env.EMAIL_PASSWORD,
         },
       });
 
       const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: 'elgameguess@gmail.com',
         to: user_email,
         subject: 'Invitation to Join League',
         text: `You have been invited to join the league: ${league_name}. Use the invitation code: ${invitation_code}`,
@@ -32,13 +32,14 @@ export default async (req, res) => {
       });
 
       if (createTableError) {
+        console.error('Error creating league table:', createTableError);
         throw new Error(`Error creating league table: ${createTableError.message}`);
       }
 
       res.status(200).json({ message: 'League created successfully' });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: 'Error creating league', error: error.message });
+      console.error('Error creating league and sending email:', error);
+      res.status(500).json({ message: 'Error creating league and sending email', error: error.message });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
