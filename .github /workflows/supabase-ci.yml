@@ -1,0 +1,26 @@
+name: Supabase CI/CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      league_id:
+        description: 'League ID'
+        required: true
+
+jobs:
+  create-league-table:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Create League Table
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          supabase db copy-table --source-table leaderboard --target-table ${{ github.event.inputs.league_id }}
