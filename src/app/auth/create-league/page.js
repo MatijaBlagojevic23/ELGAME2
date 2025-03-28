@@ -73,21 +73,6 @@ export default function CreateLeague() {
 
     console.log('League created successfully:', data);
 
-    // Insert the user into the new league's leaderboard
-    const userId = "user_id"; // Replace with the actual user ID
-    const { error: insertError } = await supabase
-      .from(leagueId)
-      .insert({
-        user_id: userId,
-        total_attempts: 0,
-        games_played: 0
-      });
-
-    if (insertError) {
-      console.error('Error inserting user into leaderboard:', insertError.message);
-      return;
-    }
-
     // Trigger the GitHub Actions workflow
     await triggerWorkflow("user.email", leagueName, invitationCode, leagueId);
   };
