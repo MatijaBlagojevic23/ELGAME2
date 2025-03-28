@@ -106,7 +106,7 @@ const PlayerInput = ({
     if (gameOver) {
       if (userId) {
         if (attempts.some((attempt) => attempt.name.toLowerCase() === target?.name.toLowerCase())) {
-          return `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}! The player was ${playerFromDB}.`;
+          return `You guessed it in ${attempts.length} ${attempts.length === 1 ? "attempt" : "attempts"}!`;
         } else {
           return `The correct player was ${target?.name || "unknown"}.`;
         }
