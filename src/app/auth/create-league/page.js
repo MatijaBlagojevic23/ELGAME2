@@ -1,7 +1,7 @@
 "use client";
 import "../../../styles/globals.css"; 
 import { useState } from "react";
-import { supabase } from "../../../utils/supabase";
+import { supabase } from "../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function CreateLeague() {
@@ -26,6 +26,24 @@ export default function CreateLeague() {
     }
 
     setErrorMessage("");
+
+    // Check if the league name is unique
+    const { data: existingLeague, error: fetchError } = await supabase
+      .from('leagues')
+      .select('name')
+      .eq('name', leagueName)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching league:', fetchError);
+      setErrorMessage('Error checking league name. Please try again.');
+      return;
+    }
+
+    if (existingLeague) {
+      setErrorMessage('League name already exists. Please choose a different name.');
+      return;
+    }
 
     // Calculate the end date
     let endDate = new Date(startDate);
@@ -78,27 +96,31 @@ export default function CreateLeague() {
   };
 
   const triggerWorkflow = async (userEmail, leagueName, invitationCode, leagueId) => {
-    const response = await fetch('https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': `token ${process.env.GITHUB_TOKEN}`,
-      },
-      body: JSON.stringify({
-        ref: 'main',
-        inputs: {
-          user_email: userEmail,
-          league_name: leagueName,
-          invitation_code: invitationCode,
-          league_id: leagueId,
+    try {
+      const response = await fetch('https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+          'Authorization': `token ${process.env.GITHUB_TOKEN}`,
         },
-      }),
-    });
+        body: JSON.stringify({
+          ref: 'main',
+          inputs: {
+            user_email: userEmail,
+            league_name: leagueName,
+            invitation_code: invitationCode,
+            league_id: leagueId,
+          },
+        }),
+      });
 
-    if (response.ok) {
+      if (!response.ok) {
+        throw new Error(`Error triggering workflow: ${response.statusText}`);
+      }
+
       console.log('Workflow triggered successfully');
-    } else {
-      console.error('Error triggering workflow:', response.statusText);
+    } catch (error) {
+      console.error('Error triggering workflow:', error);
     }
   };
 
