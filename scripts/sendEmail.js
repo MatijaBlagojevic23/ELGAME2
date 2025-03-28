@@ -8,13 +8,13 @@ async function sendInvitationEmail() {
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-      user: 'your-email@gmail.com',
+      user: 'elgameguess@gmail.com',
       pass: process.env.EMAIL_PASSWORD,
     },
   });
 
   const mailOptions = {
-    from: 'your-email@gmail.com',
+    from: 'elgameguess@gmail.com',
     to: userEmail,
     subject: 'Your League Invitation Code',
     text: `You have successfully created the league: ${leagueName}\n\nYour invitation code is: ${invitationCode}\n\nShare this code with your friends to invite them to join the league.`,
