@@ -1,6 +1,7 @@
 "use client";
 import "../../../styles/globals.css"; 
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,37 +10,29 @@ export default function CreateLeague() {
   const [startDate, setStartDate] = useState("");
   const [duration, setDuration] = useState("7 Days");
   const [percentage, setPercentage] = useState("100%");
-  const [userEmail, setUserEmail] = useState(""); // Add state for user email
+  const [userEmail, setUserEmail] = useState("");
+  const [userId, setUserId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [userId, setUserId] = useState(""); // Add state for user ID
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
-    // Assuming you have a way to get the current user's ID
-    const fetchUserEmail = async () => {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('email')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user email:', error);
-        setErrorMessage('Error fetching user email. Please try again.');
-      } else {
-        setUserEmail(user.email);
-      }
-    };
-
-    if (userId) {
-      fetchUserEmail();
+    const user_id = searchParams.get("user_id");
+    const user_email = searchParams.get("user_email");
+    if (user_id && user_email) {
+      setUserId(user_id);
+      setUserEmail(user_email);
+    } else {
+      setErrorMessage("User information is missing.");
     }
-  }, [userId]);
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!userEmail) {
-      setErrorMessage('User email is not available.');
+    if (!userEmail || !userId) {
+      setErrorMessage('User information is not available.');
       return;
     }
 
@@ -110,7 +103,8 @@ export default function CreateLeague() {
         end_date: endDate,
         participants: 1,
         percentage: parseInt(percentage),
-        invitation_code: invitationCode
+        invitation_code: invitationCode,
+        user_id: userId // Include user_id in the league details
       });
 
     if (error) {
@@ -157,20 +151,6 @@ export default function CreateLeague() {
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
         <h1 className="text-3xl font-bold mb-6 text-center">Create a New League</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Add an input for user ID */}
-          <div>
-            <label htmlFor="userId" className="block text-sm font-medium text-gray-700 mb-1">
-              User ID
-            </label>
-            <input
-              type="text"
-              id="userId"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
           <div>
             <label htmlFor="leagueName" className="block text-sm font-medium text-gray-700 mb-1">
               League Name
