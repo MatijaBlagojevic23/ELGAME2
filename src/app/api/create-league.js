@@ -27,7 +27,7 @@ export default async (req, res) => {
 
       // Create League Table
       const tableName = league_name.replace(/[^a-zA-Z0-9]/g, '');
-      const { error: createTableError } = await supabase.rpc('create_league_table', {
+      const { data, error: createTableError } = await supabase.rpc('create_league_table', {
         table_name: tableName,
       });
 
