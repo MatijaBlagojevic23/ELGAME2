@@ -1,11 +1,11 @@
 "use client";
 import "../../../styles/globals.css"; 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
 
-export default function CreateLeague() {
+function CreateLeagueComponent() {
   const [leagueName, setLeagueName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [duration, setDuration] = useState("7 Days");
@@ -18,14 +18,28 @@ export default function CreateLeague() {
 
   useEffect(() => {
     const user_id = searchParams.get("user_id");
-    const user_email = searchParams.get("user_email");
-    if (user_id && user_email) {
+    if (user_id) {
       setUserId(user_id);
-      setUserEmail(user_email);
+      fetchUserEmail(user_id);
     } else {
       setErrorMessage("User information is missing.");
     }
   }, [searchParams]);
+
+  const fetchUserEmail = async (user_id) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('email')
+      .eq('user_id', user_id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching user email:', error);
+      setErrorMessage('Error fetching user email. Please try again.');
+    } else {
+      setUserEmail(data.email);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -224,5 +238,13 @@ export default function CreateLeague() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function CreateLeaguePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateLeagueComponent />
+    </Suspense>
   );
 }
