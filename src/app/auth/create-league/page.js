@@ -100,12 +100,15 @@ export default function CreateLeague() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_email: "elgameguess@gmail.com",  // Replace with actual user email
+          user_email: "user.email",  // Replace with actual user email
           league_name: leagueName,
           invitation_code: invitationCode,
           league_id: leagueId,
         }),
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response status text:', response.statusText);
 
       if (response.ok) {
         console.log('League created and email sent successfully');
