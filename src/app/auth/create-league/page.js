@@ -91,37 +91,24 @@ export default function CreateLeague() {
 
     console.log('League created successfully:', data);
 
-    // Trigger the GitHub Actions workflow
-    await triggerWorkflow("user.email", leagueName, invitationCode, leagueId);
-  };
+    // Call the API to send email and create table
+    const response = await fetch('/api/create-league', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_email: "user.email",  // Replace with actual user email
+        league_name: leagueName,
+        invitation_code: invitationCode,
+        league_id: leagueId,
+      }),
+    });
 
-  const triggerWorkflow = async (userEmail, leagueName, invitationCode, leagueId) => {
-    try {
-      const response = await fetch('https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'Authorization': `token ${process.env.TOKEN1}`,
-        },
-        body: JSON.stringify({
-          ref: 'main',
-          inputs: {
-            user_email: userEmail,
-            league_name: leagueName,
-            invitation_code: invitationCode,
-            league_id: leagueId,
-          },
-        }),
-      });
-
-      const responseData = await response.json();
-      if (!response.ok) {
-        throw new Error(`Error triggering workflow: ${response.statusText} - ${JSON.stringify(responseData)}`);
-      }
-
-      console.log('Workflow triggered successfully', responseData);
-    } catch (error) {
-      console.error('Error triggering workflow:', error);
+    if (response.ok) {
+      console.log('League created and email sent successfully');
+    } else {
+      console.error('Error creating league and sending email:', response.statusText);
     }
   };
 
