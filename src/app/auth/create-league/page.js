@@ -3,6 +3,7 @@ import "../../../styles/globals.css";
 import { useState } from "react";
 import { supabase } from "../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
+import nodemailer from 'nodemailer';
 
 export default function CreateLeague() {
   const [leagueName, setLeagueName] = useState("");
@@ -63,8 +64,7 @@ export default function CreateLeague() {
         end_date: endDate,
         participants: 1,
         percentage: parseInt(percentage),
-        invitation_code: invitationCode,
-        logo: 'default_logo_url' // Change this to the actual logo URL if you have one
+        invitation_code: invitationCode
       });
 
     if (error) {
@@ -73,6 +73,73 @@ export default function CreateLeague() {
     }
 
     console.log('League created successfully:', data);
+
+    // Insert the user into the new league's leaderboard
+    const userId = "user_id"; // Replace with the actual user ID
+    const { error: insertError } = await supabase
+      .from(leagueId)
+      .insert({
+        user_id: userId,
+        total_attempts: 0,
+        games_played: 0
+      });
+
+    if (insertError) {
+      console.error('Error inserting user into leaderboard:', insertError.message);
+      return;
+    }
+
+    // Send the invitation email
+    await sendInvitationEmail("user.email", leagueName, invitationCode);
+
+    // Trigger the CI/CD pipeline to create a new leaderboard table
+    await triggerCICDPipeline(leagueId);
+  };
+
+  const sendInvitationEmail = async (userEmail, leagueName, invitationCode) => {
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'elgameguess@gmail.com',
+        pass: process.env.EMAIL_PASSWORD, // Use the environment variable here
+      },
+    });
+
+    const mailOptions = {
+      from: 'elgameguess@gmail.com',
+      to: userEmail,
+      subject: 'Your League Invitation Code',
+      text: `You have successfully created the league: ${leagueName}\n\nYour invitation code is: ${invitationCode}\n\nShare this code with your friends to invite them to join the league.`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Invitation email sent successfully');
+    } catch (error) {
+      console.error('Error sending invitation email:', error);
+    }
+  };
+
+  const triggerCICDPipeline = async (leagueId) => {
+    const response = await fetch('https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/supabase-ci.yml/dispatches', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+        'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+      },
+      body: JSON.stringify({
+        ref: 'main',
+        inputs: {
+          league_id: leagueId,
+        },
+      }),
+    });
+
+    if (response.ok) {
+      console.log('CI/CD pipeline triggered successfully');
+    } else {
+      console.error('Error triggering CI/CD pipeline:', response.statusText);
+    }
   };
 
   return (
@@ -121,8 +188,7 @@ export default function CreateLeague() {
               <option value="1 Month">1 Month</option>
               <option value="3 Months">3 Months</option>
               <option value="6 Months">6 Months</option>
-              <option value="1 Year">1 Year</option>
-            </select>
+              <option value="1 Year">1 Year</            </select>
           </div>
           <div>
             <label htmlFor="percentage" className="block text-sm font-medium text-gray-700 mb-1">
