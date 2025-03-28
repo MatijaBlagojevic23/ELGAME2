@@ -188,7 +188,8 @@ export default function CreateLeague() {
               <option value="1 Month">1 Month</option>
               <option value="3 Months">3 Months</option>
               <option value="6 Months">6 Months</option>
-              <option value="1 Year">1 Year</            </select>
+              <option value="1 Year">1 Year</option>
+            </select>
           </div>
           <div>
             <label htmlFor="percentage" className="block text-sm font-medium text-gray-700 mb-1">
