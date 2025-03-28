@@ -1,9 +1,8 @@
 "use client";
 import "../../../styles/globals.css"; 
 import { useState } from "react";
-import { supabase } from "../../../utils/supabase";
+import { supabase } from "../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
-import nodemailer from 'nodemailer';
 
 export default function CreateLeague() {
   const [leagueName, setLeagueName] = useState("");
@@ -89,39 +88,12 @@ export default function CreateLeague() {
       return;
     }
 
-    // Send the invitation email
-    await sendInvitationEmail("user.email", leagueName, invitationCode);
-
-    // Trigger the CI/CD pipeline to create a new leaderboard table
-    await triggerCICDPipeline(leagueId);
+    // Trigger the GitHub Actions workflow
+    await triggerWorkflow("user.email", leagueName, invitationCode, leagueId);
   };
 
-  const sendInvitationEmail = async (userEmail, leagueName, invitationCode) => {
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: 'elgameguess@gmail.com',
-        pass: process.env.EMAIL_PASSWORD, // Use the environment variable here
-      },
-    });
-
-    const mailOptions = {
-      from: 'elgameguess@gmail.com',
-      to: userEmail,
-      subject: 'Your League Invitation Code',
-      text: `You have successfully created the league: ${leagueName}\n\nYour invitation code is: ${invitationCode}\n\nShare this code with your friends to invite them to join the league.`,
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log('Invitation email sent successfully');
-    } catch (error) {
-      console.error('Error sending invitation email:', error);
-    }
-  };
-
-  const triggerCICDPipeline = async (leagueId) => {
-    const response = await fetch('https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/supabase-ci.yml/dispatches', {
+  const triggerWorkflow = async (userEmail, leagueName, invitationCode, leagueId) => {
+    const response = await fetch('https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches', {
       method: 'POST',
       headers: {
         'Accept': 'application/vnd.github.v3+json',
@@ -130,15 +102,18 @@ export default function CreateLeague() {
       body: JSON.stringify({
         ref: 'main',
         inputs: {
+          user_email: userEmail,
+          league_name: leagueName,
+          invitation_code: invitationCode,
           league_id: leagueId,
         },
       }),
     });
 
     if (response.ok) {
-      console.log('CI/CD pipeline triggered successfully');
+      console.log('Workflow triggered successfully');
     } else {
-      console.error('Error triggering CI/CD pipeline:', response.statusText);
+      console.error('Error triggering workflow:', response.statusText);
     }
   };
 
