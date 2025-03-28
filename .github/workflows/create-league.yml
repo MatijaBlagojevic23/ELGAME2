@@ -56,4 +56,18 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
-          supabase db copy-table --source-table leaderboard --target-table ${{ github.event.inputs.league_id }}
+          TABLE_NAME=$(echo ${{ github.event.inputs.league_name }} | tr -cd '[:alnum:]')
+          supabase db query "CREATE TABLE public.${TABLE_NAME} (
+            user_id uuid NOT NULL,
+            total_attempts integer NOT NULL DEFAULT 0,
+            games_played integer NOT NULL DEFAULT 0,
+            average_attempts numeric GENERATED ALWAYS AS (
+              (
+                (total_attempts)::numeric / (NULLIF(games_played, 0))::numeric
+              )
+            ) STORED NULL,
+            username character varying(255) NOT NULL,
+            CONSTRAINT ${TABLE_NAME}_pkey PRIMARY KEY (user_id),
+            CONSTRAINT ${TABLE_NAME}_user_id_key UNIQUE (user_id),
+            CONSTRAINT ${TABLE_NAME}_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+          ) TABLESPACE pg_default;"
