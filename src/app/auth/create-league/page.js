@@ -1,7 +1,7 @@
 "use client";
 import "../../../styles/globals.css"; 
 import { useState } from "react";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../../../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
 
 export default function CreateLeague() {
@@ -101,7 +101,7 @@ export default function CreateLeague() {
         method: 'POST',
         headers: {
           'Accept': 'application/vnd.github.v3+json',
-          'Authorization': `token ${process.env.GITHUB_TOKEN}`,
+          'Authorization': `token ${process.env.TOKEN1}`,
         },
         body: JSON.stringify({
           ref: 'main',
@@ -114,11 +114,12 @@ export default function CreateLeague() {
         }),
       });
 
+      const responseData = await response.json();
       if (!response.ok) {
-        throw new Error(`Error triggering workflow: ${response.statusText}`);
+        throw new Error(`Error triggering workflow: ${response.statusText} - ${JSON.stringify(responseData)}`);
       }
 
-      console.log('Workflow triggered successfully');
+      console.log('Workflow triggered successfully', responseData);
     } catch (error) {
       console.error('Error triggering workflow:', error);
     }
