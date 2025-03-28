@@ -1,7 +1,7 @@
 "use client";
 import "../../../styles/globals.css"; 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "../../../utils/supabase";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,7 +15,6 @@ export default function CreateLeague() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   useEffect(() => {
     const user_id = searchParams.get("user_id");
