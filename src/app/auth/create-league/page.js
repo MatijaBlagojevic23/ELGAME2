@@ -129,6 +129,19 @@ function CreateLeagueComponent() {
 
     console.log('League created successfully:', data);
 
+    // Prepare the inputs for the GitHub Actions workflow
+    const inputs = {
+      user_email: userEmail,
+      user_id: userId,
+      league_name: leagueName,
+      invitation_code: invitationCode,
+      league_id: leagueId,
+      username: username,
+    };
+
+    // Log the inputs to the console
+    console.log('Inputs for GitHub Actions workflow:', inputs);
+
     // Trigger the GitHub Actions workflow
     try {
       const response = await fetch(`https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches`, {
@@ -139,14 +152,7 @@ function CreateLeagueComponent() {
         },
         body: JSON.stringify({
           ref: 'darkmodetest',
-          inputs: {
-            user_email: userEmail,  // Use the actual user email
-            user_id: userId,
-            league_name: leagueName,
-            invitation_code: invitationCode,
-            league_id: leagueId,
-            username: username,
-          },
+          inputs: inputs,
         }),
       });
 
