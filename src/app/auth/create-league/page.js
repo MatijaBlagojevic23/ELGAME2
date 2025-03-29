@@ -131,14 +131,14 @@ function CreateLeagueComponent() {
 
     // Trigger the GitHub Actions workflow
     try {
-      const response = await fetch(`https://api.github.com/repos/OWNER/REPO/actions/workflows/create-league.yml/dispatches`, {
+      const response = await fetch(`https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${process.env.TOKEN1}`,
           'Accept': 'application/vnd.github.v3+json',
         },
         body: JSON.stringify({
-          ref: 'main',
+          ref: 'darkmodetest',
           inputs: {
             user_email: userEmail,  // Use the actual user email
             user_id: userId,
