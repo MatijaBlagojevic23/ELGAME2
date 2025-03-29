@@ -1,7 +1,7 @@
 import { supabase } from '../../../utils/supabase';
 import nodemailer from 'nodemailer';
 
-export default async (req, res) => {
+export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { user_email, user_id, league_name, invitation_code, league_id, username } = req.body;
 
@@ -48,7 +48,7 @@ export default async (req, res) => {
         VALUES ('${user_id}', 0, 0, '${username}');
       `;
 
-      const { error: createTableError } = await supabase.rpc('execute_sql', {
+      const { error: createTableError } = await supabase.from('leagues').rpc('execute_sql', {
         sql: createTableQuery + insertFirstPlayerQuery,
       });
 
