@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const response = await fetch(`https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.TOKEN1}`,
+        'Authorization': `Bearer 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`,
         'Accept': 'application/vnd.github.v3+json',
       },
       body: JSON.stringify({
