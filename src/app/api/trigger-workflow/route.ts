@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export async function POST(request) {
+export async function POST(request: Request) {
   const { user_email, user_id, league_name, invitation_code, league_id, username } = await request.json();
 
   const inputs = {
@@ -12,7 +12,6 @@ export async function POST(request) {
     username,
   };
 
-  // Log the inputs to the console
   console.log('Inputs for GitHub Actions workflow:', inputs);
 
   try {
