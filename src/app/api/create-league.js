@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 export default async (req, res) => {
   if (req.method === 'POST') {
-    const { user_email, league_name, invitation_code, league_id } = req.body;
+    const { user_email, user_id, league_name, invitation_code, league_id, username } = req.body;
 
     try {
       // Send Invitation Email
@@ -27,8 +27,29 @@ export default async (req, res) => {
 
       // Create League Table
       const tableName = league_name.replace(/[^a-zA-Z0-9]/g, '');
-      const { data, error: createTableError } = await supabase.rpc('create_league_table', {
-        table_name: tableName,
+      const createTableQuery = `
+        CREATE TABLE public.${tableName} (
+          user_id uuid NOT NULL,
+          total_attempts integer NOT NULL DEFAULT 0,
+          games_played integer NOT NULL DEFAULT 0,
+          average_attempts numeric GENERATED ALWAYS AS (
+            (
+              (total_attempts)::numeric / (NULLIF(games_played, 0))::numeric
+            )
+          ) STORED NULL,
+          username character varying(255) NOT NULL,
+          CONSTRAINT ${tableName}_pkey PRIMARY KEY (user_id),
+          CONSTRAINT ${tableName}_user_id_key UNIQUE (user_id),
+          CONSTRAINT ${tableName}_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
+        ) TABLESPACE pg_default;
+      `;
+      const insertFirstPlayerQuery = `
+        INSERT INTO public.${tableName} (user_id, total_attempts, games_played, username)
+        VALUES ('${user_id}', 0, 0, '${username}');
+      `;
+
+      const { error: createTableError } = await supabase.rpc('execute_sql', {
+        sql: createTableQuery + insertFirstPlayerQuery,
       });
 
       if (createTableError) {
