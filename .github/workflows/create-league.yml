@@ -1,23 +1,35 @@
-name: Create League Workflow
+name: Create League
 
 on:
   workflow_dispatch:
     inputs:
       user_email:
-        description: 'User Email'
+        description: 'User email'
         required: true
+        type: string
+      user_id:
+        description: 'User ID'
+        required: true
+        type: string
       league_name:
-        description: 'League Name'
+        description: 'League name'
         required: true
+        type: string
       invitation_code:
-        description: 'Invitation Code'
+        description: 'Invitation code'
         required: true
+        type: string
       league_id:
         description: 'League ID'
         required: true
+        type: string
+      username:
+        description: 'Username'
+        required: true
+        type: string
 
 jobs:
-  send-email:
+  create-league:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,44 +42,22 @@ jobs:
           node-version: '14'
 
       - name: Install dependencies
-        run: npm install nodemailer
+        run: npm install
 
       - name: Send Invitation Email
-        run: node sendEmail.js
+        run: node send-invitation-email.js
         env:
           USER_EMAIL: ${{ github.event.inputs.user_email }}
           LEAGUE_NAME: ${{ github.event.inputs.league_name }}
           INVITATION_CODE: ${{ github.event.inputs.invitation_code }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-
-  create-table:
-    runs-on: ubuntu-latest
-    needs: send-email
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Install Supabase CLI
-        run: npm install -g supabase
+          EMAIL_USER: 'elgameguess@gmail.com'
 
       - name: Create League Table
+        run: node create-league-table.js
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_API_KEY }}
-        run: |
-          TABLE_NAME=$(echo ${{ github.event.inputs.league_name }} | tr -cd '[:alnum:]')
-          supabase db query "CREATE TABLE public.${TABLE_NAME} (
-            user_id uuid NOT NULL,
-            total_attempts integer NOT NULL DEFAULT 0,
-            games_played integer NOT NULL DEFAULT 0,
-            average_attempts numeric GENERATED ALWAYS AS (
-              (
-                (total_attempts)::numeric / (NULLIF(games_played, 0))::numeric
-              )
-            ) STORED NULL,
-            username character varying(255) NOT NULL,
-            CONSTRAINT ${TABLE_NAME}_pkey PRIMARY KEY (user_id),
-            CONSTRAINT ${TABLE_NAME}_user_id_key UNIQUE (user_id),
-            CONSTRAINT ${TABLE_NAME}_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users (id) ON DELETE CASCADE
-          ) TABLESPACE pg_default;"
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          USER_ID: ${{ github.event.inputs.user_id }}
+          LEAGUE_NAME: ${{ github.event.inputs.league_name }}
+          USERNAME: ${{ github.event.inputs.username }}
