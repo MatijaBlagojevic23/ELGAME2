@@ -129,20 +129,24 @@ function CreateLeagueComponent() {
 
     console.log('League created successfully:', data);
 
-    // Call the API to send email and create table
+    // Trigger the GitHub Actions workflow
     try {
-      const response = await fetch('/api/create-league', {
+      const response = await fetch(`https://api.github.com/repos/OWNER/REPO/actions/workflows/create-league.yml/dispatches`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.TOKEN1}`,
+          'Accept': 'application/vnd.github.v3+json',
         },
         body: JSON.stringify({
-          user_email: userEmail,  // Use the actual user email
-          user_id: userId,
-          league_name: leagueName,
-          invitation_code: invitationCode,
-          league_id: leagueId,
-          username: username
+          ref: 'main',
+          inputs: {
+            user_email: userEmail,  // Use the actual user email
+            user_id: userId,
+            league_name: leagueName,
+            invitation_code: invitationCode,
+            league_id: leagueId,
+            username: username,
+          },
         }),
       });
 
@@ -150,10 +154,10 @@ function CreateLeagueComponent() {
       console.log('Response status text:', response.statusText);
 
       if (response.ok) {
-        console.log('League created and email sent successfully');
+        console.log('GitHub Actions workflow dispatched successfully');
       } else {
         const errorData = await response.json();
-        console.error('Error creating league and sending email:', errorData.message);
+        console.error('Error triggering GitHub Actions workflow:', errorData.message);
         setErrorMessage(errorData.message);
       }
     } catch (error) {
