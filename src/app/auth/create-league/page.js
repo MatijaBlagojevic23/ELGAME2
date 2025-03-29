@@ -129,7 +129,7 @@ function CreateLeagueComponent() {
 
     console.log('League created successfully:', data);
 
-    // Prepare the inputs for the GitHub Actions workflow
+    // Prepare the inputs for the API call
     const inputs = {
       user_email: userEmail,
       user_id: userId,
@@ -140,31 +140,27 @@ function CreateLeagueComponent() {
     };
 
     // Log the inputs to the console
-    console.log('Inputs for GitHub Actions workflow:', inputs);
+    console.log('Inputs for API call:', inputs);
 
-    // Trigger the GitHub Actions workflow
+    // Call the API to trigger the GitHub Actions workflow
     try {
-      const response = await fetch(`https://api.github.com/repos/MatijaBlagojevic23/ELGAME2/actions/workflows/create-league.yml/dispatches`, {
+      const response = await fetch('/api/trigger-workflow', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.TOKEN1}`,
-          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ref: 'darkmodetest',
-          inputs: inputs,
-        }),
+        body: JSON.stringify(inputs),
       });
 
+      const result = await response.json();
       console.log('Response status:', response.status);
-      console.log('Response status text:', response.statusText);
+      console.log('Response message:', result.message);
 
       if (response.ok) {
         console.log('GitHub Actions workflow dispatched successfully');
       } else {
-        const errorData = await response.json();
-        console.error('Error triggering GitHub Actions workflow:', errorData.message);
-        setErrorMessage(errorData.message);
+        console.error('Error triggering GitHub Actions workflow:', result.message);
+        setErrorMessage(result.message);
       }
     } catch (error) {
       console.error('Network error:', error);
