@@ -1,0 +1,63 @@
+name: Create League
+
+on:
+  workflow_dispatch:
+    inputs:
+      user_email:
+        description: 'User email'
+        required: true
+        type: string
+      user_id:
+        description: 'User ID'
+        required: true
+        type: string
+      league_name:
+        description: 'League name'
+        required: true
+        type: string
+      invitation_code:
+        description: 'Invitation code'
+        required: true
+        type: string
+      league_id:
+        description: 'League ID'
+        required: true
+        type: string
+      username:
+        description: 'Username'
+        required: true
+        type: string
+
+jobs:
+  create-league:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Send Invitation Email
+        run: node send-invitation-email.js
+        env:
+          USER_EMAIL: ${{ github.event.inputs.user_email }}
+          LEAGUE_NAME: ${{ github.event.inputs.league_name }}
+          INVITATION_CODE: ${{ github.event.inputs.invitation_code }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_USER: 'elgameguess@gmail.com'
+
+      - name: Create League Table
+        run: node create-league-table.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          USER_ID: ${{ github.event.inputs.user_id }}
+          LEAGUE_NAME: ${{ github.event.inputs.league_name }}
+          USERNAME: ${{ github.event.inputs.username }}
