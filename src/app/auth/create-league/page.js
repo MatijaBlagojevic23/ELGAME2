@@ -12,6 +12,7 @@ function CreateLeagueComponent() {
   const [percentage, setPercentage] = useState("100%");
   const [userEmail, setUserEmail] = useState("");
   const [userId, setUserId] = useState("");
+  const [username, setUsername] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const searchParams = useSearchParams();
@@ -20,24 +21,25 @@ function CreateLeagueComponent() {
     const user_id = searchParams.get("user_id");
     if (user_id) {
       setUserId(user_id);
-      fetchUserEmail(user_id);
+      fetchUserEmailAndUsername(user_id);
     } else {
       setErrorMessage("User information is missing.");
     }
   }, [searchParams]);
 
-  const fetchUserEmail = async (user_id) => {
+  const fetchUserEmailAndUsername = async (user_id) => {
     const { data, error } = await supabase
       .from('users')
-      .select('email')
+      .select('email, username')
       .eq('user_id', user_id)
       .single();
 
     if (error) {
-      console.error('Error fetching user email:', error);
-      setErrorMessage('Error fetching user email. Please try again.');
+      console.error('Error fetching user email and username:', error);
+      setErrorMessage('Error fetching user email and username. Please try again.');
     } else {
       setUserEmail(data.email);
+      setUsername(data.username);
     }
   };
 
@@ -116,8 +118,7 @@ function CreateLeagueComponent() {
         end_date: endDate,
         participants: 1,
         percentage: parseInt(percentage),
-        invitation_code: invitationCode,
-        user_id: userId // Include user_id in the league details
+        invitation_code: invitationCode
       });
 
     if (error) {
@@ -137,9 +138,11 @@ function CreateLeagueComponent() {
         },
         body: JSON.stringify({
           user_email: userEmail,  // Use the actual user email
+          user_id: userId,
           league_name: leagueName,
           invitation_code: invitationCode,
           league_id: leagueId,
+          username: username
         }),
       });
 
